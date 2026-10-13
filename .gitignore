@@ -8,3 +8,6 @@ pruebas/capturas/
 *.spec
 .pytest_cache/
 prueba_error.txt
+
+# Manual: PDF y HTML generados
+herramientas/manual/salida/

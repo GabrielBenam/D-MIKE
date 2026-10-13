@@ -77,6 +77,7 @@ herramientas/exportar_catalogo.py
 herramientas/generar_caso_integral.py
 herramientas/generar_ejemplos.py
 herramientas/huellas_sinteticas.py
+herramientas/manual/README.md
 herramientas/manual/gen.py
 herramientas/manual/textos.json
 herramientas/receta_caso_integral.py
@@ -133,6 +134,7 @@ pruebas/test_inferencia.py
 pruebas/test_inferencia_libro.py
 pruebas/test_interfaz.py
 pruebas/test_lean.py
+pruebas/test_manual_gen.py
 pruebas/test_modo_v026.py
 pruebas/test_modulos.py
 pruebas/test_modulos_interfaz.py

@@ -1,12 +1,47 @@
-import sys, re, json, inspect, html, subprocess, markdown
-sys.path.insert(0, "/home/claude/d-mike")
+"""Genera el Manual de uso de D-MIKE en PDF. Ver README.md de esta carpeta (comando, entradas y salida).
+Todas las rutas son relativas a este archivo o a la raíz del repositorio: corre igual desde cualquier directorio."""
+import sys, os, re, json, inspect, html, shutil, argparse, subprocess, markdown
+from pathlib import Path
+
+AQUI = Path(__file__).resolve().parent           # herramientas/manual
+RAIZ = AQUI.parent.parent                        # raíz del repositorio
+sys.path.insert(0, str(RAIZ))
+_ap = argparse.ArgumentParser(description="Genera el Manual de uso de D-MIKE en PDF.")
+_ap.add_argument("--salida", default=os.environ.get("DMIKE_MANUAL_SALIDA") or str(AQUI / "salida"), help="carpeta de salida (por omisión herramientas/manual/salida)")
+_ap.add_argument("--entradas", default=os.environ.get("DMIKE_MANUAL_ENTRADAS") or str(AQUI / "entradas"), help="carpeta con el paso a paso del caso, svgs.json y el glosario (por omisión herramientas/manual/entradas)")
+_ap.add_argument("--permitir-faltantes", action="store_true", help="genera el PDF aunque falten esas entradas; las secciones afectadas quedan marcadas como no generadas")
+ARGS = _ap.parse_args()
+SAL, ENT = Path(ARGS.salida).resolve(), Path(ARGS.entradas).resolve()
+SAL.mkdir(parents=True, exist_ok=True)
+
+ENTRADAS = {"caso": (ENT / "D-MIKE_caso_integral_paso_a_paso.md", "paso a paso del caso maestro (sección 6)"),
+            "svgs": (ENT / "svgs.json", "gráficas SVG del caso (figuras de la sección 6)"),
+            "glosario": (ENT / "08_GLOSARIO.md", "glosario de la base del curso (apéndice B)")}
+FALTAN = [f"{ruta}  [{que}]" for ruta, que in ENTRADAS.values() if not ruta.is_file()]
+FALTAN += [f"{h}  [herramienta del sistema; instala poppler-utils]" for h in ("pdfinfo", "pdftotext") if not shutil.which(h)]
+if FALTAN and not ARGS.permitir_faltantes:
+    sys.exit("Faltan entradas para generar el manual completo:\n  " + "\n  ".join(FALTAN) +
+             "\nColócalas ahí (o usa --entradas) o corre con --permitir-faltantes para generar un PDF parcial. Ver herramientas/manual/README.md.")
+if any("poppler" in f for f in FALTAN): sys.exit("Falta poppler-utils (pdfinfo, pdftotext): sin él no se puede numerar el índice.")
+
+
+def leer_entrada(clave, defecto):
+    ruta = ENTRADAS[clave][0]
+    return open(ruta, encoding="utf-8").read() if ruta.is_file() else defecto
+
+
+def no_generada(clave):
+    ruta, que = ENTRADAS[clave]
+    return f"<p class='lean'>Sección no generada: falta el archivo {E(ruta.name)} ({E(que)}). Este PDF es parcial.</p>"
+
+
 from app.api import Api, VERSION
 from app.modulos import cargar
 from app.modulos.formatos import FORMATOS
 from app.nucleo.menus import MENUS
 from playwright.sync_api import sync_playwright
 
-R = cargar(); A = Api(); INFO = A.info_modulos(); CMD = json.load(open("/home/claude/d-mike/app/datos/comandos.json", encoding="utf-8"))
+R = cargar(); A = Api(); INFO = A.info_modulos(); CMD = json.load(open(RAIZ / "app" / "datos" / "comandos.json", encoding="utf-8"))
 CMDN = {c["n"].lower().replace("…", ""): c for c in CMD}
 LEAN_PEND = {"TAKT", "TIEMPOS", "BALANCE", "MUDAS", "TRABAJO-EST", "VSM", "BALANCE-FUT", "RESULTADOS-LEAN"}
 FASE = {"D": "Definir", "M": "Medir", "A": "Analizar", "I": "Mejorar", "C": "Controlar"}
@@ -113,64 +148,70 @@ for n, (tab, ops) in enumerate(MENUS, 1):
     cerrar_simples(); mod_html.append(bloque)
 
 # ---------- caso maestro (del paso a paso, adaptado a la v0.25) ----------
-md = open("/mnt/user-data/outputs/D-MIKE_caso_integral_paso_a_paso.md", encoding="utf-8").read()
-md = md.split("## 2. El caso y el origen de cada dato", 1)[1]
-md = "## 6.1 El caso y el origen de cada dato" + md
-grupo = {}
-for menu, ops in MENUS:
-    g = ""
-    for t, acc in ops:
-        if t.startswith("§"): g = t[1:]; continue
-        grupo[(menu, t)] = g; grupo[(menu, t.replace("…", ""))] = g
-def ruta(m):
-    p = [x.strip() for x in m.group(1).split("›")]
-    if len(p) == 2 and (p[0], p[1]) in grupo: p = [p[0], grupo[(p[0], p[1])], p[1]]
-    elif len(p) != 2 or p[0] not in [x for x, _ in MENUS]: return m.group(0)
-    return '<span class="ruta">' + " › ".join(p) + "</span>"
-md = re.sub(r"`([^`]*›[^`]*)`", ruta, md)
-ren = {"## 3. Preparar": "## 6.2 Preparar", "## 4. Definir": "## 6.3 Definir", "## 5. Medir": "## 6.4 Medir", "## 6. Analizar": "## 6.5 Analizar", "## 7. Mejorar": "## 6.6 Mejorar",
-       "## 8. Controlar": "## 6.7 Controlar", "## 9. Resumen": "## 6.8 Resumen", "## 10. Cómo armar": "## 6.9 Cómo armar", "## 11. Notas de rigor": "## 6.10 Notas de rigor"}
-for a_, b_ in ren.items(): md = md.replace(a_, b_)
-md = md.replace("D-MIKE 0.21.1", f"D-MIKE {VERSION}").replace("«Repetir»", "«Repetir con datos actuales»")
-md = md.replace("**Dos formas de seguirlo.**", "**Novedades de la v0.25 en el caso.** Todos los resultados del caso se recalcularon con la versión " + VERSION + ": cada uno guarda su copia congelada y su huella SHA-256 (indicador «Vigente» junto al título), y sus gráficas son interactivas (Estilo y color, Escala original y pestaña «Gráfico»). La forma más rápida de reproducir el caso es abrir la plantilla llena con «Archivo › Abrir proyecto» y elegir «Ejecutar en un proyecto nuevo».\n\n**Dos formas de seguirlo.**")
-SV = json.load(open("/home/claude/manual25/svgs.json", encoding="utf-8"))
-def fig(mod, k=0, j=0, pie=""):
-    try: s = SV[mod][k]["svg"][j]; h = SV[mod][k]["huella"]
-    except (KeyError, IndexError): return ""
-    return f"\n<figure>{s}<figcaption>{E(pie)}{' · huella ' + h if h else ''}</figcaption></figure>\n"
-INS = {"### 5.2": fig("MSA-VAR", 0, 0, "Gage R&R del caso"), "### 5.4": fig("SPC", 0, 0, "Carta X̄-R de la línea base"), "### 5.5": fig("CAPACIDAD", 0, 0, "Capacidad de la línea base"),
-       "### 6.1": fig("PARETO", 0, 0, "Pareto de defectos"), "### 6.3": fig("ANOVA", 0, 0, "ANOVA por lote de adhesivo"), "### 7.1": fig("FACTORIAL", 0, 0, "Pareto de efectos estandarizados del cribado"),
-       "### 7.3": fig("RSM", 0, 1, "Superficie de respuesta de la resistencia"), "### 7.4": fig("RSM", 1, 1, "Superficie de respuesta de la porosidad"), "### 7.5": fig("OPTIMIZADOR", 0, 0, "Optimizador de respuestas"),
-       "### 8.2": fig("CAPACIDAD", 1, 0, "Capacidad con el proceso nuevo")}
-lineas, out, pend = md.split("\n"), [], []
-for l in lineas:
-    if l.startswith("#"):
-        out += pend; pend = []
-        for k, v in INS.items():
-            if l.startswith(k): pend.append(v)
-    out.append(l.replace("### ", "### 6.").replace("### 6.6.", "### 6.") if False else l)
-out += pend
-out = [re.sub(r"^### (\d+)\.(\d+)", lambda m: f"### 6.{int(m.group(1)) - 1}.{m.group(2)}", l) for l in out]   # 5.2 -> 6.4.2, etc.
-caso_html = markdown.markdown("\n".join(out), extensions=["tables"])
-caso_html = re.sub(r"<h2>(6\.\d+[^<]*)</h2>", lambda m: f"<h2 id='c{m.group(1).split()[0]}'>{m.group(1)}</h2>", caso_html)
+SV = json.loads(leer_entrada("svgs", "{}"))      # sin svgs.json no hay figuras (fig() devuelve vacío)
+
+
+def construir_caso(md):
+    md = md.split("## 2. El caso y el origen de cada dato", 1)[1]
+    md = "## 6.1 El caso y el origen de cada dato" + md
+    grupo = {}
+    for menu, ops in MENUS:
+        g = ""
+        for t, acc in ops:
+            if t.startswith("§"): g = t[1:]; continue
+            grupo[(menu, t)] = g; grupo[(menu, t.replace("…", ""))] = g
+    def ruta(m):
+        p = [x.strip() for x in m.group(1).split("›")]
+        if len(p) == 2 and (p[0], p[1]) in grupo: p = [p[0], grupo[(p[0], p[1])], p[1]]
+        elif len(p) != 2 or p[0] not in [x for x, _ in MENUS]: return m.group(0)
+        return '<span class="ruta">' + " › ".join(p) + "</span>"
+    md = re.sub(r"`([^`]*›[^`]*)`", ruta, md)
+    ren = {"## 3. Preparar": "## 6.2 Preparar", "## 4. Definir": "## 6.3 Definir", "## 5. Medir": "## 6.4 Medir", "## 6. Analizar": "## 6.5 Analizar", "## 7. Mejorar": "## 6.6 Mejorar",
+           "## 8. Controlar": "## 6.7 Controlar", "## 9. Resumen": "## 6.8 Resumen", "## 10. Cómo armar": "## 6.9 Cómo armar", "## 11. Notas de rigor": "## 6.10 Notas de rigor"}
+    for a_, b_ in ren.items(): md = md.replace(a_, b_)
+    md = md.replace("D-MIKE 0.21.1", f"D-MIKE {VERSION}").replace("«Repetir»", "«Repetir con datos actuales»")
+    md = md.replace("**Dos formas de seguirlo.**", "**Novedades de la v0.25 en el caso.** Todos los resultados del caso se recalcularon con la versión " + VERSION + ": cada uno guarda su copia congelada y su huella SHA-256 (indicador «Vigente» junto al título), y sus gráficas son interactivas (Estilo y color, Escala original y pestaña «Gráfico»). La forma más rápida de reproducir el caso es abrir la plantilla llena con «Archivo › Abrir proyecto» y elegir «Ejecutar en un proyecto nuevo».\n\n**Dos formas de seguirlo.**")
+    def fig(mod, k=0, j=0, pie=""):
+        try: s = SV[mod][k]["svg"][j]; h = SV[mod][k]["huella"]
+        except (KeyError, IndexError): return ""
+        return f"\n<figure>{s}<figcaption>{E(pie)}{' · huella ' + h if h else ''}</figcaption></figure>\n"
+    INS = {"### 5.2": fig("MSA-VAR", 0, 0, "Gage R&R del caso"), "### 5.4": fig("SPC", 0, 0, "Carta X̄-R de la línea base"), "### 5.5": fig("CAPACIDAD", 0, 0, "Capacidad de la línea base"),
+           "### 6.1": fig("PARETO", 0, 0, "Pareto de defectos"), "### 6.3": fig("ANOVA", 0, 0, "ANOVA por lote de adhesivo"), "### 7.1": fig("FACTORIAL", 0, 0, "Pareto de efectos estandarizados del cribado"),
+           "### 7.3": fig("RSM", 0, 1, "Superficie de respuesta de la resistencia"), "### 7.4": fig("RSM", 1, 1, "Superficie de respuesta de la porosidad"), "### 7.5": fig("OPTIMIZADOR", 0, 0, "Optimizador de respuestas"),
+           "### 8.2": fig("CAPACIDAD", 1, 0, "Capacidad con el proceso nuevo")}
+    lineas, out, pend = md.split("\n"), [], []
+    for l in lineas:
+        if l.startswith("#"):
+            out += pend; pend = []
+            for k, v in INS.items():
+                if l.startswith(k): pend.append(v)
+        out.append(l.replace("### ", "### 6.").replace("### 6.6.", "### 6.") if False else l)
+    out += pend
+    out = [re.sub(r"^### (\d+)\.(\d+)", lambda m: f"### 6.{int(m.group(1)) - 1}.{m.group(2)}", l) for l in out]   # 5.2 -> 6.4.2, etc.
+    caso_html = markdown.markdown("\n".join(out), extensions=["tables"])
+    return re.sub(r"<h2>(6\.\d+[^<]*)</h2>", lambda m: f"<h2 id='c{m.group(1).split()[0]}'>{m.group(1)}</h2>", caso_html)
+
+
+MD_CASO = leer_entrada("caso", None)
+caso_html = construir_caso(MD_CASO) if MD_CASO is not None else no_generada("caso")
 
 # ---------- glosario ----------
-glo = open("/mnt/project/08_GLOSARIO.md", encoding="utf-8").read().split("\n")
+glo = leer_entrada("glosario", "").split("\n")
 glos = [l for l in glo if ":" in l and not l.startswith("#") and len(l) > 10 and not l.startswith("Glosario")]
-glo_html = "".join(f"<p class='glo'><b>{E(l.split(':', 1)[0])}</b>: {E(l.split(':', 1)[1].strip())}</p>" for l in glos)
+glo_html = no_generada("glosario") if not ENTRADAS["glosario"][0].is_file() else "".join(f"<p class='glo'><b>{E(l.split(':', 1)[0])}</b>: {E(l.split(':', 1)[1].strip())}</p>" for l in glos)
 CTX = {"G": "Global", "H": "Hoja", "F": "Formatos", "R": "Resultados", "T": "Tablero", "P": "Riel DMAIC"}
 cmd_html = "<table class='cmd'><thead><tr><th>Comando</th><th>Atajo</th><th>Funciona en</th><th>Estado</th><th>Qué hace</th></tr></thead><tbody>" + "".join(
     f"<tr{' class=sep' if i == 0 or CMD[i - 1]['cat'] != c['cat'] else ''}><td>{'<span class=cat>' + E(c['cat']) + '</span>' if i == 0 or CMD[i - 1]['cat'] != c['cat'] else ''}{E(c['n'])}</td><td class=at>{'' if c['a'] == '—' else E(c['a'])}</td><td>{', '.join(CTX.get(x, x) for x in c['c'])}</td><td>{'Disponible' if c['e'] == 'D' else 'Propuesto'}</td><td>{E(c['d'])}</td></tr>"
     for i, c in enumerate(CMD)) + "</tbody></table>"
 
-TXT = json.load(open("/home/claude/manual25/textos.json", encoding="utf-8"))
-L10O = open("/tmp/logo10_oscuro.svg").read()
+TXT = json.load(open(AQUI / "textos.json", encoding="utf-8"))
+L10O = open(RAIZ / "app" / "ui" / "logo10_oscuro.svg", encoding="utf-8").read()
 TOC = [("1", "Introducción"), ("2", "Trabajo con proyectos"), ("3", "Resultados, gráficas y reglas de cálculo"), ("4", "Módulos por pestaña de la cinta")] + toc4 + \
       [("5", "Recetas y Diagnóstico en línea"), ("6", "Caso maestro de principio a fin")] + [(k.split()[0], " ".join(k.split()[1:])) for k in re.findall(r"<h2 id='c[^']*'>([^<]*)</h2>", caso_html)] + [("7", "Apéndice A · Comandos y atajos"), ("8", "Apéndice B · Glosario")]
 def doc(paginas):
     toc = "".join(f"<li class='{'sub' if '.' in n else ''}'><span>{E(n)} {E(t)}</span><span class='pun'></span><span>{paginas.get(n, '')}</span></li>" for n, t in TOC)
     return f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><style>
-@font-face {{ font-family: M; src: url("file:///home/claude/d-mike/app/ui/fuentes/Montserrat.woff2"); font-weight: 100 900; }}
+@font-face {{ font-family: M; src: url("{(RAIZ / 'app' / 'ui' / 'fuentes' / 'Montserrat.woff2').as_uri()}"); font-weight: 100 900; }}
 body {{ margin: 0; font-family: M, sans-serif; color: #2b2620; font-size: 9.6pt; line-height: 1.5; }}
 .portada {{ height: 228mm; box-sizing: border-box; background: #1c1916; color: #f1ece4; padding: 26mm 18mm; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; break-after: page; }}
 .portada svg {{ width: 115mm; height: auto; }} .portada h1 {{ font-size: 32pt; margin: 12mm 0 3mm; color: #f1ece4; border: 0; break-before: auto; }} .portada p {{ color: #c9c0b2; font-size: 12pt; margin: 0 0 2mm; }}
@@ -202,20 +243,29 @@ figure {{ margin: 3mm 0 4mm; break-inside: avoid; }} figure svg {{ width: 100%; 
 <h1 id="s8">8 Apéndice B · Glosario</h1><p class="mut">Del glosario de la base del curso (08_GLOSARIO). COMP = complemento de literatura estándar.</p>{glo_html}
 </body></html>'''
 pie = f'<div style="font-family:M,sans-serif;font-size:7.5pt;color:#6f675b;width:100%;padding:0 16mm;display:flex;justify-content:space-between"><span>D-MIKE {VERSION} · Manual de uso</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>'
+HTML, PASADA1 = SAL / "manual.html", SAL / "_pasada1.pdf"
+PDF = SAL / f"D-MIKE_Manual_de_uso_v{VERSION.rsplit('.', 1)[0].replace('.', '')}.pdf"
+
+
 def render(html_txt, pdf):
-    open("/home/claude/manual25/manual.html", "w", encoding="utf-8").write(html_txt)
+    HTML.write_text(html_txt, encoding="utf-8")
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(); pg.goto("file:///home/claude/manual25/manual.html"); pg.wait_for_timeout(1500)
-        pg.pdf(path=pdf, format="Letter", print_background=True, display_header_footer=True, header_template="<span></span>", footer_template=pie, margin={"top": "16mm", "bottom": "16mm", "left": "16mm", "right": "16mm"})
+        b = p.chromium.launch(); pg = b.new_page(); pg.goto(HTML.as_uri()); pg.wait_for_timeout(1500)
+        pg.pdf(path=str(pdf), format="Letter", print_background=True, display_header_footer=True, header_template="<span></span>", footer_template=pie, margin={"top": "16mm", "bottom": "16mm", "left": "16mm", "right": "16mm"})
         b.close()
-render(doc({}), "/tmp/m25_p1.pdf")
+
+
+render(doc({}), PASADA1)
 # segunda pasada: números de página del índice
 paginas = {}
-n = int(re.search(r"Pages:\s+(\d+)", subprocess.run(["pdfinfo", "/tmp/m25_p1.pdf"], capture_output=True, text=True).stdout).group(1))
-textos = [subprocess.run(["pdftotext", "-f", str(i), "-l", str(i), "-layout", "/tmp/m25_p1.pdf", "-"], capture_output=True, text=True).stdout for i in range(1, n + 1)]
+n = int(re.search(r"Pages:\s+(\d+)", subprocess.run(["pdfinfo", str(PASADA1)], capture_output=True, text=True).stdout).group(1))
+textos = [subprocess.run(["pdftotext", "-f", str(i), "-l", str(i), "-layout", str(PASADA1), "-"], capture_output=True, text=True).stdout for i in range(1, n + 1)]
 for num, tit in TOC:
     clave = f"{num} {tit}"[:40]
     for i, t in enumerate(textos[2:], 3):
         if re.search(r"(^|\n)\s*" + re.escape(clave), t): paginas[num] = i; break
-render(doc(paginas), "/mnt/user-data/outputs/D-MIKE_Manual_de_uso_v025.pdf")
-print(n, "páginas;", len(paginas), "de", len(TOC), "entradas del índice con página;", len(vistos), "módulos")
+render(doc(paginas), PDF)
+PASADA1.unlink(missing_ok=True)
+n2 = int(re.search(r"Pages:\s+(\d+)", subprocess.run(["pdfinfo", str(PDF)], capture_output=True, text=True).stdout).group(1))
+print(f"{PDF}\n{n2} páginas;", len(paginas), "de", len(TOC), "entradas del índice con página;", len(vistos), "módulos")
+for f in FALTAN: print("ADVERTENCIA, falta:", f)
