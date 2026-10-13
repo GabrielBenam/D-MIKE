@@ -18,7 +18,7 @@ Ingeniero Aeronáutico en Manufactura y Black Belt LSS, nivel informático bási
 2. Incrementos pequeños; cada cambio con su prueba. No borres pruebas para que pasen: corrige el código o explica por qué la prueba era incorrecta.
 3. Vacío no es cero; porcentajes con su base; redondeo solo al mostrar; resultados reproducibles (copia congelada y huella SHA-256). No rompas estas reglas.
 4. Compatibilidad: los `.dmike` y recetas de versiones anteriores deben seguir abriendo (agrega pruebas de migración cuando cambies el formato).
-5. Al terminar una entrega: sube `VERSION`, regenera `MANIFIESTO.txt`, actualiza `proyecto/ESTADO_D-MIKE.md`, corre la suite completa y reporta: qué cambió, qué probaste, qué no y riesgos.
+5. Al terminar una entrega: sube `VERSION`, regenera `MANIFIESTO.txt`, regenera el catálogo (`python herramientas/exportar_catalogo.py` crea `proyecto/catalogo/catalogo_dmike_<versión>.json`; borra el de la versión anterior), actualiza `proyecto/ESTADO_D-MIKE.md`, corre la suite completa y reporta: qué cambió, qué probaste, qué no y riesgos.
 6. Compilación: GitHub Actions (`.github/workflows/`) arma el instalador en cada push a `main`. Trabaja en ramas y abre PR; el usuario aprueba el merge.
 
 ## Formato de reporte por cambio
