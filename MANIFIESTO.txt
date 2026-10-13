@@ -71,8 +71,11 @@ app/ui/ui2.js
 app/ui/ui3.js
 app/ui/vendor/plotly.min.js
 herramientas/aplicar_logo.py
+herramientas/exportar_catalogo.py
 herramientas/generar_caso_integral.py
 herramientas/generar_ejemplos.py
+herramientas/manual/gen.py
+herramientas/manual/textos.json
 herramientas/receta_caso_integral.py
 herramientas_arbol/engine.js
 herramientas_arbol/simular_arbol.py
@@ -88,9 +91,11 @@ main.py
 proyecto/ESTADO_D-MIKE.md
 proyecto/ETAPA_MOTOR_ESTADISTICO.md
 proyecto/PROMPT_MAESTRO.md
+proyecto/artefactos/diagnostico/index.html
 proyecto/artefactos/guia_dmike.html
 proyecto/artefactos/tablero.plantilla.html
 proyecto/artefactos/visor.plantilla.html
+proyecto/catalogo/catalogo_dmike_0.25.0.json
 pruebas/conftest.py
 pruebas/maquetas/maquetas.py
 pruebas/sinteticos/caso_integral_datos_llenos.xlsx
@@ -108,6 +113,7 @@ pruebas/test_capturas_manual.py
 pruebas/test_catalogo.py
 pruebas/test_doe.py
 pruebas/test_estadistica.py
+pruebas/test_exportar_catalogo.py
 pruebas/test_factorial.py
 pruebas/test_formatos_v010.py
 pruebas/test_formatos_v010_interfaz.py
