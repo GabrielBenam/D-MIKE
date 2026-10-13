@@ -38,7 +38,11 @@ def exportar(carpeta, api):
     os.makedirs(destino, exist_ok=True)
     escritos = []
 
+    from . import modo as MD
+    marca = MD.etiqueta(proy)
+
     def tabla(archivo_csv, cabeza, filas):
+        if marca: cabeza, filas = list(cabeza) + ["marca"], [list(f) + [marca] for f in filas]       # E1-R7: solo proyectos de demostración
         _escribir(os.path.join(destino, archivo_csv), cabeza, filas); escritos.append((archivo_csv, len(filas)))
 
     fijos = {k: v["valor"] for k, v in proy.fijos.items()}
@@ -119,6 +123,7 @@ def exportar(carpeta, api):
     with open(os.path.join(destino, "tema_dmike.json"), "w", encoding="utf-8") as f:
         json.dump(tema_power_bi(), f, ensure_ascii=False, indent=2)
     with open(os.path.join(destino, "LEEME.txt"), "w", encoding="utf-8-sig") as f:
+        if marca: f.write(f"{marca}\nLos datos de este proyecto son sintéticos: cada tabla trae la columna «marca».\n\n")
         f.write(LEEME.format(proyecto=nombre, archivos="\n".join(f"  {a}: {n} filas" for a, n in escritos)))
     return destino, escritos
 

@@ -49,13 +49,16 @@ def _con_folio(origen, destino, folio):
 
 
 def test_receta_con_folio_actualiza_el_mismo_proyecto(tmp_path):
+    """0.26 (E1-R9): el folio ya NO identifica al proyecto. D-MIKE no propone actualizar por folio; el usuario confirma a mano cuál proyecto abierto."""
     vacia, llena = str(tmp_path / "v.xlsx"), str(tmp_path / "l.xlsx")
     _con_folio(S / "caso_integral_plantilla.xlsx", vacia, "DMK-PRUEBA-0001"); _con_folio(S / "caso_integral_datos_llenos.xlsx", llena, "DMK-PRUEBA-0001")
     a = Api(); a.ejecutar_receta(vacia)
-    v = a.abrir_proyecto(llena); assert v["receta"]["actualizable"]["nombre"].startswith("Resistencia")
-    r = a.ejecutar_receta(llena, "actualizar", v["receta"]["actualizable"]["id"])
+    v = a.abrir_proyecto(llena)
+    assert "actualizable" not in v["receta"] and v["receta"]["abiertos"][0]["nombre"].startswith("Resistencia")      # antes: propuesto por folio
+    destino = v["receta"]["abiertos"][0]["id"]                                                                         # ahora: confirmación manual
+    r = a.ejecutar_receta(llena, "actualizar", destino)
     assert r["receta_resultado"]["log"][-1] == "Análisis corridos: 15 de 15." and len(a.proyectos()["proyectos"]) == 1 and len(a.resultados()) == 17
-    r = a.ejecutar_receta(llena, "actualizar", v["receta"]["actualizable"]["id"])          # no repite lo ya corrido
+    r = a.ejecutar_receta(llena, "actualizar", destino)          # no repite lo ya corrido
     assert r["receta_resultado"]["log"][-1] == "Análisis corridos: 0 de 15." and len(a.resultados()) == 17
 
 

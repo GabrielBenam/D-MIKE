@@ -44,6 +44,9 @@ def construir(ruta, res, hoja, proyecto):
     filas = _datos(hoja, nombres); n = len(filas)
     if n < 3: raise ValueError("Hay muy pocos datos para verificar.")
     wb = Workbook(); wd = wb.active; wd.title = "Datos"
+    from ..nucleo import modo as MD
+    if MD.etiqueta(proyecto):                 # E1-R7: la hoja «Datos» queda limpia; la marca va en su propia hoja y en las propiedades
+        wb.create_sheet("AVISO").cell(1, 1, MD.ETIQUETA).font = Font(name=FUENTE, bold=True, color="B3261E"); wb.properties.subject = MD.ETIQUETA
     for k, nom in enumerate(nombres, 1):
         wd.cell(1, k, nom).font = Font(name=FUENTE, bold=True)
         for i, f in enumerate(filas, 2): wd.cell(i, k, f[k - 1])
