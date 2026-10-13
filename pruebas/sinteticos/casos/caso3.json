@@ -1,0 +1,315 @@
+{
+ "perfil_empresa": {
+  "tamano": "250+",
+  "giro": "manufactura",
+  "n_operadores": 30,
+  "alcance": "linea_area"
+ },
+ "diagnostico": {
+  "sintoma": "S07",
+  "secundarios": [],
+  "objetivos": [
+   "errores",
+   "costo"
+  ],
+  "tipo_dato": "variable",
+  "datos": "sistema",
+  "volumen": "gt200",
+  "fase_actual": "A",
+  "equipo": "5+",
+  "semanas": "gt12",
+  "puede_experimentar": null
+ },
+ "modulos": [
+  {
+   "id": "CHARTER",
+   "nombre": "Acta del proyecto (Project/Kaizen Charter)",
+   "fase_asignada": "D",
+   "estado": "disponible",
+   "prioridad": "R",
+   "motivos": [
+    "documentar el acta si aún no existe"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL01, PL14",
+   "datos_minimos": "Caso de negocio, CTQ con línea base y objetivo, alcance, equipo y métricas [CURSO]."
+  },
+  {
+   "id": "DEF-PROBLEMA",
+   "nombre": "Definición del problema (3 pasos)",
+   "fase_asignada": "D",
+   "estado": "disponible",
+   "prioridad": "R",
+   "motivos": [
+    "definir el criterio de defecto"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL08",
+   "datos_minimos": "Síntoma observable, dónde, cuándo y magnitud del problema [CURSO]."
+  },
+  {
+   "id": "MSA-VAR",
+   "nombre": "MSA de variable (R&R)",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "validar la medición",
+    "validar la medición antes de analizar"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL16",
+   "datos_minimos": "10 piezas que cubran el rango, 2-3 evaluadores y al menos 2 repeticiones en orden aleatorio; aceptable si %R&R <= 10% [CURSO].",
+   "verificar_fase_anterior": true,
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "DISTRIB",
+   "nombre": "Distribuciones y normalidad",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "P",
+   "motivos": [
+    "prerrequisito de CAPACIDAD"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "El curso no fija mínimo; sus ejemplos usan de 30 a 150 datos [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "HISTO",
+   "nombre": "Histograma",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "forma de la distribución"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Al menos 50 datos, con el número de clases de la tabla del curso [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "SPC",
+   "nombre": "Cartas de control (SPC)",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "estabilidad"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "20 subgrupos de 5 o 25 de 4 (100 observaciones); n de 4-6 detecta cambios moderados y 7-10 pequeños; para atributos, muestras de 25, 50 o 100 [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "CAPACIDAD",
+   "nombre": "Capacidad (Cp, Cpk, Pp, Ppk)",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "Cp y Cpk"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Límites de especificación y 20 subgrupos de 5 (100 datos) para corto plazo; para largo plazo, datos de todas las fuentes de variación [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "ISHIKAWA",
+   "nombre": "Diagrama de Ishikawa",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "causas potenciales"
+   ],
+   "tipo": "grafico",
+   "plantilla": "",
+   "datos_minimos": "Efecto y causas potenciales por las 6M [CURSO]."
+  },
+  {
+   "id": "CINCO-PQ",
+   "nombre": "5 Porqués",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "causa raíz"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  },
+  {
+   "id": "PARETO",
+   "nombre": "Diagrama de Pareto",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "priorizar tipos de defecto",
+    "tipos de error"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "FINANZAS",
+   "nombre": "Evaluación financiera y ROI",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "cuantificar el costo"
+   ],
+   "tipo": "calculo",
+   "plantilla": "PL18",
+   "datos_minimos": "Ventas, costos de conversión y variables, inventario, activo fijo y cuentas por cobrar [CURSO]."
+  },
+  {
+   "id": "POKAYOKE",
+   "nombre": "Poka Yoke",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "prevenir el error"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  },
+  {
+   "id": "AMEF",
+   "nombre": "AMEF",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "riesgos futuros"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL04",
+   "datos_minimos": "Modos de falla con severidad, ocurrencia y detección (escalas 1-10 del curso) [CURSO]."
+  },
+  {
+   "id": "TRABAJO-EST",
+   "nombre": "Trabajo estándar",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "estandarizar el método"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  }
+ ],
+ "sugeridos": [],
+ "no_recomendados": [],
+ "hoja_datos_sugerida": [
+  {
+   "nombre": "fecha",
+   "tipo": "fecha",
+   "rol": "id",
+   "desc": ""
+  },
+  {
+   "nombre": "unidad_id",
+   "tipo": "id",
+   "rol": "id",
+   "desc": "Lote, pieza, documento u orden"
+  },
+  {
+   "nombre": "operador",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": ""
+  },
+  {
+   "nombre": "turno",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": ""
+  },
+  {
+   "nombre": "tipo_defecto",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Tipo de defecto o error"
+  },
+  {
+   "nombre": "cantidad_defectos",
+   "tipo": "num",
+   "rol": "respuesta",
+   "desc": "Defectos detectados"
+  },
+  {
+   "nombre": "tamano_muestra",
+   "tipo": "num",
+   "rol": "covariable",
+   "desc": "Unidades revisadas"
+  }
+ ],
+ "advertencias": [],
+ "notas": [],
+ "pendientes_datos": [
+  {
+   "modulo": "MSA-VAR",
+   "minimos": "10 piezas que cubran el rango, 2-3 evaluadores y al menos 2 repeticiones en orden aleatorio; aceptable si %R&R <= 10% [CURSO]."
+  },
+  {
+   "modulo": "DISTRIB",
+   "minimos": "El curso no fija mínimo; sus ejemplos usan de 30 a 150 datos [CURSO]."
+  },
+  {
+   "modulo": "HISTO",
+   "minimos": "Al menos 50 datos, con el número de clases de la tabla del curso [CURSO]."
+  },
+  {
+   "modulo": "SPC",
+   "minimos": "20 subgrupos de 5 o 25 de 4 (100 observaciones); n de 4-6 detecta cambios moderados y 7-10 pequeños; para atributos, muestras de 25, 50 o 100 [CURSO]."
+  },
+  {
+   "modulo": "CAPACIDAD",
+   "minimos": "Límites de especificación y 20 subgrupos de 5 (100 datos) para corto plazo; para largo plazo, datos de todas las fuentes de variación [CURSO]."
+  },
+  {
+   "modulo": "PARETO",
+   "minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP]."
+  }
+ ],
+ "ruta_sugerida": [
+  "MSA-VAR",
+  "DISTRIB",
+  "HISTO",
+  "SPC",
+  "CAPACIDAD",
+  "ISHIKAWA",
+  "CINCO-PQ",
+  "PARETO",
+  "FINANZAS",
+  "POKAYOKE",
+  "AMEF",
+  "TRABAJO-EST"
+ ],
+ "siguiente_paso": "MSA-VAR",
+ "datos_fijos": {
+  "nombre_proyecto": "Caso sintético 3",
+  "cliente_area": null,
+  "responsable": null,
+  "logo": null,
+  "notas": "Generado con simular_arbol.py. Sintético."
+ },
+ "version_perfil": 1,
+ "arbol_version": "1.3",
+ "generado_en": "2026-09-30T00:00:00+00:00"
+}

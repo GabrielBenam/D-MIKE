@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+build/
+dist/
+instalador/salida/
+instalador/MicrosoftEdgeWebview2Setup.exe
+pruebas/capturas/
+*.spec
+.pytest_cache/
+prueba_error.txt

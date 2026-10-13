@@ -1,0 +1,192 @@
+{
+ "perfil_empresa": {
+  "tamano": "lt10",
+  "giro": "servicios",
+  "n_operadores": 4,
+  "alcance": "puntual"
+ },
+ "diagnostico": {
+  "sintoma": "S01",
+  "secundarios": [],
+  "objetivos": [
+   "satisfaccion"
+  ],
+  "tipo_dato": null,
+  "datos": "ninguno",
+  "volumen": null,
+  "fase_actual": "D",
+  "equipo": "1",
+  "semanas": "lt4",
+  "puede_experimentar": null
+ },
+ "modulos": [
+  {
+   "id": "CHARTER",
+   "nombre": "Acta del proyecto (Project/Kaizen Charter)",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "documentar caso de negocio, CTQ y alcance",
+    "fase Definir"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL01, PL14",
+   "datos_minimos": "Caso de negocio, CTQ con línea base y objetivo, alcance, equipo y métricas [CURSO]."
+  },
+  {
+   "id": "DEF-PROBLEMA",
+   "nombre": "Definición del problema (3 pasos)",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "definir el problema con alcance y magnitud"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL08",
+   "datos_minimos": "Síntoma observable, dónde, cuándo y magnitud del problema [CURSO]."
+  },
+  {
+   "id": "A3",
+   "nombre": "Informe A3",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "resumir el problema en una hoja"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL08",
+   "datos_minimos": ""
+  },
+  {
+   "id": "SIPOC",
+   "nombre": "Diagrama SIPOC",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "delimitar el proceso"
+   ],
+   "tipo": "grafico",
+   "plantilla": "PL10",
+   "datos_minimos": "Proveedores, entradas, proceso, salidas, clientes y requisitos medibles [CURSO]."
+  },
+  {
+   "id": "KANO",
+   "nombre": "Modelo Kano",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "requisitos del cliente poco claros",
+    "requisitos de satisfacción"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL10",
+   "datos_minimos": "Lista de requisitos y encuesta de dos preguntas por requisito; el curso no fija mínimo (ejemplo: 237 clientes) [CURSO]."
+  },
+  {
+   "id": "CTQ-TREE",
+   "nombre": "Árbol CTQ",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "traducir necesidades",
+    "traducir a medibles"
+   ],
+   "tipo": "grafico",
+   "plantilla": "PL15",
+   "datos_minimos": "Necesidad crítica, impulsores de calidad y requisitos de desempeño medibles [CURSO]."
+  },
+  {
+   "id": "GANTT",
+   "nombre": "Cronograma DMAIC (Gantt)",
+   "fase_asignada": "D",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "cronograma del proyecto"
+   ],
+   "tipo": "calculo",
+   "plantilla": "PL14",
+   "datos_minimos": "Fecha de inicio y duración en días de cada actividad [CURSO]."
+  },
+  {
+   "id": "MUESTREO",
+   "nombre": "Plan de muestreo",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "definir cuántos datos reunir"
+   ],
+   "tipo": "calculo",
+   "plantilla": "PL11",
+   "datos_minimos": "Población, característica, proporción o desviación estimada, precisión y confianza (z 1.64 o 1.96) [CURSO]."
+  },
+  {
+   "id": "HOJA-DATOS",
+   "nombre": "Hoja de recolección de datos",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "aún no hay datos: primero recolectar"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL11",
+   "datos_minimos": "Fecha, responsable, instrumento y una columna por variable [CURSO]."
+  },
+  {
+   "id": "KAIZEN",
+   "nombre": "Evento Kaizen / Kaizen Charter",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "evento Kaizen corto"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL01",
+   "datos_minimos": ""
+  }
+ ],
+ "sugeridos": [],
+ "no_recomendados": [],
+ "hoja_datos_sugerida": [],
+ "advertencias": [
+  "Todavía no hay datos: los módulos estadísticos quedan en espera hasta reunir el mínimo.",
+  "Empresa pequeña: conviene privilegiar eventos Kaizen cortos y formatos ligeros.",
+  "Menos de 4 semanas: prioriza herramientas de ciclo corto."
+ ],
+ "notas": [
+  "La unidad de análisis es el documento, la orden o la transacción, no la pieza."
+ ],
+ "pendientes_datos": [],
+ "ruta_sugerida": [
+  "CHARTER",
+  "DEF-PROBLEMA",
+  "A3",
+  "SIPOC",
+  "KANO",
+  "CTQ-TREE",
+  "GANTT",
+  "MUESTREO",
+  "HOJA-DATOS",
+  "KAIZEN"
+ ],
+ "siguiente_paso": "HOJA-DATOS",
+ "datos_fijos": {
+  "nombre_proyecto": "Caso sintético 4",
+  "cliente_area": null,
+  "responsable": null,
+  "logo": null,
+  "notas": "Generado con simular_arbol.py. Sintético."
+ },
+ "version_perfil": 1,
+ "arbol_version": "1.3",
+ "generado_en": "2026-09-30T00:00:00+00:00"
+}

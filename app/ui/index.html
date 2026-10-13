@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>D-MIKE</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="barra">
+  <span class="marca"><img class="logo-img" src="logo.svg" alt="" width="24" height="24"><span>D-MIKE</span></span>
+  <nav id="menus" class="menus" aria-label="Menú principal"></nav>
+</header>
+<div id="cinta" class="cinta" hidden></div>
+<nav id="docs" class="docs" aria-label="Proyectos abiertos"></nav>
+<nav id="pestanas" class="pestanas" aria-label="Ventanas abiertas"><button class="pestana activa" data-p="hoja">Hoja de datos</button></nav>
+<div id="herramientas" class="herramientas" role="toolbar" aria-label="Herramientas"></div>
+<section id="franja" class="franja" hidden></section>
+<main class="cuerpo">
+  <div class="columna-dmaic"><aside id="fases" class="fases" aria-label="Fases DMAIC"></aside></div>
+  <section class="trabajo">
+    <div class="paneles" id="paneles">
+    <div id="vista" class="vista" hidden></div>
+    <div class="hoja-marco" id="marco-hoja">
+      <div class="hoja-titulo"><span>Hoja de datos <span id="archivo" class="archivo"></span> <span id="info-filtro" class="info-filtro" hidden></span></span>
+        <span class="derecha"><span id="estado-rango" class="estado-rango"></span><span id="celda-activa" class="celda-activa"></span></span></div>
+      <div id="hoja" class="hoja" tabindex="0"></div>
+    </div>
+    <aside id="derecha" class="vista derecha-pane" hidden aria-label="Vista derecha"></aside>
+    </div>
+    <section class="sesion" aria-label="Sesión">
+      <div class="sesion-titulo">Sesión</div>
+      <ol id="sesion" class="sesion-lista"></ol>
+    </section>
+  </section>
+</main>
+<script src="vendor/plotly.min.js"></script>
+<script src="iconos.js"></script>
+<script src="app.js"></script>
+<script src="hoja.js"></script>
+<script src="modulos.js"></script>
+<script src="tablero.js"></script>
+<script src="inicio.js"></script>
+<script src="ayuda.js"></script>
+<script src="ui2.js"></script>
+<script src="ui3.js"></script>
+<script src="graficas.js"></script>
+</body>
+</html>

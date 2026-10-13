@@ -1,0 +1,212 @@
+{
+ "perfil_empresa": {
+  "tamano": "50-249",
+  "giro": "manufactura",
+  "n_operadores": 8,
+  "alcance": "linea_area"
+ },
+ "diagnostico": {
+  "sintoma": "S13",
+  "secundarios": [],
+  "objetivos": [
+   "costo"
+  ],
+  "tipo_dato": "variable",
+  "datos": "excel",
+  "volumen": "15-50",
+  "fase_actual": "A",
+  "equipo": "2-4",
+  "semanas": "4-12",
+  "puede_experimentar": "no"
+ },
+ "modulos": [
+  {
+   "id": "CHARTER",
+   "nombre": "Acta del proyecto (Project/Kaizen Charter)",
+   "fase_asignada": "D",
+   "estado": "disponible",
+   "prioridad": "R",
+   "motivos": [
+    "documentar el acta si aún no existe"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL01, PL14",
+   "datos_minimos": "Caso de negocio, CTQ con línea base y objetivo, alcance, equipo y métricas [CURSO]."
+  },
+  {
+   "id": "MSA-VAR",
+   "nombre": "MSA de variable (R&R)",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "medición confiable antes de experimentar",
+    "validar la medición antes de analizar"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL16",
+   "datos_minimos": "10 piezas que cubran el rango, 2-3 evaluadores y al menos 2 repeticiones en orden aleatorio; aceptable si %R&R <= 10% [CURSO].",
+   "verificar_fase_anterior": true,
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "MULTIVARI",
+   "nombre": "Análisis Multi-Vari",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "reducir muchas X a pocas vitales"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Al menos 15 mediciones, en subgrupos de 3 a 5 unidades, con tiempo entre muestras suficiente para ver variación [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "ANOVA",
+   "nombre": "ANOVA (1, 2 y 3 factores; con o sin bloqueo)",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "factores significativos"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL12",
+   "datos_minimos": "Réplicas por nivel (las plantillas admiten hasta 5) con orden aleatorizado; con 2 niveles equivale a la prueba t de dos muestras [COMP].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "CORREL",
+   "nombre": "Correlación",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "relación entre variables"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Pares X-Y; los ejemplos del curso usan 11 a 12 pares [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "REGRESION",
+   "nombre": "Regresión simple, múltiple y polinomial",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "modelo Y = f(X)"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Al menos 15 observaciones (requisito de Durbin-Watson del curso) y repeticiones de Y para la prueba de falta de ajuste [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "FINANZAS",
+   "nombre": "Evaluación financiera y ROI",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "cuantificar el costo"
+   ],
+   "tipo": "calculo",
+   "plantilla": "PL18",
+   "datos_minimos": "Ventas, costos de conversión y variables, inventario, activo fijo y cuentas por cobrar [CURSO]."
+  }
+ ],
+ "sugeridos": [],
+ "no_recomendados": [
+  {
+   "id": "DOE-FRAC",
+   "nombre": "DOE fraccionado",
+   "motivos": [
+    "5 o más factores: fraccionado 2^(5-1)",
+    "no se pueden cambiar condiciones"
+   ]
+  },
+  {
+   "id": "RSM",
+   "nombre": "Superficies de respuesta",
+   "motivos": [
+    "buscar el punto óptimo",
+    "no se pueden cambiar condiciones"
+   ]
+  }
+ ],
+ "hoja_datos_sugerida": [
+  {
+   "nombre": "orden_corrida",
+   "tipo": "id",
+   "rol": "id",
+   "desc": "Orden aleatorio de ejecución"
+  },
+  {
+   "nombre": "factor_A",
+   "tipo": "num",
+   "rol": "factor",
+   "desc": ""
+  },
+  {
+   "nombre": "factor_B",
+   "tipo": "num",
+   "rol": "factor",
+   "desc": ""
+  },
+  {
+   "nombre": "respuesta",
+   "tipo": "num",
+   "rol": "respuesta",
+   "desc": ""
+  }
+ ],
+ "advertencias": [
+  "Sin poder experimentar, los hallazgos serán de asociación y no de causa (ver CORR-CAUSALIDAD)."
+ ],
+ "notas": [],
+ "pendientes_datos": [
+  {
+   "modulo": "MSA-VAR",
+   "minimos": "10 piezas que cubran el rango, 2-3 evaluadores y al menos 2 repeticiones en orden aleatorio; aceptable si %R&R <= 10% [CURSO]."
+  },
+  {
+   "modulo": "MULTIVARI",
+   "minimos": "Al menos 15 mediciones, en subgrupos de 3 a 5 unidades, con tiempo entre muestras suficiente para ver variación [CURSO]."
+  },
+  {
+   "modulo": "ANOVA",
+   "minimos": "Réplicas por nivel (las plantillas admiten hasta 5) con orden aleatorizado; con 2 niveles equivale a la prueba t de dos muestras [COMP]."
+  },
+  {
+   "modulo": "CORREL",
+   "minimos": "Pares X-Y; los ejemplos del curso usan 11 a 12 pares [CURSO]."
+  },
+  {
+   "modulo": "REGRESION",
+   "minimos": "Al menos 15 observaciones (requisito de Durbin-Watson del curso) y repeticiones de Y para la prueba de falta de ajuste [CURSO]."
+  }
+ ],
+ "ruta_sugerida": [
+  "MSA-VAR",
+  "MULTIVARI",
+  "ANOVA",
+  "CORREL",
+  "REGRESION",
+  "FINANZAS"
+ ],
+ "siguiente_paso": "MSA-VAR",
+ "datos_fijos": {
+  "nombre_proyecto": "Caso sintético 5",
+  "cliente_area": null,
+  "responsable": null,
+  "logo": null,
+  "notas": "Generado con simular_arbol.py. Sintético."
+ },
+ "version_perfil": 1,
+ "arbol_version": "1.3",
+ "generado_en": "2026-09-30T00:00:00+00:00"
+}
