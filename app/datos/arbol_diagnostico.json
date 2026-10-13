@@ -1,0 +1,4207 @@
+{
+ "version": "1.3",
+ "fecha": "2026-09-29",
+ "nota": "Árbol de diagnóstico para el artefacto de la Fase 1. Origen: guía síntoma-herramienta (07_MATRIZ_Y_GUIA) ampliada con los módulos de Green y Black Belt. Umbrales tomados del curso salvo los marcados [COMP].",
+ "leyenda_prioridad": {
+  "N": "núcleo (activo)",
+  "R": "recomendado (activo)",
+  "O": "opcional (disponible, sugerido)",
+  "X": "no recomendado (disponible con aviso)"
+ },
+ "fases": [
+  "D",
+  "M",
+  "A",
+  "I",
+  "C"
+ ],
+ "catalogo": [
+  {
+   "id": "CHARTER",
+   "nombre": "Acta del proyecto (Project/Kaizen Charter)",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "YB/GB",
+   "base": "13_GB_DEFINIR: DEF-CHARTER",
+   "plantilla": "PL01, PL14",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Caso de negocio, CTQ con línea base y objetivo, alcance, equipo y métricas [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "DEF-PROBLEMA",
+   "nombre": "Definición del problema (3 pasos)",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "03_SOLUCION_PROBLEMAS: PS-3PASOS, PS-DEFINICION",
+   "plantilla": "PL08",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Síntoma observable, dónde, cuándo y magnitud del problema [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "A3",
+   "nombre": "Informe A3",
+   "fases": [
+    "D",
+    "M",
+    "A",
+    "I",
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "03_SOLUCION_PROBLEMAS: PS-A3",
+   "plantilla": "PL08",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "SIPOC",
+   "nombre": "Diagrama SIPOC",
+   "fases": [
+    "D",
+    "M"
+   ],
+   "tipo": "grafico",
+   "nivel": "YB/GB",
+   "base": "14_GB_MEDIR: MED-SIPOC",
+   "plantilla": "PL10",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Proveedores, entradas, proceso, salidas, clientes y requisitos medibles [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "CUATRO-Q",
+   "nombre": "4 Preguntas (4Qs)",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "03_SOLUCION_PROBLEMAS: 4Qs",
+   "plantilla": "PL08",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "KANO",
+   "nombre": "Modelo Kano",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "GB",
+   "base": "13_GB_DEFINIR: DEF-KANO",
+   "plantilla": "PL10",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Lista de requisitos y encuesta de dos preguntas por requisito; el curso no fija mínimo (ejemplo: 237 clientes) [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "CTQ-TREE",
+   "nombre": "Árbol CTQ",
+   "fases": [
+    "D"
+   ],
+   "tipo": "grafico",
+   "nivel": "GB",
+   "base": "13_GB_DEFINIR: DEF-CTQTREE",
+   "plantilla": "PL15",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Necesidad crítica, impulsores de calidad y requisitos de desempeño medibles [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "QFD",
+   "nombre": "QFD (matriz 1)",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "BB",
+   "base": "13_GB_DEFINIR: DEF-QFD",
+   "plantilla": "PL10",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Hasta 6 requisitos de cliente (importancia 1-5) y hasta 5 requisitos técnicos; competidores opcional [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "GANTT",
+   "nombre": "Cronograma DMAIC (Gantt)",
+   "fases": [
+    "D"
+   ],
+   "tipo": "calculo",
+   "nivel": "GB",
+   "base": "13_GB_DEFINIR: DEF-GANTT-DMAIC",
+   "plantilla": "PL14",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Fecha de inicio y duración en días de cada actividad [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "INTERESADOS",
+   "nombre": "Registro de interesados",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "PMBOK",
+   "base": "PMBOK 6: 13.1.3.1, 13.1.2.4, 13.2.2.5; PMBOK 7: 2.1, 4.6.2, 4.6.6",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": "10-49",
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "HOSHIN",
+   "nombre": "Hoshin Kanri / Canvas estratégico",
+   "fases": [
+    "D"
+   ],
+   "tipo": "manual",
+   "nivel": "YB/BB",
+   "base": "05_ESTRATEGIA",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": "250+",
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "PMAPA",
+   "nombre": "Mapa de proceso",
+   "fases": [
+    "M"
+   ],
+   "tipo": "grafico",
+   "nivel": "GB",
+   "base": "14_GB_MEDIR: MED-PMAP",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Pasos con entradas y salidas (X y Y) clasificadas [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "VSM",
+   "nombre": "Mapa de valor (VSM actual)",
+   "fases": [
+    "M"
+   ],
+   "tipo": "grafico",
+   "nivel": "YB",
+   "base": "02_DIAGNOSTICO: DIAG-VSM, DIAG-LEADTIME",
+   "plantilla": "PL03",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Recorrido real del flujo, tiempo de ciclo y de cambio, inventarios, demanda y tiempo disponible [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "TAKT",
+   "nombre": "Takt time",
+   "fases": [
+    "M"
+   ],
+   "tipo": "calculo",
+   "nivel": "YB",
+   "base": "02_DIAGNOSTICO: DIAG-TAKT",
+   "plantilla": "PL03",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Demanda del cliente por periodo y tiempo disponible neto [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "OEE",
+   "nombre": "OEE y tablero de OEE",
+   "fases": [
+    "M"
+   ],
+   "tipo": "datos",
+   "nivel": "YB",
+   "base": "02_DIAGNOSTICO: DIAG-OEE",
+   "plantilla": "PL09",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Por hora, en al menos un turno completo: tiempo programado, paros (causa y minutos), piezas producidas y defectuosas [COMP: el curso muestra ejemplo de 3 horas].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "TIEMPOS",
+   "nombre": "Medición de tiempos",
+   "fases": [
+    "M"
+   ],
+   "tipo": "datos",
+   "nivel": "YB",
+   "base": "02_DIAGNOSTICO: hoja de tiempos",
+   "plantilla": "PL09",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": 30,
+   "datos_minimos": "30 mediciones por elemento de trabajo (formato del curso) [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "MUDAS",
+   "nombre": "Identificación de Mudas",
+   "fases": [
+    "M",
+    "A"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "02_DIAGNOSTICO: DIAG-MUDA10",
+   "plantilla": "PL03",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "MUESTREO",
+   "nombre": "Plan de muestreo",
+   "fases": [
+    "M"
+   ],
+   "tipo": "calculo",
+   "nivel": "GB",
+   "base": "15_GB_ESTADISTICA_Y_MUESTREO: MUE-DISCRETA, MUE-CONTINUA",
+   "plantilla": "PL11",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Población, característica, proporción o desviación estimada, precisión y confianza (z 1.64 o 1.96) [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "HOJA-DATOS",
+   "nombre": "Hoja de recolección de datos",
+   "fases": [
+    "M"
+   ],
+   "tipo": "manual",
+   "nivel": "GB",
+   "base": "15_GB_ESTADISTICA_Y_MUESTREO: MUE-HOJA-DATOS",
+   "plantilla": "PL11",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Fecha, responsable, instrumento y una columna por variable [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "MSA-VAR",
+   "nombre": "MSA de variable (R&R)",
+   "fases": [
+    "M"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "14_GB_MEDIR: MED-RR-VARIABLE",
+   "plantilla": "PL16",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": 10,
+   "datos_minimos": "10 piezas que cubran el rango, 2-3 evaluadores y al menos 2 repeticiones en orden aleatorio; aceptable si %R&R <= 10% [CURSO].",
+   "requiere_datos": true,
+   "verificable": true
+  },
+  {
+   "id": "MSA-ATR",
+   "nombre": "MSA de atributos",
+   "fases": [
+    "M"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "14_GB_MEDIR: MED-RR-ATRIBUTO",
+   "plantilla": "PL16",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": 30,
+   "datos_minimos": "30 a 50 muestras (5-10 marginales, 5-10 evidentemente defectuosas, resto buenas), 2-3 evaluadores, al menos 2 rondas; valor de referencia si existe; coincidencia >= 0.75 (ideal > 0.90) [CURSO].",
+   "requiere_datos": true,
+   "verificable": true
+  },
+  {
+   "id": "DISTRIB",
+   "nombre": "Distribuciones y normalidad",
+   "fases": [
+    "M",
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "BB",
+   "base": "25_BB_DISTRIBUCIONES: DIST-IDENTIFICAR-TIPO, DIST-TRANSFORMACION",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "El curso no fija mínimo; sus ejemplos usan de 30 a 150 datos [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "HISTO",
+   "nombre": "Histograma",
+   "fases": [
+    "M",
+    "A",
+    "I"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO: HIST-PROCEDIMIENTO",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": 50,
+   "datos_minimos": "Al menos 50 datos, con el número de clases de la tabla del curso [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "CORRIDA",
+   "nombre": "Gráfica de corrida / tendencia",
+   "fases": [
+    "M",
+    "C"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "07_MATRIZ_Y_GUIA: gráficas de tendencia (GB)",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Datos en orden cronológico; el curso no fija mínimo [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "CAPACIDAD",
+   "nombre": "Capacidad (Cp, Cpk, Pp, Ppk)",
+   "fases": [
+    "M",
+    "A",
+    "I",
+    "C"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO: CAP-*",
+   "plantilla": "",
+   "prereq": [
+    "MSA-VAR",
+    "DISTRIB",
+    "SPC"
+   ],
+   "min_tamano": null,
+   "min_n": 100,
+   "datos_minimos": "Límites de especificación y 20 subgrupos de 5 (100 datos) para corto plazo; para largo plazo, datos de todas las fuentes de variación [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "DESEMPENO",
+   "nombre": "Desempeño (DPMO, nivel sigma)",
+   "fases": [
+    "M"
+   ],
+   "tipo": "calculo",
+   "nivel": "GB",
+   "base": "16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO: DES-DPMO, DES-Z-VALUE",
+   "plantilla": "PL12",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Unidades, oportunidades por unidad y defectos observados [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "GEMBA",
+   "nombre": "Caminata Gemba",
+   "fases": [
+    "M",
+    "A",
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "BB",
+   "base": "32_BB_CAMINATAS_GEMBA",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "ISHIKAWA",
+   "nombre": "Diagrama de Ishikawa",
+   "fases": [
+    "A"
+   ],
+   "tipo": "grafico",
+   "nivel": "YB",
+   "base": "03_SOLUCION_PROBLEMAS: PS-ISHIKAWA",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Efecto y causas potenciales por las 6M [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "CINCO-PQ",
+   "nombre": "5 Porqués",
+   "fases": [
+    "A"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "03_SOLUCION_PROBLEMAS: PS-5PQ",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "PARETO",
+   "nombre": "Diagrama de Pareto",
+   "fases": [
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "07_MATRIZ_Y_GUIA: Pareto (GB)",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "BOXPLOT",
+   "nombre": "Diagrama de caja",
+   "fases": [
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "17_GB_ANALIZAR: BOX-*",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Dos o más grupos comparables; los ejemplos del curso usan de 10 a 25 datos por grupo [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "MULTIVARI",
+   "nombre": "Análisis Multi-Vari",
+   "fases": [
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "17_GB_ANALIZAR: MV-*",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": 15,
+   "datos_minimos": "Al menos 15 mediciones, en subgrupos de 3 a 5 unidades, con tiempo entre muestras suficiente para ver variación [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "ANOVA",
+   "nombre": "ANOVA (1, 2 y 3 factores; con o sin bloqueo)",
+   "fases": [
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "17_GB_ANALIZAR: ANOVA-*",
+   "plantilla": "PL12",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Réplicas por nivel (las plantillas admiten hasta 5) con orden aleatorizado; con 2 niveles equivale a la prueba t de dos muestras [COMP].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "CORREL",
+   "nombre": "Correlación",
+   "fases": [
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "17_GB_ANALIZAR: CORR-*",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Pares X-Y; los ejemplos del curso usan 11 a 12 pares [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "REGRESION",
+   "nombre": "Regresión simple, múltiple y polinomial",
+   "fases": [
+    "A"
+   ],
+   "tipo": "datos",
+   "nivel": "BB",
+   "base": "27_BB_REGRESION",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": 15,
+   "datos_minimos": "Al menos 15 observaciones (requisito de Durbin-Watson del curso) y repeticiones de Y para la prueba de falta de ajuste [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "TOC",
+   "nombre": "Teoría de Restricciones (5 pasos)",
+   "fases": [
+    "A"
+   ],
+   "tipo": "manual",
+   "nivel": "BB",
+   "base": "24_BB_TEORIA_RESTRICCIONES",
+   "plantilla": "",
+   "prereq": [
+    "VSM"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "BALANCE",
+   "nombre": "Gráfica de balance",
+   "fases": [
+    "A"
+   ],
+   "tipo": "grafico",
+   "nivel": "YB",
+   "base": "03_SOLUCION_PROBLEMAS / 02_DIAGNOSTICO: LEAN-BALANCE",
+   "plantilla": "PL03",
+   "prereq": [
+    "TAKT",
+    "TIEMPOS"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "ESPAGUETI",
+   "nombre": "Diagrama de espagueti",
+   "fases": [
+    "A"
+   ],
+   "tipo": "grafico",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-ESPAGUETI",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "FINANZAS",
+   "nombre": "Evaluación financiera y ROI",
+   "fases": [
+    "A",
+    "I"
+   ],
+   "tipo": "calculo",
+   "nivel": "BB",
+   "base": "23_BB_EVALUACION_FINANCIERA",
+   "plantilla": "PL18",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Ventas, costos de conversión y variables, inventario, activo fijo y cuentas por cobrar [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "CINCO-S",
+   "nombre": "5S",
+   "fases": [
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-5S",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "SMED",
+   "nombre": "SMED",
+   "fases": [
+    "I"
+   ],
+   "tipo": "datos",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-SMED",
+   "plantilla": "PL02",
+   "prereq": [
+    "CINCO-S"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Medición o video del cambio actual y clasificación interno/externo [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "TPM",
+   "nombre": "TPM",
+   "fases": [
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-TPM",
+   "plantilla": "PL06",
+   "prereq": [
+    "CINCO-S"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "KANBAN",
+   "nombre": "Kanban",
+   "fases": [
+    "I"
+   ],
+   "tipo": "calculo",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-KANBAN",
+   "plantilla": "PL05",
+   "prereq": [
+    "VSM",
+    "TAKT"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Demanda, tiempo de reposición, coeficiente de variación y ubicaciones (fórmula del curso) [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "FLUJO",
+   "nombre": "Flujo continuo",
+   "fases": [
+    "I"
+   ],
+   "tipo": "grafico",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-FLUJO",
+   "plantilla": "PL05",
+   "prereq": [
+    "VSM"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "POKAYOKE",
+   "nombre": "Poka Yoke",
+   "fases": [
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "11_GUIA_POKAYOKE",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "AMEF",
+   "nombre": "AMEF",
+   "fases": [
+    "I",
+    "C"
+   ],
+   "tipo": "datos",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-AMEF",
+   "plantilla": "PL04",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Modos de falla con severidad, ocurrencia y detección (escalas 1-10 del curso) [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "KAIZEN",
+   "nombre": "Evento Kaizen / Kaizen Charter",
+   "fases": [
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-KAIZEN",
+   "plantilla": "PL01",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "TARJETAS",
+   "nombre": "Tarjetas de oportunidad",
+   "fases": [
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-TARJETAS",
+   "plantilla": "PL01",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "DOE-FACT",
+   "nombre": "DOE factorial",
+   "fases": [
+    "I"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "18_GB_MEJORAR: FACT-*",
+   "plantilla": "PL13",
+   "prereq": [
+    "MSA-VAR"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Réplicas por corrida según el diseño (2^2: 9, 2^3: 5, 2^4: 3, 2^5: 2), orden aleatorio, y no más del 25% de los recursos en el experimento inicial [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "DOE-FRAC",
+   "nombre": "DOE fraccionado",
+   "fases": [
+    "I"
+   ],
+   "tipo": "datos",
+   "nivel": "BB",
+   "base": "26_BB_DOE_FRACCIONADOS",
+   "plantilla": "",
+   "prereq": [
+    "MSA-VAR"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "5 o más factores a 2 niveles; con 5 factores, 16 corridas (2^(5-1)); resolución IV o V preferible [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "RSM",
+   "nombre": "Superficies de respuesta",
+   "fases": [
+    "I"
+   ],
+   "tipo": "datos",
+   "nivel": "BB",
+   "base": "28_BB_SUPERFICIES_RESPUESTA",
+   "plantilla": "PL18",
+   "prereq": [
+    "DOE-FACT|DOE-FRAC"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Diseño de 2 niveles con 3 a 5 corridas en el punto central; luego ascenso/descenso y diseño central compuesto [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "SCRUM",
+   "nombre": "Scrum",
+   "fases": [
+    "D",
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "BB",
+   "base": "22_BB_SCRUM",
+   "plantilla": "PL17",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Equipo auto-organizado de 5 a 10 integrantes, Sprints de 1 a 4 semanas [CURSO].",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "RIESGOS",
+   "nombre": "Registro de riesgos",
+   "fases": [
+    "I"
+   ],
+   "tipo": "manual",
+   "nivel": "PMBOK",
+   "base": "PMBOK 6: 11.2.3.1, 11.3, 11.5.2.4-5, figura 11-5; PMBOK 7: 2.8, 4.4.1",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "SPC",
+   "nombre": "Cartas de control (SPC)",
+   "fases": [
+    "M",
+    "A",
+    "C"
+   ],
+   "tipo": "datos",
+   "nivel": "GB",
+   "base": "19_GB_CONTROLAR: SPC-*",
+   "plantilla": "",
+   "prereq": [
+    "MSA-VAR|MSA-ATR"
+   ],
+   "min_tamano": null,
+   "min_n": 100,
+   "datos_minimos": "20 subgrupos de 5 o 25 de 4 (100 observaciones); n de 4-6 detecta cambios moderados y 7-10 pequeños; para atributos, muestras de 25, 50 o 100 [CURSO].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "PLAN-CONTROL",
+   "nombre": "Plan de control",
+   "fases": [
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "GB",
+   "base": "19_GB_CONTROLAR: CTRL-*",
+   "plantilla": "PL13",
+   "prereq": [
+    "AMEF"
+   ],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "VISUAL",
+   "nombre": "Gestión visual (Andon)",
+   "fases": [
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-VISUAL",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "KATA",
+   "nombre": "Kata",
+   "fases": [
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-KATA",
+   "plantilla": "PL07",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "TRABAJO-EST",
+   "nombre": "Trabajo estándar",
+   "fases": [
+    "I",
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "YB",
+   "base": "04_HERRAMIENTAS_LEAN: LEAN-TRABAJO-EST",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "LSW",
+   "nombre": "Trabajo estándar de líderes",
+   "fases": [
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "BB",
+   "base": "31_BB_TRABAJO_ESTANDAR_LIDERES",
+   "plantilla": "PL19",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "TABLERO",
+   "nombre": "Tablero de seguimiento semanal (KPI)",
+   "fases": [
+    "C",
+    "M"
+   ],
+   "tipo": "datos",
+   "nivel": "propio",
+   "base": "31_BB_TRABAJO_ESTANDAR_LIDERES: LSW-ESTRUCTURA-RESULTADOS; diseño Fase 4",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "Indicadores con meta y resultado por semana, y trabajos en proceso [COMP].",
+   "requiere_datos": true,
+   "verificable": false
+  },
+  {
+   "id": "LECCIONES",
+   "nombre": "Cierre y lecciones aprendidas",
+   "fases": [
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "GB/PMBOK",
+   "base": "PMBOK 6: 4.4.3.1, 4.7.3.2, 4.7.3.3; PMBOK 7: 2.5.8, 2.3.5; 13_GB_DEFINIR: DEF-GANTT-DMAIC",
+   "plantilla": "",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  },
+  {
+   "id": "CHECKLIST-FASE",
+   "nombre": "Checklist de revisión de fase",
+   "fases": [
+    "D",
+    "M",
+    "A",
+    "I",
+    "C"
+   ],
+   "tipo": "manual",
+   "nivel": "GB",
+   "base": "13_GB_DEFINIR: DEF-CHECKLIST; 16_GB: DES-CHECKLIST; 17_GB: CORR-CHECKLIST-ANALIZAR",
+   "plantilla": "PL13",
+   "prereq": [],
+   "min_tamano": null,
+   "min_n": null,
+   "datos_minimos": "",
+   "requiere_datos": false,
+   "verificable": false
+  }
+ ],
+ "cuestionario": [
+  {
+   "id": "E1",
+   "nombre": "Perfil",
+   "preguntas": [
+    {
+     "id": "tamano",
+     "texto": "¿Cuántas personas tiene la empresa?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "lt10",
+       "Menos de 10"
+      ],
+      [
+       "10-49",
+       "10 a 49"
+      ],
+      [
+       "50-249",
+       "50 a 249"
+      ],
+      [
+       "250+",
+       "250 o más"
+      ]
+     ]
+    },
+    {
+     "id": "n_operadores",
+     "texto": "¿Cuántas personas ejecutan el proceso a mejorar?",
+     "tipo": "numero",
+     "min": 1
+    },
+    {
+     "id": "giro",
+     "texto": "¿Qué tipo de operación es?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "manufactura",
+       "Manufactura"
+      ],
+      [
+       "servicios",
+       "Servicios"
+      ],
+      [
+       "ingenieria_documentacion",
+       "Ingeniería o documentación"
+      ],
+      [
+       "logistica",
+       "Logística"
+      ],
+      [
+       "mantenimiento",
+       "Mantenimiento"
+      ],
+      [
+       "otro",
+       "Otro"
+      ]
+     ]
+    },
+    {
+     "id": "alcance",
+     "texto": "¿Qué alcance tiene el problema?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "puntual",
+       "Un proceso o tarea puntual"
+      ],
+      [
+       "linea_area",
+       "Una línea o un área"
+      ],
+      [
+       "cadena",
+       "Toda una cadena de valor"
+      ],
+      [
+       "varios",
+       "Varios procesos"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E2",
+   "nombre": "Síntoma",
+   "preguntas": [
+    {
+     "id": "categoria",
+     "texto": "¿En qué categoría cae tu problema?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "A",
+       "Flujo y tiempos"
+      ],
+      [
+       "B",
+       "Calidad y variación"
+      ],
+      [
+       "D",
+       "Definir y entender al cliente"
+      ],
+      [
+       "C",
+       "Sostener y mejorar continuamente"
+      ],
+      [
+       "E",
+       "Medir el efecto de algo que ya hice, o descubrir factores"
+      ],
+      [
+       "F",
+       "Gestión y dinero"
+      ]
+     ]
+    },
+    {
+     "id": "sintoma",
+     "texto": "¿Cuál describe mejor lo que observas?",
+     "tipo": "unica",
+     "depende_de": "categoria",
+     "opciones": [
+      [
+       "S01",
+       "El problema no está bien definido o no tiene alcance claro",
+       "D"
+      ],
+      [
+       "S17",
+       "No tengo claros los requisitos del cliente",
+       "D"
+      ],
+      [
+       "S02",
+       "Inventario alto o tiempo de entrega largo (flujo lento)",
+       "A"
+      ],
+      [
+       "S03",
+       "Cambios de producto largos o lotes grandes",
+       "A"
+      ],
+      [
+       "S04",
+       "Paros no planeados, línea o equipo parado, baja disponibilidad",
+       "A"
+      ],
+      [
+       "S05",
+       "Búsquedas, caminatas o layout deficiente",
+       "A"
+      ],
+      [
+       "S06",
+       "Estaciones desbalanceadas o esperas entre actividades",
+       "A"
+      ],
+      [
+       "S07",
+       "Defectos, errores o retrabajos",
+       "B"
+      ],
+      [
+       "S08",
+       "Variación entre turnos, operadores o lotes",
+       "B"
+      ],
+      [
+       "S11",
+       "El proceso no cumple especificaciones (capacidad)",
+       "B"
+      ],
+      [
+       "S12",
+       "Dudo de mi sistema de medición",
+       "B"
+      ],
+      [
+       "S09",
+       "Las mejoras no se sostienen",
+       "C"
+      ],
+      [
+       "S10",
+       "Ideas del personal sin canal",
+       "C"
+      ],
+      [
+       "S13",
+       "Quiero descubrir qué factores influyen o encontrar el óptimo",
+       "E"
+      ],
+      [
+       "S14",
+       "Ya implementé un cambio o herramienta y quiero medir si mejora (con/sin, antes/después)",
+       "E"
+      ],
+      [
+       "S15",
+       "Necesito justificar el proyecto financieramente",
+       "F"
+      ],
+      [
+       "S16",
+       "Necesito organizar y gestionar el proyecto (equipo, entregas, riesgos)",
+       "F"
+      ]
+     ]
+    },
+    {
+     "id": "secundarios",
+     "texto": "¿Hay otro síntoma relevante? (máximo 2, opcional)",
+     "tipo": "multiple",
+     "max": 2,
+     "opciones": [
+      [
+       "S01",
+       "El problema no está bien definido o no tiene alcance claro"
+      ],
+      [
+       "S17",
+       "No tengo claros los requisitos del cliente"
+      ],
+      [
+       "S02",
+       "Inventario alto o tiempo de entrega largo (flujo lento)"
+      ],
+      [
+       "S03",
+       "Cambios de producto largos o lotes grandes"
+      ],
+      [
+       "S04",
+       "Paros no planeados, línea o equipo parado, baja disponibilidad"
+      ],
+      [
+       "S05",
+       "Búsquedas, caminatas o layout deficiente"
+      ],
+      [
+       "S06",
+       "Estaciones desbalanceadas o esperas entre actividades"
+      ],
+      [
+       "S07",
+       "Defectos, errores o retrabajos"
+      ],
+      [
+       "S08",
+       "Variación entre turnos, operadores o lotes"
+      ],
+      [
+       "S11",
+       "El proceso no cumple especificaciones (capacidad)"
+      ],
+      [
+       "S12",
+       "Dudo de mi sistema de medición"
+      ],
+      [
+       "S09",
+       "Las mejoras no se sostienen"
+      ],
+      [
+       "S10",
+       "Ideas del personal sin canal"
+      ],
+      [
+       "S13",
+       "Quiero descubrir qué factores influyen o encontrar el óptimo"
+      ],
+      [
+       "S14",
+       "Ya implementé un cambio o herramienta y quiero medir si mejora (con/sin, antes/después)"
+      ],
+      [
+       "S15",
+       "Necesito justificar el proyecto financieramente"
+      ],
+      [
+       "S16",
+       "Necesito organizar y gestionar el proyecto (equipo, entregas, riesgos)"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E3",
+   "nombre": "Precisión sobre el síntoma",
+   "preguntas": [
+    {
+     "id": "f_s01_req",
+     "sintoma": "S01",
+     "texto": "¿Están claros los requisitos del cliente para este proceso?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "parcial",
+       "Parcialmente"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s02_vsm",
+     "sintoma": "S02",
+     "texto": "¿Ya existe un mapa de valor (VSM) actual?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s02_demanda",
+     "sintoma": "S02",
+     "texto": "¿Conoces la demanda del cliente por periodo?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s03_5s",
+     "sintoma": "S03",
+     "texto": "¿Está implantado 5S en el área del cambio?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s04_registro",
+     "sintoma": "S04",
+     "texto": "¿Se registran los paros (causa y duración)?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "parcial",
+       "Parcialmente"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s04_cuello",
+     "sintoma": "S04",
+     "texto": "¿Esta línea o estación es el cuello de botella del flujo?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ],
+      [
+       "no_se",
+       "No sé"
+      ]
+     ]
+    },
+    {
+     "id": "f_s04_cliente",
+     "sintoma": "S04",
+     "texto": "¿El paro afecta compromisos de entrega al cliente?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s07_definido",
+     "sintoma": "S07",
+     "texto": "¿El defecto tiene un criterio de aceptación claro?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s08_datos",
+     "sintoma": "S08",
+     "texto": "¿Hay datos por turno u operador?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s11_estable",
+     "sintoma": "S11",
+     "texto": "¿El proceso es estable (sin causas especiales evidentes)?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ],
+      [
+       "no_se",
+       "No sé"
+      ]
+     ]
+    },
+    {
+     "id": "f_s13_factores",
+     "sintoma": "S13",
+     "texto": "¿Cuántos factores quieres estudiar?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "1-2",
+       "1 a 2"
+      ],
+      [
+       "3-4",
+       "3 a 4"
+      ],
+      [
+       "5+",
+       "5 o más"
+      ]
+     ]
+    },
+    {
+     "id": "f_s13_optimizar",
+     "sintoma": "S13",
+     "texto": "¿Buscas el punto óptimo (máximo o mínimo) de la respuesta?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s14_dificultad",
+     "sintoma": "S14",
+     "texto": "¿Las unidades a comparar tienen dificultad o tamaño distinto (p. ej. longitud)?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s14_estado",
+     "sintoma": "S14",
+     "texto": "¿La herramienta o cambio ya está validado y funciona de forma confiable?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí, funciona de forma confiable"
+      ],
+      [
+       "parcial",
+       "Solo algunas partes"
+      ],
+      [
+       "no",
+       "Todavía no"
+      ]
+     ]
+    },
+    {
+     "id": "f_s14_deteccion",
+     "sintoma": "S14",
+     "texto": "¿Cómo se detectan los errores hoy?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "revision",
+       "Una revisión posterior por otra persona"
+      ],
+      [
+       "auto",
+       "Lo verifica quien lo hizo"
+      ],
+      [
+       "cliente",
+       "Lo detecta el cliente o el campo"
+      ],
+      [
+       "ninguno",
+       "No se registran"
+      ]
+     ]
+    },
+    {
+     "id": "f_s14_familias",
+     "sintoma": "S14",
+     "texto": "¿La herramienta afecta varios tipos de elementos o tareas?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    },
+    {
+     "id": "f_s14_diseno",
+     "sintoma": "S14",
+     "texto": "¿Cómo se compararán las condiciones?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "antes_despues",
+       "Antes contra después"
+      ],
+      [
+       "simultaneo",
+       "Al mismo tiempo, con y sin"
+      ],
+      [
+       "cruzado",
+       "Cada operador trabaja con y sin la mejora"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E4",
+   "nombre": "Datos, fase y objetivo",
+   "preguntas": [
+    {
+     "id": "datos",
+     "texto": "¿Qué datos existen hoy?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "ninguno",
+       "Ninguno"
+      ],
+      [
+       "manual",
+       "Registros manuales"
+      ],
+      [
+       "excel",
+       "Hojas de Excel"
+      ],
+      [
+       "sistema",
+       "Un sistema con historial"
+      ]
+     ]
+    },
+    {
+     "id": "volumen",
+     "texto": "¿Cuántas observaciones hay aproximadamente?",
+     "tipo": "unica",
+     "mostrar_si": {
+      "no": {
+       "datos": "ninguno"
+      }
+     },
+     "opciones": [
+      [
+       "lt15",
+       "Menos de 15"
+      ],
+      [
+       "15-50",
+       "15 a 50"
+      ],
+      [
+       "50-200",
+       "50 a 200"
+      ],
+      [
+       "gt200",
+       "Más de 200"
+      ]
+     ]
+    },
+    {
+     "id": "tipo_dato",
+     "texto": "La medida clave, ¿es una medición o un conteo?",
+     "tipo": "unica",
+     "mostrar_si": {
+      "sintoma": {
+       "in": [
+        "S07",
+        "S08",
+        "S11",
+        "S12",
+        "S13",
+        "S14"
+       ]
+      }
+     },
+     "opciones": [
+      [
+       "variable",
+       "Medición (tiempo, longitud, peso...)"
+      ],
+      [
+       "atributo",
+       "Conteo o pasa/no pasa"
+      ],
+      [
+       "mixto",
+       "Ambas"
+      ],
+      [
+       "no_se",
+       "No sé"
+      ]
+     ]
+    },
+    {
+     "id": "fase_actual",
+     "texto": "¿En qué fase está el proyecto?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "D",
+       "Definir: aún no está definido"
+      ],
+      [
+       "M",
+       "Medir: ya está definido"
+      ],
+      [
+       "A",
+       "Analizar: ya hay datos"
+      ],
+      [
+       "I",
+       "Mejorar: ya se conocen causas"
+      ],
+      [
+       "C",
+       "Controlar: ya se mejoró"
+      ]
+     ]
+    },
+    {
+     "id": "objetivos",
+     "texto": "¿Qué quieres mejorar? (uno o más)",
+     "tipo": "multiple",
+     "opciones": [
+      [
+       "tiempo",
+       "Tiempo"
+      ],
+      [
+       "errores",
+       "Errores o defectos"
+      ],
+      [
+       "costo",
+       "Costo"
+      ],
+      [
+       "entrega",
+       "Entrega al cliente"
+      ],
+      [
+       "seguridad",
+       "Seguridad"
+      ],
+      [
+       "satisfaccion",
+       "Satisfacción"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E5",
+   "nombre": "Restricciones",
+   "preguntas": [
+    {
+     "id": "equipo",
+     "texto": "¿Cuántas personas dedicarán tiempo al proyecto?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "1",
+       "1"
+      ],
+      [
+       "2-4",
+       "2 a 4"
+      ],
+      [
+       "5+",
+       "5 o más"
+      ]
+     ]
+    },
+    {
+     "id": "semanas",
+     "texto": "¿De cuánto tiempo dispones?",
+     "tipo": "unica",
+     "opciones": [
+      [
+       "lt4",
+       "Menos de 4 semanas"
+      ],
+      [
+       "4-12",
+       "4 a 12 semanas"
+      ],
+      [
+       "gt12",
+       "Más de 12 semanas"
+      ]
+     ]
+    },
+    {
+     "id": "puede_experimentar",
+     "texto": "¿Se pueden cambiar condiciones a propósito para probar?",
+     "tipo": "unica",
+     "mostrar_si": {
+      "sintoma": {
+       "in": [
+        "S13",
+        "S14"
+       ]
+      }
+     },
+     "opciones": [
+      [
+       "si",
+       "Sí"
+      ],
+      [
+       "no",
+       "No"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "E6",
+   "nombre": "Datos fijos del proyecto",
+   "campos": [
+    "nombre_proyecto",
+    "cliente_area",
+    "responsable",
+    "logo",
+    "notas"
+   ]
+  }
+ ],
+ "sintomas": {
+  "S01": {
+   "categoria": "D",
+   "texto": "El problema no está bien definido o no tiene alcance claro",
+   "origen": "GUIA"
+  },
+  "S17": {
+   "categoria": "D",
+   "texto": "No tengo claros los requisitos del cliente",
+   "origen": "ampliado"
+  },
+  "S02": {
+   "categoria": "A",
+   "texto": "Inventario alto o tiempo de entrega largo (flujo lento)",
+   "origen": "GUIA"
+  },
+  "S03": {
+   "categoria": "A",
+   "texto": "Cambios de producto largos o lotes grandes",
+   "origen": "GUIA"
+  },
+  "S04": {
+   "categoria": "A",
+   "texto": "Paros no planeados, línea o equipo parado, baja disponibilidad",
+   "origen": "GUIA"
+  },
+  "S05": {
+   "categoria": "A",
+   "texto": "Búsquedas, caminatas o layout deficiente",
+   "origen": "GUIA"
+  },
+  "S06": {
+   "categoria": "A",
+   "texto": "Estaciones desbalanceadas o esperas entre actividades",
+   "origen": "GUIA"
+  },
+  "S07": {
+   "categoria": "B",
+   "texto": "Defectos, errores o retrabajos",
+   "origen": "GUIA + estadística"
+  },
+  "S08": {
+   "categoria": "B",
+   "texto": "Variación entre turnos, operadores o lotes",
+   "origen": "GUIA + estadística"
+  },
+  "S11": {
+   "categoria": "B",
+   "texto": "El proceso no cumple especificaciones (capacidad)",
+   "origen": "ampliado"
+  },
+  "S12": {
+   "categoria": "B",
+   "texto": "Dudo de mi sistema de medición",
+   "origen": "ampliado"
+  },
+  "S09": {
+   "categoria": "C",
+   "texto": "Las mejoras no se sostienen",
+   "origen": "GUIA"
+  },
+  "S10": {
+   "categoria": "C",
+   "texto": "Ideas del personal sin canal",
+   "origen": "GUIA"
+  },
+  "S13": {
+   "categoria": "E",
+   "texto": "Quiero descubrir qué factores influyen o encontrar el óptimo",
+   "origen": "ampliado"
+  },
+  "S14": {
+   "categoria": "E",
+   "texto": "Ya implementé un cambio o herramienta y quiero medir si mejora (con/sin, antes/después)",
+   "origen": "ampliado"
+  },
+  "S15": {
+   "categoria": "F",
+   "texto": "Necesito justificar el proyecto financieramente",
+   "origen": "ampliado"
+  },
+  "S16": {
+   "categoria": "F",
+   "texto": "Necesito organizar y gestionar el proyecto (equipo, entregas, riesgos)",
+   "origen": "ampliado"
+  }
+ },
+ "categorias": [
+  [
+   "A",
+   "Flujo y tiempos"
+  ],
+  [
+   "B",
+   "Calidad y variación"
+  ],
+  [
+   "D",
+   "Definir y entender al cliente"
+  ],
+  [
+   "C",
+   "Sostener y mejorar continuamente"
+  ],
+  [
+   "E",
+   "Medir el efecto de algo que ya hice, o descubrir factores"
+  ],
+  [
+   "F",
+   "Gestión y dinero"
+  ]
+ ],
+ "reglas": [
+  {
+   "id": "B-S01",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "DEF-PROBLEMA",
+     "N",
+     "definir el problema con alcance y magnitud"
+    ],
+    [
+     "CHARTER",
+     "N",
+     "documentar caso de negocio, CTQ y alcance"
+    ],
+    [
+     "SIPOC",
+     "N",
+     "delimitar el proceso"
+    ],
+    [
+     "A3",
+     "R",
+     "resumir el problema en una hoja"
+    ]
+   ],
+   "sintoma_base": "S01"
+  },
+  {
+   "id": "B-S17",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "KANO",
+     "N",
+     "clasificar requisitos del cliente"
+    ],
+    [
+     "CTQ-TREE",
+     "N",
+     "traducir necesidades en requisitos medibles"
+    ],
+    [
+     "QFD",
+     "N",
+     "relacionar requisitos y características técnicas"
+    ],
+    [
+     "SIPOC",
+     "R",
+     "ver proveedores y clientes"
+    ]
+   ],
+   "sintoma_base": "S17"
+  },
+  {
+   "id": "B-S02",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "VSM",
+     "N",
+     "ver el flujo completo y dónde se acumula"
+    ],
+    [
+     "TAKT",
+     "R",
+     "ritmo que pide el cliente"
+    ],
+    [
+     "MUDAS",
+     "R",
+     "identificar desperdicios"
+    ],
+    [
+     "FLUJO",
+     "R",
+     "rediseñar el flujo después del VSM"
+    ],
+    [
+     "KANBAN",
+     "O",
+     "reposición por consumo, tras VSM y takt"
+    ],
+    [
+     "TOC",
+     "O",
+     "si aparece un cuello de botella claro"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "etapa",
+     "tipo": "cat",
+     "rol": "id",
+     "desc": "Etapa o proceso del flujo"
+    },
+    {
+     "nombre": "tiempo_ciclo",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Tiempo de ciclo"
+    },
+    {
+     "nombre": "inventario",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Unidades en espera antes de la etapa"
+    },
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": "Fecha de la medición"
+    }
+   ],
+   "sintoma_base": "S02"
+  },
+  {
+   "id": "B-S03",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "CINCO-S",
+     "N",
+     "prerrequisito de SMED (obligatorio en el curso)"
+    ],
+    [
+     "SMED",
+     "N",
+     "reducir el tiempo de cambio"
+    ],
+    [
+     "TIEMPOS",
+     "R",
+     "medir el cambio actual"
+    ],
+    [
+     "HOJA-DATOS",
+     "R",
+     "registrar cada cambio"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "cambio_id",
+     "tipo": "id",
+     "rol": "id",
+     "desc": "Identificador del cambio"
+    },
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": ""
+    },
+    {
+     "nombre": "tiempo_cambio",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Duración del cambio"
+    },
+    {
+     "nombre": "tipo_actividad",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Interna o externa"
+    }
+   ],
+   "sintoma_base": "S03"
+  },
+  {
+   "id": "B-S04",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "OEE",
+     "N",
+     "cuantificar disponibilidad, rendimiento y calidad"
+    ],
+    [
+     "CINCO-PQ",
+     "N",
+     "causa raíz de las mayores pérdidas"
+    ],
+    [
+     "PARETO",
+     "R",
+     "priorizar causas de paro"
+    ],
+    [
+     "TPM",
+     "R",
+     "mantenimiento autónomo y planificado"
+    ],
+    [
+     "AMEF",
+     "R",
+     "riesgos de falla futuros"
+    ],
+    [
+     "GEMBA",
+     "R",
+     "observar el paro en el lugar"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": ""
+    },
+    {
+     "nombre": "turno",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "equipo_estacion",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Equipo o estación"
+    },
+    {
+     "nombre": "causa_paro",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Causa del paro"
+    },
+    {
+     "nombre": "duracion_min",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Duración del paro"
+    }
+   ],
+   "sintoma_base": "S04"
+  },
+  {
+   "id": "B-S05",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "CINCO-S",
+     "N",
+     "ordenar y reducir búsquedas"
+    ],
+    [
+     "ESPAGUETI",
+     "N",
+     "medir recorridos"
+    ],
+    [
+     "VISUAL",
+     "R",
+     "señalizar y hacer visible"
+    ],
+    [
+     "GEMBA",
+     "O",
+     "observar en sitio"
+    ]
+   ],
+   "sintoma_base": "S05"
+  },
+  {
+   "id": "B-S06",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "TAKT",
+     "N",
+     "referencia para balancear"
+    ],
+    [
+     "TIEMPOS",
+     "N",
+     "tiempo de cada estación"
+    ],
+    [
+     "BALANCE",
+     "N",
+     "ver el desbalance"
+    ],
+    [
+     "VSM",
+     "R",
+     "contexto del flujo"
+    ],
+    [
+     "FLUJO",
+     "R",
+     "rediseñar el flujo"
+    ],
+    [
+     "TOC",
+     "R",
+     "identificar la restricción"
+    ]
+   ],
+   "sintoma_base": "S06"
+  },
+  {
+   "id": "B-S07",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "PARETO",
+     "N",
+     "priorizar tipos de defecto"
+    ],
+    [
+     "ISHIKAWA",
+     "N",
+     "causas potenciales"
+    ],
+    [
+     "CINCO-PQ",
+     "N",
+     "causa raíz"
+    ],
+    [
+     "DEF-PROBLEMA",
+     "R",
+     "definir el criterio de defecto"
+    ],
+    [
+     "POKAYOKE",
+     "R",
+     "prevenir el error"
+    ],
+    [
+     "AMEF",
+     "R",
+     "riesgos futuros"
+    ],
+    [
+     "TRABAJO-EST",
+     "R",
+     "estandarizar el método"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": ""
+    },
+    {
+     "nombre": "unidad_id",
+     "tipo": "id",
+     "rol": "id",
+     "desc": "Lote, pieza, documento u orden"
+    },
+    {
+     "nombre": "operador",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "turno",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "tipo_defecto",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Tipo de defecto o error"
+    },
+    {
+     "nombre": "cantidad_defectos",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Defectos detectados"
+    },
+    {
+     "nombre": "tamano_muestra",
+     "tipo": "num",
+     "rol": "covariable",
+     "desc": "Unidades revisadas"
+    }
+   ],
+   "sintoma_base": "S07"
+  },
+  {
+   "id": "B-S08",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "MULTIVARI",
+     "N",
+     "separar variación por turno, operador y tiempo"
+    ],
+    [
+     "ANOVA",
+     "N",
+     "comparar medias entre grupos"
+    ],
+    [
+     "BOXPLOT",
+     "N",
+     "ver diferencias entre grupos"
+    ],
+    [
+     "TRABAJO-EST",
+     "R",
+     "estandarizar"
+    ],
+    [
+     "VISUAL",
+     "R",
+     "gestión visual"
+    ],
+    [
+     "MSA-VAR",
+     "R",
+     "separar la variación del sistema de medición"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": ""
+    },
+    {
+     "nombre": "turno",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "operador",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "lote",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "medicion",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Característica medida"
+    }
+   ],
+   "sintoma_base": "S08"
+  },
+  {
+   "id": "B-S09",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "VISUAL",
+     "N",
+     "hacer visible el estándar"
+    ],
+    [
+     "KATA",
+     "N",
+     "hábito de mejora"
+    ],
+    [
+     "LSW",
+     "N",
+     "rutina de los líderes"
+    ],
+    [
+     "PLAN-CONTROL",
+     "R",
+     "asegurar las mejoras"
+    ],
+    [
+     "TABLERO",
+     "R",
+     "seguimiento de indicadores"
+    ],
+    [
+     "GEMBA",
+     "R",
+     "revisión en sitio"
+    ],
+    [
+     "SPC",
+     "O",
+     "monitorear la variable crítica"
+    ],
+    [
+     "HOSHIN",
+     "O",
+     "alinear con la estrategia"
+    ]
+   ],
+   "sintoma_base": "S09"
+  },
+  {
+   "id": "B-S10",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "TARJETAS",
+     "N",
+     "canal para las ideas"
+    ],
+    [
+     "KAIZEN",
+     "N",
+     "implementar ideas"
+    ],
+    [
+     "VISUAL",
+     "O",
+     "tablero de ideas"
+    ]
+   ],
+   "sintoma_base": "S10"
+  },
+  {
+   "id": "B-S11",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "DISTRIB",
+     "N",
+     "verificar normalidad"
+    ],
+    [
+     "HISTO",
+     "N",
+     "forma y centrado frente a especificaciones"
+    ],
+    [
+     "CAPACIDAD",
+     "N",
+     "Cp y Cpk"
+    ],
+    [
+     "SPC",
+     "N",
+     "verificar estabilidad"
+    ],
+    [
+     "MULTIVARI",
+     "R",
+     "fuentes de variación"
+    ],
+    [
+     "ANOVA",
+     "O",
+     "comparar fuentes"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "subgrupo",
+     "tipo": "id",
+     "rol": "id",
+     "desc": "Número de subgrupo"
+    },
+    {
+     "nombre": "medicion",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Característica medida"
+    },
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": ""
+    }
+   ],
+   "sintoma_base": "S11"
+  },
+  {
+   "id": "B-S12",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "MUESTREO",
+     "R",
+     "plan de muestreo del estudio de medición"
+    ]
+   ],
+   "sintoma_base": "S12"
+  },
+  {
+   "id": "B-S13",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "MULTIVARI",
+     "R",
+     "reducir muchas X a pocas vitales"
+    ],
+    [
+     "ANOVA",
+     "R",
+     "factores significativos"
+    ],
+    [
+     "CORREL",
+     "R",
+     "relación entre variables"
+    ],
+    [
+     "REGRESION",
+     "R",
+     "modelo Y = f(X)"
+    ],
+    [
+     "MSA-VAR",
+     "N",
+     "medición confiable antes de experimentar"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "orden_corrida",
+     "tipo": "id",
+     "rol": "id",
+     "desc": "Orden aleatorio de ejecución"
+    },
+    {
+     "nombre": "factor_A",
+     "tipo": "num",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "factor_B",
+     "tipo": "num",
+     "rol": "factor",
+     "desc": ""
+    },
+    {
+     "nombre": "respuesta",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": ""
+    }
+   ],
+   "sintoma_base": "S13"
+  },
+  {
+   "id": "B-S14",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "HOJA-DATOS",
+     "N",
+     "registrar cada unidad con y sin la condición"
+    ],
+    [
+     "BOXPLOT",
+     "N",
+     "comparar las condiciones"
+    ],
+    [
+     "CORRIDA",
+     "N",
+     "ver la tendencia en el tiempo"
+    ],
+    [
+     "ANOVA",
+     "N",
+     "probar si la diferencia es real"
+    ],
+    [
+     "TABLERO",
+     "N",
+     "seguimiento semanal"
+    ],
+    [
+     "PARETO",
+     "R",
+     "tipos de error"
+    ],
+    [
+     "DISTRIB",
+     "R",
+     "verificar normalidad de los tiempos"
+    ]
+   ],
+   "columnas": [
+    {
+     "nombre": "fecha",
+     "tipo": "fecha",
+     "rol": "id",
+     "desc": ""
+    },
+    {
+     "nombre": "unidad_id",
+     "tipo": "id",
+     "rol": "id",
+     "desc": "Unidad de trabajo (p. ej. DCN, dibujo u orden)"
+    },
+    {
+     "nombre": "condicion",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Con o sin la mejora"
+    },
+    {
+     "nombre": "operador",
+     "tipo": "cat",
+     "rol": "bloque",
+     "desc": "Quién ejecuta"
+    },
+    {
+     "nombre": "familia_elemento",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Familia o tipo de elemento (p. ej. flag note, callout, tabla)"
+    },
+    {
+     "nombre": "tamano_unidad",
+     "tipo": "num",
+     "rol": "covariable",
+     "desc": "Tamaño o dificultad de la unidad (p. ej. longitud o cantidad de elementos)"
+    },
+    {
+     "nombre": "tiempo",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Tiempo dedicado"
+    },
+    {
+     "nombre": "errores",
+     "tipo": "num",
+     "rol": "respuesta",
+     "desc": "Errores detectados"
+    },
+    {
+     "nombre": "tipo_error",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Tipo de error detectado (si aplica)"
+    },
+    {
+     "nombre": "origen_error",
+     "tipo": "cat",
+     "rol": "factor",
+     "desc": "Humano o de la propia herramienta"
+    },
+    {
+     "nombre": "tiempo_no_afectado",
+     "tipo": "num",
+     "rol": "covariable",
+     "desc": "Tiempo del trabajo que la mejora no cambia (control)"
+    },
+    {
+     "nombre": "contexto",
+     "tipo": "cat",
+     "rol": "covariable",
+     "desc": "Notas que puedan confundir el resultado"
+    }
+   ],
+   "sintoma_base": "S14"
+  },
+  {
+   "id": "B-S15",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "FINANZAS",
+     "N",
+     "cuantificar el impacto"
+    ],
+    [
+     "CHARTER",
+     "R",
+     "registrar los ahorros esperados"
+    ],
+    [
+     "TABLERO",
+     "O",
+     "seguir el resultado"
+    ]
+   ],
+   "sintoma_base": "S15"
+  },
+  {
+   "id": "B-S16",
+   "etapa": 1,
+   "si": {},
+   "activar": [
+    [
+     "CHARTER",
+     "N",
+     "acta del proyecto"
+    ],
+    [
+     "GANTT",
+     "N",
+     "cronograma"
+    ],
+    [
+     "INTERESADOS",
+     "R",
+     "identificar interesados"
+    ],
+    [
+     "RIESGOS",
+     "R",
+     "riesgos del proyecto"
+    ],
+    [
+     "SCRUM",
+     "R",
+     "entregas iterativas"
+    ],
+    [
+     "CHECKLIST-FASE",
+     "R",
+     "revisar cada fase"
+    ],
+    [
+     "LECCIONES",
+     "R",
+     "cerrar con lecciones aprendidas"
+    ]
+   ],
+   "sintoma_base": "S16"
+  },
+  {
+   "id": "F-s01-req",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S01",
+    "f_s01_req": {
+     "in": [
+      "parcial",
+      "no"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "KANO",
+     "R",
+     "requisitos del cliente poco claros"
+    ],
+    [
+     "CTQ-TREE",
+     "R",
+     "traducir necesidades"
+    ]
+   ]
+  },
+  {
+   "id": "F-s01-req2",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S01",
+    "f_s01_req": "no"
+   },
+   "activar": [
+    [
+     "QFD",
+     "O",
+     "priorizar requisitos"
+    ]
+   ]
+  },
+  {
+   "id": "F-s02-vsm-si",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S02",
+    "f_s02_vsm": "si"
+   },
+   "activar": [
+    [
+     "TAKT",
+     "N",
+     "siguiente paso tras el VSM"
+    ],
+    [
+     "OEE",
+     "R",
+     "medir por proceso"
+    ]
+   ],
+   "fijar": [
+    [
+     "VSM",
+     "O",
+     "ya existe un mapa de valor actual"
+    ]
+   ]
+  },
+  {
+   "id": "F-s02-dem",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S02",
+    "f_s02_demanda": "no"
+   },
+   "activar": [
+    [
+     "HOJA-DATOS",
+     "N",
+     "registrar la demanda real"
+    ]
+   ]
+  },
+  {
+   "id": "F-s03-5s-si",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S03",
+    "f_s03_5s": "si"
+   },
+   "fijar": [
+    [
+     "CINCO-S",
+     "O",
+     "ya está implantado"
+    ]
+   ]
+  },
+  {
+   "id": "F-s04-reg",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S04",
+    "f_s04_registro": {
+     "in": [
+      "parcial",
+      "no"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "HOJA-DATOS",
+     "N",
+     "registrar causa y duración de cada paro"
+    ]
+   ]
+  },
+  {
+   "id": "F-s04-reg-si",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S04",
+    "f_s04_registro": "si"
+   },
+   "activar": [
+    [
+     "PARETO",
+     "N",
+     "ya hay datos de paros"
+    ]
+   ]
+  },
+  {
+   "id": "F-s04-cuello",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S04",
+    "f_s04_cuello": {
+     "in": [
+      "si",
+      "no_se"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "TOC",
+     "N",
+     "ver si es la restricción del flujo"
+    ]
+   ]
+  },
+  {
+   "id": "F-s04-cuello-no",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S04",
+    "f_s04_cuello": "no"
+   },
+   "activar": [
+    [
+     "TOC",
+     "O",
+     "solo si aparece otra restricción"
+    ]
+   ]
+  },
+  {
+   "id": "F-s04-cli",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S04",
+    "f_s04_cliente": "si"
+   },
+   "activar": [
+    [
+     "QFD",
+     "O",
+     "priorizar requisitos críticos afectados"
+    ],
+    [
+     "CTQ-TREE",
+     "O",
+     "traducir la necesidad a requisitos"
+    ],
+    [
+     "TAKT",
+     "R",
+     "ritmo que exige el cliente"
+    ]
+   ]
+  },
+  {
+   "id": "F-s07-def",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S07",
+    "f_s07_definido": "no"
+   },
+   "activar": [
+    [
+     "DEF-PROBLEMA",
+     "N",
+     "falta un criterio de aceptación"
+    ],
+    [
+     "MSA-ATR",
+     "R",
+     "validar el criterio de inspección"
+    ]
+   ]
+  },
+  {
+   "id": "F-s07-atr",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S07",
+    "tipo_dato": "atributo"
+   },
+   "activar": [
+    [
+     "DESEMPENO",
+     "R",
+     "DPMO y nivel sigma"
+    ],
+    [
+     "SPC",
+     "R",
+     "cartas p, np, c o u"
+    ],
+    [
+     "MSA-ATR",
+     "R",
+     "validar la inspección"
+    ]
+   ]
+  },
+  {
+   "id": "F-s07-var",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S07",
+    "tipo_dato": "variable"
+   },
+   "activar": [
+    [
+     "HISTO",
+     "R",
+     "forma de la distribución"
+    ],
+    [
+     "CAPACIDAD",
+     "R",
+     "Cp y Cpk"
+    ],
+    [
+     "SPC",
+     "R",
+     "estabilidad"
+    ],
+    [
+     "MSA-VAR",
+     "R",
+     "validar la medición"
+    ]
+   ]
+  },
+  {
+   "id": "F-s07-mix",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S07",
+    "tipo_dato": "mixto"
+   },
+   "activar": [
+    [
+     "HISTO",
+     "R",
+     "forma de la distribución"
+    ],
+    [
+     "SPC",
+     "R",
+     "estabilidad"
+    ],
+    [
+     "MSA-ATR",
+     "R",
+     "validar la inspección"
+    ]
+   ]
+  },
+  {
+   "id": "F-s08-dat",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S08",
+    "f_s08_datos": "no"
+   },
+   "activar": [
+    [
+     "HOJA-DATOS",
+     "N",
+     "registrar por turno y operador"
+    ]
+   ]
+  },
+  {
+   "id": "F-s11-est",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S11",
+    "f_s11_estable": {
+     "in": [
+      "no",
+      "no_se"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "SPC",
+     "N",
+     "verificar la estabilidad antes de calcular capacidad"
+    ]
+   ]
+  },
+  {
+   "id": "F-s11-var",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S11",
+    "tipo_dato": {
+     "in": [
+      "variable",
+      "mixto",
+      "no_se"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "MSA-VAR",
+     "N",
+     "medición confiable"
+    ]
+   ]
+  },
+  {
+   "id": "F-s11-atr",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S11",
+    "tipo_dato": {
+     "in": [
+      "atributo",
+      "mixto"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "MSA-ATR",
+     "N",
+     "inspección confiable"
+    ],
+    [
+     "DESEMPENO",
+     "R",
+     "DPMO y nivel sigma"
+    ]
+   ]
+  },
+  {
+   "id": "F-s12-var",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S12",
+    "tipo_dato": {
+     "in": [
+      "variable",
+      "mixto"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "MSA-VAR",
+     "N",
+     "estudio R&R"
+    ]
+   ]
+  },
+  {
+   "id": "F-s12-atr",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S12",
+    "tipo_dato": {
+     "in": [
+      "atributo",
+      "mixto"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "MSA-ATR",
+     "N",
+     "estudio de acuerdo entre inspectores"
+    ]
+   ]
+  },
+  {
+   "id": "F-s12-ns",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S12",
+    "tipo_dato": "no_se"
+   },
+   "activar": [
+    [
+     "MSA-VAR",
+     "R",
+     "si es una medición"
+    ],
+    [
+     "MSA-ATR",
+     "R",
+     "si es un conteo o inspección"
+    ]
+   ]
+  },
+  {
+   "id": "F-s13-a",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S13",
+    "f_s13_factores": "1-2"
+   },
+   "activar": [
+    [
+     "DOE-FACT",
+     "N",
+     "2 factores: factorial completo 2^2"
+    ]
+   ],
+   "minimos": {
+    "DOE-FACT": "2 factores: 4 corridas x 9 réplicas por corrida [CURSO]."
+   }
+  },
+  {
+   "id": "F-s13-b",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S13",
+    "f_s13_factores": "3-4"
+   },
+   "activar": [
+    [
+     "DOE-FACT",
+     "N",
+     "factorial completo 2^3 o 2^4"
+    ]
+   ],
+   "minimos": {
+    "DOE-FACT": "3 factores: 8 corridas x 5 réplicas; 4 factores: 16 corridas x 3 réplicas [CURSO]."
+   }
+  },
+  {
+   "id": "F-s13-c",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S13",
+    "f_s13_factores": "5+"
+   },
+   "activar": [
+    [
+     "DOE-FRAC",
+     "N",
+     "5 o más factores: fraccionado 2^(5-1)"
+    ]
+   ],
+   "fijar": [
+    [
+     "DOE-FACT",
+     "O",
+     "con 5 o más factores el completo es demasiado grande"
+    ]
+   ],
+   "minimos": {
+    "DOE-FRAC": "5 factores: 16 corridas con 2 réplicas (32 en el ejemplo del curso); resolución V [CURSO]."
+   }
+  },
+  {
+   "id": "F-s13-opt",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S13",
+    "f_s13_optimizar": "si"
+   },
+   "activar": [
+    [
+     "RSM",
+     "N",
+     "buscar el punto óptimo"
+    ]
+   ]
+  },
+  {
+   "id": "F-s13-nopt",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S13",
+    "f_s13_optimizar": "no"
+   },
+   "activar": [
+    [
+     "RSM",
+     "O",
+     "si más adelante se busca el óptimo"
+    ]
+   ]
+  },
+  {
+   "id": "F-s14-cr",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_diseno": "cruzado"
+   },
+   "nota": "Reparte el orden al azar: cada operador ejecuta unidades con y sin la mejora; en el ANOVA usa el operador como bloque."
+  },
+  {
+   "id": "F-s14-si",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_diseno": "simultaneo"
+   },
+   "nota": "Compara en las mismas fechas para no confundir la mejora con el paso del tiempo."
+  },
+  {
+   "id": "F-s14-ad",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_diseno": "antes_despues"
+   },
+   "advertir": [
+    "Antes contra después puede confundirse con cambios de contexto (volumen, tipo de trabajo, temporada); registra el contexto de cada unidad."
+   ]
+  },
+  {
+   "id": "F-s14-dif",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_dificultad": "si"
+   },
+   "activar": [
+    [
+     "REGRESION",
+     "R",
+     "regresión múltiple: tiempo contra dificultad, con condición y operador como variables 0/1 [COMP]"
+    ],
+    [
+     "CORREL",
+     "R",
+     "medir cuánto explica la dificultad"
+    ]
+   ],
+   "nota": "Las unidades tienen dificultad distinta: agrúpalas por rango de dificultad y reparte con y sin la mejora de forma balanceada dentro de cada grupo, o usa la dificultad como variable explicativa; no compares promedios brutos."
+  },
+  {
+   "id": "F-s14-est",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_estado": {
+     "in": [
+      "parcial",
+      "no"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "AMEF",
+     "R",
+     "riesgos de la propia herramienta: qué fallas podría introducir"
+    ],
+    [
+     "PLAN-CONTROL",
+     "R",
+     "protocolo de validación antes de liberar cada versión"
+    ]
+   ],
+   "nota": "La herramienta aún no está totalmente validada: mide primero las partes ya validadas, trata las pendientes como mejoras del proyecto y registra también los errores que introduce la propia herramienta."
+  },
+  {
+   "id": "F-s14-det-rev",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_deteccion": "revision"
+   },
+   "activar": [
+    [
+     "MSA-ATR",
+     "R",
+     "los revisores deben coincidir en qué cuenta como error"
+    ]
+   ]
+  },
+  {
+   "id": "F-s14-det-auto",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_deteccion": "auto"
+   },
+   "advertir": [
+    "Si quien ejecuta también verifica, los errores se subestiman: para medir conviene una revisión independiente."
+   ]
+  },
+  {
+   "id": "F-s14-det-cli",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_deteccion": "cliente"
+   },
+   "advertir": [
+    "Los errores que detecta el cliente llegan tarde y son pocos: agrega una revisión interna para poder medir."
+   ]
+  },
+  {
+   "id": "F-s14-det-no",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_deteccion": "ninguno"
+   },
+   "activar": [
+    [
+     "HOJA-DATOS",
+     "N",
+     "definir desde ya el registro de errores"
+    ]
+   ]
+  },
+  {
+   "id": "F-s14-fam",
+   "etapa": 2,
+   "si": {
+    "sintoma": "S14",
+    "f_s14_familias": "si"
+   },
+   "nota": "La herramienta afecta varios tipos de elemento: registra el tipo en cada fila y compara con y sin dentro de cada tipo."
+  },
+  {
+   "id": "G-sin-datos",
+   "etapa": 2,
+   "si": {
+    "datos": "ninguno"
+   },
+   "activar": [
+    [
+     "HOJA-DATOS",
+     "N",
+     "aún no hay datos: primero recolectar"
+    ],
+    [
+     "MUESTREO",
+     "R",
+     "definir cuántos datos reunir"
+    ]
+   ],
+   "advertir": [
+    "Todavía no hay datos: los módulos estadísticos quedan en espera hasta reunir el mínimo."
+   ]
+  },
+  {
+   "id": "G-sec-s14",
+   "etapa": 2,
+   "si": {
+    "secundarios": {
+     "contiene": "S14"
+    },
+    "no": {
+     "sintoma": "S14"
+    }
+   },
+   "nota": "Marcaste medir el efecto de un cambio como síntoma secundario. Si esa es la pregunta principal del proyecto, cámbialo a síntoma principal: solo así se activan la comparación y la hoja de datos con y sin la mejora."
+  },
+  {
+   "id": "G-chico",
+   "etapa": 2,
+   "si": {
+    "tamano": "lt10"
+   },
+   "fijar": [
+    [
+     "HOSHIN",
+     "X",
+     "empresa pequeña"
+    ],
+    [
+     "SCRUM",
+     "X",
+     "empresa pequeña"
+    ],
+    [
+     "INTERESADOS",
+     "O",
+     "formato ligero"
+    ]
+   ],
+   "advertir": [
+    "Empresa pequeña: conviene privilegiar eventos Kaizen cortos y formatos ligeros."
+   ]
+  },
+  {
+   "id": "G-grande",
+   "etapa": 2,
+   "si": {
+    "tamano": "250+",
+    "alcance": {
+     "in": [
+      "cadena",
+      "varios"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "HOSHIN",
+     "R",
+     "alinear a la estrategia"
+    ],
+    [
+     "INTERESADOS",
+     "R",
+     "muchos interesados"
+    ],
+    [
+     "VSM",
+     "R",
+     "visión de toda la cadena"
+    ]
+   ]
+  },
+  {
+   "id": "G-cadena",
+   "etapa": 2,
+   "si": {
+    "alcance": "cadena"
+   },
+   "activar": [
+    [
+     "VSM",
+     "R",
+     "alcance de toda la cadena"
+    ],
+    [
+     "SIPOC",
+     "R",
+     "delimitar la cadena"
+    ]
+   ]
+  },
+  {
+   "id": "G-equipo1",
+   "etapa": 2,
+   "si": {
+    "equipo": "1"
+   },
+   "fijar": [
+    [
+     "SCRUM",
+     "X",
+     "requiere un equipo (el curso indica de 5 a 10 integrantes)"
+    ]
+   ]
+  },
+  {
+   "id": "G-sin-exp",
+   "etapa": 2,
+   "si": {
+    "puede_experimentar": "no"
+   },
+   "fijar": [
+    [
+     "DOE-FACT",
+     "X",
+     "no se pueden cambiar condiciones"
+    ],
+    [
+     "DOE-FRAC",
+     "X",
+     "no se pueden cambiar condiciones"
+    ],
+    [
+     "RSM",
+     "X",
+     "no se pueden cambiar condiciones"
+    ]
+   ],
+   "advertir": [
+    "Sin poder experimentar, los hallazgos serán de asociación y no de causa (ver CORR-CAUSALIDAD)."
+   ]
+  },
+  {
+   "id": "G-corto",
+   "etapa": 2,
+   "si": {
+    "semanas": "lt4"
+   },
+   "activar": [
+    [
+     "KAIZEN",
+     "R",
+     "evento Kaizen corto"
+    ]
+   ],
+   "fijar": [
+    [
+     "DOE-FRAC",
+     "O",
+     "poco tiempo"
+    ],
+    [
+     "RSM",
+     "O",
+     "poco tiempo"
+    ],
+    [
+     "SCRUM",
+     "O",
+     "poco tiempo"
+    ],
+    [
+     "HOSHIN",
+     "O",
+     "poco tiempo"
+    ]
+   ],
+   "advertir": [
+    "Menos de 4 semanas: prioriza herramientas de ciclo corto."
+   ]
+  },
+  {
+   "id": "G-servicio",
+   "etapa": 2,
+   "si": {
+    "giro": {
+     "in": [
+      "ingenieria_documentacion",
+      "servicios"
+     ]
+    }
+   },
+   "fijar": [
+    [
+     "SMED",
+     "O",
+     "poco aplicable a servicios"
+    ],
+    [
+     "TPM",
+     "O",
+     "poco aplicable a servicios"
+    ]
+   ],
+   "nota": "La unidad de análisis es el documento, la orden o la transacción, no la pieza."
+  },
+  {
+   "id": "G-ob-err",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "errores"
+    }
+   },
+   "activar": [
+    [
+     "PARETO",
+     "R",
+     "tipos de error"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-err-at",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "errores"
+    },
+    "tipo_dato": {
+     "in": [
+      "atributo",
+      "mixto"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "MSA-ATR",
+     "R",
+     "validar el criterio de revisión"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-tie-m",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "tiempo"
+    },
+    "giro": {
+     "in": [
+      "manufactura",
+      "logistica",
+      "mantenimiento"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "TIEMPOS",
+     "R",
+     "medir tiempos en el lugar"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-tie-s",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "tiempo"
+    },
+    "giro": {
+     "in": [
+      "ingenieria_documentacion",
+      "servicios",
+      "otro"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "TIEMPOS",
+     "O",
+     "solo si se cronometra por observación"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-cos",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "costo"
+    }
+   },
+   "activar": [
+    [
+     "FINANZAS",
+     "R",
+     "cuantificar el costo"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-ent",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "entrega"
+    }
+   },
+   "activar": [
+    [
+     "TAKT",
+     "R",
+     "ritmo de entrega"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-sat",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "satisfaccion"
+    }
+   },
+   "activar": [
+    [
+     "KANO",
+     "R",
+     "requisitos de satisfacción"
+    ],
+    [
+     "CTQ-TREE",
+     "R",
+     "traducir a medibles"
+    ]
+   ]
+  },
+  {
+   "id": "G-ob-seg",
+   "etapa": 2,
+   "si": {
+    "objetivos": {
+     "contiene": "seguridad"
+    }
+   },
+   "activar": [
+    [
+     "AMEF",
+     "R",
+     "riesgos de seguridad"
+    ]
+   ]
+  },
+  {
+   "id": "G-charter",
+   "etapa": 2,
+   "si": {
+    "fase_actual": "D"
+   },
+   "activar": [
+    [
+     "CHARTER",
+     "N",
+     "fase Definir"
+    ],
+    [
+     "SIPOC",
+     "R",
+     "delimitar el proceso"
+    ],
+    [
+     "GANTT",
+     "R",
+     "cronograma del proyecto"
+    ]
+   ]
+  },
+  {
+   "id": "G-charter2",
+   "etapa": 2,
+   "si": {
+    "fase_actual": {
+     "in": [
+      "M",
+      "A",
+      "I",
+      "C"
+     ]
+    }
+   },
+   "activar": [
+    [
+     "CHARTER",
+     "R",
+     "documentar el acta si aún no existe"
+    ]
+   ]
+  },
+  {
+   "id": "P-msa-var",
+   "etapa": 3,
+   "si": {
+    "tipo_dato": {
+     "in": [
+      "variable",
+      "mixto"
+     ]
+    },
+    "activo_alguno": [
+     "HISTO",
+     "CAPACIDAD",
+     "SPC",
+     "MULTIVARI",
+     "ANOVA",
+     "BOXPLOT",
+     "REGRESION",
+     "CORREL",
+     "DOE-FACT",
+     "DOE-FRAC",
+     "RSM"
+    ],
+    "no": {
+     "objetivos": {
+      "contiene": "tiempo"
+     }
+    }
+   },
+   "activar": [
+    [
+     "MSA-VAR",
+     "R",
+     "validar la medición antes de analizar"
+    ]
+   ]
+  },
+  {
+   "id": "P-msa-var-t",
+   "etapa": 3,
+   "si": {
+    "tipo_dato": {
+     "in": [
+      "variable",
+      "mixto"
+     ]
+    },
+    "activo_alguno": [
+     "HISTO",
+     "CAPACIDAD",
+     "SPC",
+     "MULTIVARI",
+     "ANOVA",
+     "BOXPLOT",
+     "REGRESION",
+     "CORREL",
+     "DOE-FACT",
+     "DOE-FRAC",
+     "RSM"
+    ],
+    "objetivos": {
+     "contiene": "tiempo"
+    }
+   },
+   "activar": [
+    [
+     "MSA-VAR",
+     "O",
+     "el tiempo se mide con reloj; opcional"
+    ]
+   ]
+  },
+  {
+   "id": "P-msa-atr",
+   "etapa": 3,
+   "si": {
+    "tipo_dato": {
+     "in": [
+      "atributo",
+      "mixto"
+     ]
+    },
+    "activo_alguno": [
+     "SPC",
+     "DESEMPENO",
+     "PARETO"
+    ]
+   },
+   "activar": [
+    [
+     "MSA-ATR",
+     "R",
+     "validar la inspección antes de analizar"
+    ]
+   ]
+  },
+  {
+   "id": "P-pocos",
+   "etapa": 3,
+   "si": {
+    "volumen": "lt15",
+    "activo_alguno": [
+     "HISTO",
+     "CAPACIDAD",
+     "SPC",
+     "MULTIVARI",
+     "ANOVA",
+     "BOXPLOT",
+     "REGRESION",
+     "CORREL",
+     "DOE-FACT",
+     "DOE-FRAC",
+     "RSM"
+    ]
+   },
+   "advertir": [
+    "Menos de 15 datos: cualquier análisis estadístico será solo exploratorio."
+   ]
+  },
+  {
+   "id": "P-pocos-op",
+   "etapa": 3,
+   "si": {
+    "n_operadores": {
+     "lt": 3
+    },
+    "activo_alguno": [
+     "ANOVA",
+     "BOXPLOT",
+     "MULTIVARI",
+     "DOE-FACT",
+     "DOE-FRAC"
+    ]
+   },
+   "advertir": [
+    "Con menos de 3 operadores no se puede estimar bien la variación entre operadores: usa el elemento o la orden como unidad de análisis y, si comparas un método, cruza (cada operador con y sin)."
+   ]
+  },
+  {
+   "id": "P-msa-op1",
+   "etapa": 3,
+   "si": {
+    "n_operadores": {
+     "lt": 2
+    },
+    "activo_alguno": [
+     "MSA-VAR",
+     "MSA-ATR"
+    ]
+   },
+   "advertir": [
+    "Un estudio R&R necesita al menos 2 evaluadores."
+   ]
+  }
+ ],
+ "volumen_max": {
+  "lt15": 14,
+  "15-50": 50,
+  "50-200": 200,
+  "gt200": 1000000000
+ },
+ "esquema_salida": {
+  "perfil_empresa": [
+   "tamano",
+   "giro",
+   "n_operadores",
+   "alcance"
+  ],
+  "diagnostico": [
+   "sintoma",
+   "secundarios",
+   "objetivos",
+   "tipo_dato",
+   "datos",
+   "volumen",
+   "fase_actual",
+   "equipo",
+   "semanas",
+   "puede_experimentar"
+  ],
+  "modulos": [
+   "id",
+   "fase_asignada",
+   "estado",
+   "prioridad",
+   "motivos",
+   "datos_minimos",
+   "tipo",
+   "plantilla"
+  ],
+  "otros": [
+   "hoja_datos_sugerida",
+   "advertencias",
+   "notas",
+   "pendientes_datos",
+   "ruta_sugerida",
+   "siguiente_paso",
+   "datos_fijos"
+  ]
+ }
+}

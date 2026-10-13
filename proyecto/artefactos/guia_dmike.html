@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guía de uso de D-MIKE</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#faf8f4;--sup:#fff;--linea:#e2dcd0;--tinta:#2b2620;--suave:#6f675b;--acento:#dd5813;--claro:#fbe8dd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--papel:#1f1b17;--sup:#2a2520;--linea:#41392f;--tinta:#f1ece4;--suave:#b3aa9c;--claro:#4a2a17}}
+:root[data-theme="dark"]{--papel:#1f1b17;--sup:#2a2520;--linea:#41392f;--tinta:#f1ece4;--suave:#b3aa9c;--claro:#4a2a17}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--papel);color:var(--tinta);font:14px/1.5 Montserrat,"Segoe UI",sans-serif}
+header{padding:18px 16px 10px;max-width:900px;margin:auto}
+h1{margin:0;font-size:20px}h1 span{color:var(--acento)}
+.ver{color:var(--suave);font-size:12px;margin-top:2px}
+#q{width:100%;margin-top:12px;padding:9px 12px;border:1px solid var(--linea);border-radius:6px;background:var(--sup);color:var(--tinta);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips button{border:1px solid var(--linea);background:var(--sup);color:var(--suave);border-radius:14px;padding:4px 11px;font:inherit;font-size:12px;cursor:pointer}
+.chips button.on{background:var(--acento);border-color:var(--acento);color:#fff}
+main{max-width:900px;margin:auto;padding:4px 16px 40px}
+.card{background:var(--sup);border:1px solid var(--linea);border-radius:8px;margin:10px 0;overflow:hidden}
+.card>button{all:unset;display:flex;width:100%;box-sizing:border-box;padding:12px 14px;cursor:pointer;gap:10px;align-items:center}
+.card>button:focus-visible{outline:2px solid var(--acento)}
+.card b{flex:1}.card small{color:var(--suave);font-size:11px}
+.card .cuerpo{display:none;padding:0 14px 14px;border-top:1px solid var(--linea)}
+.card.open .cuerpo{display:block}.card.open>button{background:var(--claro)}
+.ruta{display:inline-block;background:var(--claro);color:var(--acento);border-radius:4px;padding:1px 7px;font-size:12px;font-weight:600;margin:10px 0 2px}
+ol{padding-left:20px;margin:8px 0}li{margin:3px 0}
+.ojo{background:var(--papel);border-left:3px solid var(--acento);padding:7px 10px;margin-top:8px;font-size:13px}
+.vacio{color:var(--suave);padding:20px 0}
+h2{font-size:14px;margin:22px 0 0;color:var(--suave)}
+</style></head><body>
+<header>
+<h1><span>D-MIKE</span> Guía de uso</h1>
+<div class="ver" id="ver"></div>
+<input id="q" type="search" placeholder="Buscar: capacidad, importar, optimizar..." aria-label="Buscar">
+<div class="chips" id="chips"></div>
+</header>
+<main id="lista"></main>
+<script>
+/* ===== PARA ACTUALIZAR: cambia VERSION, agrega objetos a GUIA y una línea a NOVEDADES ===== */
+const VERSION = "0.13.0";
+const NOVEDADES = [
+  "0.13.0: hoja con rangos y portapapeles, filtro, calculadora de columnas, panel DMAIC plegable, Gage R&R, formatos SMED, Gantt, 4Qs, A3, Kaizen, Tarjetas, Mudas y Kata, y hoja de verificación en Excel.",
+  "0.12.0: superficies de respuesta y optimizador; importar archivos; ordenar; buscar y reemplazar; deshacer.",
+  "0.11.0: cartas de control, capacidad, correlación y regresión; botones Repetir y Copiar.",
+  "0.10.0: formatos OEE, Takt, Kanban, Charter, SIPOC, Ishikawa y 5 Porqués; tablero configurable; exportar a Power BI."
+];
+/* tema = categoría; ruta = menú; pasos = lista; ojo = advertencia (opcional) */
+const GUIA = [
+ {tema:"Primeros pasos", t:"Cómo se organiza la pantalla", ruta:"Pantalla principal", pasos:[
+  "A la izquierda están las fases D-M-A-I-C; con un perfil cargado muestran los módulos activos de cada una.",
+  "Al centro está la Hoja de datos. Los análisis y formatos se abren en pestañas encima de ella.",
+  "Abajo está la Sesión, donde aparecen avisos y mensajes de cada acción."], ojo:"Cada resultado queda guardado en el proyecto: lo ves otra vez en Proyecto > Resultados del proyecto."},
+ {tema:"Primeros pasos", t:"Guardar y abrir un proyecto", ruta:"Archivo > Guardar / Abrir proyecto", pasos:[
+  "Archivo > Guardar (o Ctrl+S) crea un archivo .dmike con la hoja, los resultados y los formatos.",
+  "Archivo > Abrir proyecto lo recupera. Un punto junto al nombre indica cambios sin guardar."], ojo:"Al cerrar con cambios sin guardar, el programa pregunta antes."},
+ {tema:"Primeros pasos", t:"Cargar el perfil del diagnóstico", ruta:"Proyecto > Abrir perfil del diagnóstico", pasos:[
+  "Elige el archivo perfil_proyecto.json que generó el diagnóstico.",
+  "El panel izquierdo muestra los módulos recomendados y la franja superior los datos fijos.",
+  "Un perfil con versión mayor se fusiona con el proyecto sin borrar datos."], ojo:"Solo se acepta una versión mayor a la ya cargada."},
+ {tema:"Hoja de datos", t:"Seleccionar, copiar y rellenar rangos", ruta:"Hoja de datos · Editar", pasos:[
+  "Mayús+clic o arrastrar selecciona un rango; clic en C1, C2… selecciona la columna y clic en el número de fila selecciona la fila. Ctrl+A selecciona los datos (otra vez, toda la hoja).",
+  "Ctrl+C copia, Ctrl+X corta y Ctrl+V pega; si pegas un solo valor sobre varias celdas seleccionadas, lo pone en todas.",
+  "Ctrl+D rellena hacia abajo y Ctrl+R hacia la derecha con la primera fila o columna de la selección.",
+  "Supr borra el contenido. Ctrl++ inserta y Ctrl+- elimina las filas o columnas seleccionadas.",
+  "Abajo a la derecha verás cuenta, suma, promedio, mínimo y máximo de lo seleccionado."], ojo:"Con un filtro activo no se puede rellenar, insertar ni eliminar filas: primero quita el filtro."},
+ {tema:"Hoja de datos", t:"Moverse con el teclado", ruta:"Hoja de datos", pasos:[
+  "Flechas mueven; Mayús+flechas extienden la selección; Ctrl+flechas saltan al borde del bloque de datos.",
+  "Inicio y Fin van a la primera y última columna; Ctrl+Inicio y Ctrl+Fin a la primera celda y a la última con datos.",
+  "Re Pág y Av Pág suben y bajan una pantalla; F2 edita la celda; Escape quita la selección de rango.",
+  "Ayuda > Atajos de teclado muestra la lista completa."]},
+ {tema:"Hoja de datos", t:"Menú contextual (clic derecho)", ruta:"Clic derecho en la hoja", pasos:[
+  "Cortar, copiar, pegar, borrar, rellenar, insertar y eliminar.",
+  "Ordenar la columna de menor a mayor o al revés.",
+  "Filtrar por el valor de la celda, o abrir el filtro completo; cambiar el tipo de la columna; buscar y reemplazar."]},
+ {tema:"Hoja de datos", t:"Filtrar filas", ruta:"Datos > Filtrar filas (Ctrl+Mayús+L)", pasos:[
+  "Elige columna, condición y valor; con «Agregar condición» combinas varias con «y».",
+  "Las filas que no cumplen se ocultan y no entran a ningún análisis; no se borran.",
+  "Datos > Quitar filtro las vuelve a mostrar. Un aviso sobre la hoja indica cuántas filas se ven."], ojo:"El filtro también se deshace con Ctrl+Z y se guarda en el proyecto."},
+ {tema:"Hoja de datos", t:"Calculadora de columnas", ruta:"Calc > Calculadora de columnas", pasos:[
+  "Escribe el nombre de la columna donde irá el resultado (nueva o existente).",
+  "Escribe la fórmula con columnas (C1, 'nombre con espacios' o el nombre) y funciones: LOG10, LN, RAIZ, ABS, REDONDEAR(x;2), SI(cond;a;b), SUMA, PROMEDIO, DESV, ACUM, DIF, RETRASO(x;1), RANGO, ESTAND, FILA().",
+  "Ejemplo: ESTAND(dureza) o SI(tiempo > 25; 1; 0). Las filas sin dato quedan vacías."], ojo:"Solo opera con columnas numéricas y no ejecuta código: si la fórmula no se entiende, el aviso dice qué falló."},
+ {tema:"Hoja de datos", t:"Serie, aleatorios, recodificar, apilar y duplicados", ruta:"Calc", pasos:[
+  "Serie y patrón: rangos como 1:10 o listas como A, B, C, repetidos las veces que indiques.",
+  "Datos aleatorios: ocho distribuciones con semilla, para pruebas y simulación (no son datos reales).",
+  "Recodificar valores: Sin=0; Con=1. Apilar columnas: junta varias en una con su origen. Detectar duplicados: marca con 1 las filas repetidas."]},
+ {tema:"Primeros pasos", t:"Ocultar y mostrar el panel DMAIC", ruta:"Ctrl+B · Ver > panel · botón de la barra", pasos:[
+  "Ctrl+B o el primer botón de la derecha en la barra de herramientas oculta el panel de fases y la hoja usa todo el ancho.",
+  "Se vuelve a mostrar igual, con las mismas fases abiertas. La sesión se oculta con el botón de al lado.",
+  "El programa recuerda tu elección la próxima vez."]},
+ {tema:"Control y capacidad", t:"Gage R&R de variable", ruta:"Estadística > Gage R&R de variable", pasos:[
+  "Elige la columna de pieza, la de evaluador y la de medición; opcionalmente la tolerancia (LSE - LIE).",
+  "El estudio debe estar balanceado: cada evaluador mide cada pieza el mismo número de veces (al menos 2).",
+  "Obtienes componentes de varianza, % contribución, % variación del estudio, % tolerancia, categorías distintas y seis gráficas.",
+  "La conclusión sigue la base: 10% o menos aceptable, de 10% a 30% marginal, más de 30% inaceptable."], ojo:"El curso usa 10 piezas que cubran el rango de la especificación y 2 o 3 evaluadores."},
+ {tema:"Formatos", t:"SMED, Mudas, Kaizen, Tarjetas y Kata", ruta:"Herramientas de calidad", pasos:[
+  "SMED: escribe cada operación con su tiempo real, potencial y clasificación (interna, externa o desperdicio); se calcula acumulado, desperdicio y ahorro.",
+  "Mudas: ocho desperdicios ya listados; califica el impacto y propón una acción.",
+  "Kaizen, Tarjetas de oportunidad y Kata: fichas con avisos de fechas, folios repetidos y metas no medibles."]},
+ {tema:"Formatos", t:"Cronograma DMAIC, 4 Qs y A3", ruta:"Herramientas de calidad", pasos:[
+  "Gantt: captura la fecha de la semana 1 (un lunes) y, por actividad, inicio y fin en DD/MM/AAAA; se calculan días y semanas y se dibuja el cronograma de 12 semanas.",
+  "4 Qs: métrico, objetivo, cinco porqués y plan de acciones con responsable y fecha.",
+  "A3: siete secciones, de antecedentes a seguimiento."]},
+ {tema:"Resultados", t:"Verificar un análisis en Excel y comparar con Minitab", ruta:"Botón «Verificar en Excel…» de un resultado", pasos:[
+  "Abre el resultado (estadísticos, correlación, regresión simple, capacidad o normalidad) y presiona «Verificar en Excel…».",
+  "Se crea un libro con tus datos, las fórmulas de Excel equivalentes, los valores de D-MIKE y una columna amarilla vacía.",
+  "Corre el mismo análisis en Minitab y captura sus valores en la columna amarilla.",
+  "La última columna dice «Coincide» o «Revisar». Registra los «Revisar» en la bitácora del Visor."], ojo:"Si Excel y D-MIKE difieren, revisa el método (por ejemplo, el tipo de cuartil o n-1 contra n)."},
+ {tema:"Hoja de datos", t:"Capturar o pegar datos", ruta:"Hoja de datos", pasos:[
+  "Haz clic en una celda y escribe; Enter baja, Tab avanza.",
+  "Puedes pegar desde Excel (Ctrl+V) con la primera fila como nombres.",
+  "Las celdas que no corresponden al tipo de su columna quedan en rojo y no entran a los cálculos."], ojo:"El tipo de columna lo decide la mayoría de los datos; cámbialo en Datos > Tipo de columna."},
+ {tema:"Hoja de datos", t:"Importar CSV, TXT o Excel", ruta:"Archivo > Importar archivo", pasos:[
+  "Elige un archivo .csv, .txt, .tsv o .xlsx; la primera fila debe tener los nombres.",
+  "Si la hoja ya tiene datos, las columnas nuevas se agregan a la derecha."], ojo:"El formato .xls antiguo no se lee: guárdalo como .xlsx."},
+ {tema:"Hoja de datos", t:"Ordenar, reemplazar y deshacer", ruta:"Datos > Ordenar / Buscar y reemplazar / Deshacer", pasos:[
+  "Ordenar mueve las filas completas según una columna.",
+  "Buscar y reemplazar trabaja en toda la hoja o en una columna.",
+  "Ctrl+Z deshace y Ctrl+Y rehace (hasta 50 pasos); también deshacen importaciones, diseños, filtros y la calculadora."]},
+ {tema:"Hoja de datos", t:"Exportar para Minitab", ruta:"Archivo > Exportar para Minitab", pasos:[
+  "Elige .xlsx o .csv.",
+  "Las celdas inválidas salen vacías y los nombres se ajustan a las reglas de Minitab."]},
+ {tema:"Estadística", t:"Estadísticos, normalidad y gráficas básicas", ruta:"Calc, Estadística y Gráficas", pasos:[
+  "Calc > Estadísticos de columna: media, desviación, cuartiles, asimetría, por grupo si quieres.",
+  "Estadística > Distribuciones y normalidad: histograma, prueba de normalidad y % fuera de especificación.",
+  "Gráficas > Corrida, Caja y Pareto."], ojo:"Un valor p mayor a 0.05 en normalidad significa que no se rechaza la normalidad, no que los datos sean normales."},
+ {tema:"Estadística", t:"ANOVA", ruta:"Estadística > ANOVA", pasos:[
+  "Elige la respuesta y el factor; el bloque es opcional.",
+  "El resultado trae la tabla ANOVA, medias, gráficas de residuos y los supuestos revisados."]},
+ {tema:"Estadística", t:"Correlación y regresión", ruta:"Estadística > Correlación / Regresión", pasos:[
+  "Correlación: marca dos o más columnas numéricas.",
+  "Regresión: elige la respuesta y uno o más predictores; con uno solo puedes ajustar grado 2 o 3.",
+  "Escribe un valor en «Predecir en X» para obtener la predicción con sus intervalos."], ojo:"Revisa el aviso de extrapolación y la tabla de observaciones inusuales."},
+ {tema:"Control y capacidad", t:"Cartas de control", ruta:"Estadística > Cartas de control", pasos:[
+  "Elige el tipo: I-MR, X̄-R, X̄-S, p, np, c o u.",
+  "Indica el tamaño de subgrupo (o una columna que identifique los subgrupos).",
+  "Opcional: calcular los límites con los primeros k subgrupos.",
+  "Las señales aparecen en rojo con el número de la prueba."], ojo:"Los límites de control no son límites de especificación."},
+ {tema:"Control y capacidad", t:"Capacidad de proceso", ruta:"Estadística > Capacidad de proceso", pasos:[
+  "Elige los datos, el tamaño de subgrupo y los límites LIE y LSE.",
+  "Obtienes Cp, Cpk, Pp, Ppk, PPM y nivel sigma, con un resumen gráfico."], ojo:"Si el proceso no está estable, los índices no son confiables; el resultado lo advierte."},
+ {tema:"Optimizar procesos", t:"Superficie de respuesta paso a paso", ruta:"Estadística > Crear diseño / Analizar superficie / Optimizador", pasos:[
+  "Crear diseño de experimentos: escribe los factores con sus niveles bajo y alto; el diseño se escribe en la hoja.",
+  "Corre los experimentos en el orden de la columna OrdenCorrida y captura la respuesta.",
+  "Analizar superficie de respuesta: elige la respuesta y los factores. Quita términos no significativos uno por uno.",
+  "Revisa el contorno, el punto estacionario y la falta de ajuste.",
+  "Optimizador de respuestas: elige la superficie analizada y define máximo, mínimo u objetivo."], ojo:"Confirma el óptimo con corridas de verificación antes de fijarlo en el proceso."},
+ {tema:"Formatos", t:"Formatos de calidad y Lean", ruta:"Herramientas de calidad", pasos:[
+  "Abre el formato del menú: se llena en pantalla y calcula solo (OEE, RPN del AMEF, Takt, Kanban...).",
+  "Los datos fijos del proyecto se copian a la cabecera.",
+  "Cada formato tiene su botón Exportar a Excel."]},
+ {tema:"Formatos", t:"Tablero de indicadores", ruta:"Herramientas de calidad > Tablero semanal", pasos:[
+  "Usa «Agregar del catálogo» para sumar indicadores o escríbelos tú.",
+  "Define meta, límite de advertencia y si aparece en el resumen.",
+  "Puedes llenar las semanas desde la hoja eligiendo una columna de fecha."], ojo:"Para un resumen ejecutivo funcionan mejor de 6 a 10 tarjetas."},
+ {tema:"Resultados", t:"Repetir, copiar y exportar un resultado", ruta:"Barra de cada resultado", pasos:[
+  "Repetir vuelve a correr el análisis con los datos actuales de la hoja.",
+  "Copiar deja las tablas y conclusiones listas para pegar.",
+  "Exportar genera un reporte en Excel (con la hoja Datos) o la gráfica en PNG."]},
+ {tema:"Resultados", t:"Exportar para Power BI", ruta:"Archivo > Exportar para Power BI", pasos:[
+  "Elige una carpeta: se crean tablas CSV, el tema de color y un LEEME.txt.",
+  "En Power BI Desktop usa Obtener datos > Texto/CSV y sigue el LEEME."]}
+];
+/* ===== fin de la parte editable ===== */
+const $=s=>document.querySelector(s);let tema="Todos",txt="";
+$("#ver").textContent="Versión del programa descrita: "+VERSION+". "+NOVEDADES[0];
+const temas=["Todos",...new Set(GUIA.map(g=>g.tema))];
+function chips(){$("#chips").innerHTML="";temas.forEach(t=>{const b=document.createElement("button");b.textContent=t;b.className=t===tema?"on":"";b.onclick=()=>{tema=t;chips();pintar()};$("#chips").append(b)})}
+function pintar(){const L=$("#lista");L.innerHTML="";
+ const f=GUIA.filter(g=>(tema==="Todos"||g.tema===tema)&&(g.t+g.ruta+g.pasos.join(" ")+(g.ojo||"")).toLowerCase().includes(txt));
+ if(!f.length){L.innerHTML='<p class="vacio">No hay coincidencias.</p>';return}
+ f.forEach((g,i)=>{const c=document.createElement("div");c.className="card"+(f.length<=2?" open":"");
+  c.innerHTML=`<button aria-expanded="${f.length<=2}"><b>${g.t}</b><small>${g.tema}</small></button><div class="cuerpo"><span class="ruta">${g.ruta}</span><ol>${g.pasos.map(p=>`<li>${p}</li>`).join("")}</ol>${g.ojo?`<div class="ojo"><b>Ojo:</b> ${g.ojo}</div>`:""}</div>`;
+  c.querySelector("button").onclick=e=>{const o=c.classList.toggle("open");e.currentTarget.setAttribute("aria-expanded",o)};L.append(c)});
+ const h=document.createElement("h2");h.textContent="Novedades";L.append(h);NOVEDADES.forEach(n=>{const p=document.createElement("p");p.textContent=n;p.style.margin="4px 0";L.append(p)})}
+$("#q").oninput=e=>{txt=e.target.value.toLowerCase();pintar()};chips();pintar();
+</script></body></html>

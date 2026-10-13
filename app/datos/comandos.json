@@ -1,0 +1,2634 @@
+[
+{
+"cat": "Archivo",
+"n": "Nuevo proyecto",
+"a": "Ctrl+N",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Proyecto vacío; pregunta si guardar los cambios"
+},
+{
+"cat": "Archivo",
+"n": "Abrir proyecto",
+"a": "Ctrl+O",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Abre un archivo .dmike"
+},
+{
+"cat": "Archivo",
+"n": "Abrir reciente",
+"a": "Alt+A, R",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Lista de proyectos recientes con su fase"
+},
+{
+"cat": "Archivo",
+"n": "Guardar",
+"a": "Ctrl+S",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Guarda el proyecto completo"
+},
+{
+"cat": "Archivo",
+"n": "Guardar como",
+"a": "Ctrl+Mayús+S",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Guarda con otro nombre o lugar"
+},
+{
+"cat": "Archivo",
+"n": "Guardar copia de respaldo",
+"a": "Ctrl+Alt+S",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Copia con fecha sin cambiar el archivo abierto"
+},
+{
+"cat": "Archivo",
+"n": "Gestionar proyectos",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Inicio: proyectos abiertos y recientes"
+},
+{
+"cat": "Archivo",
+"n": "Cerrar proyecto",
+"a": "×  en su pestaña",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Cierra la pestaña del proyecto; pregunta si hay cambios"
+},
+{
+"cat": "Archivo",
+"n": "Importar datos (CSV, TXT, Excel)",
+"a": "Ctrl+Mayús+I",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Agrega columnas desde un archivo"
+},
+{
+"cat": "Archivo",
+"n": "Exportar para Minitab",
+"a": "Ctrl+Mayús+M",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Excel o CSV limpio con nombres válidos"
+},
+{
+"cat": "Archivo",
+"n": "Exportar para Power BI",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Tablas CSV, tema y guía de uso"
+},
+{
+"cat": "Archivo",
+"n": "Exportar resultado o formato",
+"a": "Ctrl+Mayús+E",
+"c": [
+"R",
+"F",
+"T"
+],
+"e": "D",
+"d": "Excel con reporte; gráfica en PNG"
+},
+{
+"cat": "Archivo",
+"n": "Exportar a PDF",
+"a": "Ctrl+P",
+"c": [
+"R",
+"F"
+],
+"e": "P",
+"d": "Reporte con encabezado de la marca"
+},
+{
+"cat": "Archivo",
+"n": "Imprimir",
+"a": "Ctrl+Alt+P",
+"c": [
+"R",
+"F"
+],
+"e": "P",
+"d": "Vista previa e impresión"
+},
+{
+"cat": "Archivo",
+"n": "Abrir perfil del diagnóstico",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Carga módulos sugeridos y datos fijos"
+},
+{
+"cat": "Archivo",
+"n": "Datos fijos del proyecto",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Nombre, área, responsable y notas"
+},
+{
+"cat": "Archivo",
+"n": "Propiedades del proyecto",
+"a": "Alt+Enter",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Fechas, versión del perfil y autor"
+},
+{
+"cat": "Archivo",
+"n": "Salir",
+"a": "Alt+F4",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Cierra D-MIKE"
+},
+{
+"cat": "Edición",
+"n": "Deshacer",
+"a": "Ctrl+Z",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Hasta 50 pasos en la hoja"
+},
+{
+"cat": "Edición",
+"n": "Rehacer",
+"a": "Ctrl+Y",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Repite lo deshecho"
+},
+{
+"cat": "Edición",
+"n": "Cortar",
+"a": "Ctrl+X",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Corta celdas o texto"
+},
+{
+"cat": "Edición",
+"n": "Copiar",
+"a": "Ctrl+C",
+"c": [
+"H",
+"F",
+"R"
+],
+"e": "D",
+"d": "Copia celdas, texto o un resultado"
+},
+{
+"cat": "Edición",
+"n": "Pegar",
+"a": "Ctrl+V",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Pega datos con tabuladores o texto"
+},
+{
+"cat": "Edición",
+"n": "Pegado especial",
+"a": "Ctrl+Alt+V",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Solo valores, transpuesto o sumando"
+},
+{
+"cat": "Edición",
+"n": "Pegar como columna nueva",
+"a": "Ctrl+Mayús+V",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Agrega lo copiado a la derecha"
+},
+{
+"cat": "Edición",
+"n": "Borrar contenido",
+"a": "Supr",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Vacía la selección"
+},
+{
+"cat": "Edición",
+"n": "Seleccionar todo",
+"a": "Ctrl+A",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Datos; otra vez, toda la hoja"
+},
+{
+"cat": "Edición",
+"n": "Rellenar hacia abajo",
+"a": "Ctrl+D",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Copia la primera fila a la selección"
+},
+{
+"cat": "Edición",
+"n": "Rellenar hacia la derecha",
+"a": "Ctrl+R",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Copia la primera columna a la selección"
+},
+{
+"cat": "Edición",
+"n": "Rellenar serie",
+"a": "Ctrl+Mayús+D",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Continúa una serie (1, 2, 3 o fechas)"
+},
+{
+"cat": "Edición",
+"n": "Buscar",
+"a": "Ctrl+F",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Busca en la hoja o en el formato abierto"
+},
+{
+"cat": "Edición",
+"n": "Reemplazar",
+"a": "Ctrl+H",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Busca y reemplaza"
+},
+{
+"cat": "Edición",
+"n": "Buscar siguiente",
+"a": "F3",
+"c": [
+"H",
+"F"
+],
+"e": "P",
+"d": "Siguiente coincidencia"
+},
+{
+"cat": "Edición",
+"n": "Ir a celda",
+"a": "Ctrl+G",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Ej. C5 fila 120"
+},
+{
+"cat": "Edición",
+"n": "Copiar formato",
+"a": "Ctrl+Mayús+C",
+"c": [
+"H",
+"F"
+],
+"e": "P",
+"d": "Copia tipo y formato de una celda"
+},
+{
+"cat": "Edición",
+"n": "Pegar formato",
+"a": "Ctrl+Mayús+P",
+"c": [
+"H",
+"F"
+],
+"e": "P",
+"d": "Aplica el formato copiado"
+},
+{
+"cat": "Edición",
+"n": "Editar celda",
+"a": "F2",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Edita sin borrar el contenido"
+},
+{
+"cat": "Edición",
+"n": "Cancelar edición",
+"a": "Esc",
+"c": [
+"H",
+"F"
+],
+"e": "D",
+"d": "Descarta lo escrito"
+},
+{
+"cat": "Edición",
+"n": "Comentario en celda",
+"a": "Mayús+F2",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Nota visible al pasar el mouse"
+},
+{
+"cat": "Edición",
+"n": "Revisar ortografía",
+"a": "F7",
+"c": [
+"F"
+],
+"e": "P",
+"d": "En campos de texto de los formatos"
+},
+{
+"cat": "Ver",
+"n": "Mostrar u ocultar el riel DMAIC",
+"a": "Ctrl+B",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Al ocultarlo, la hoja ocupa todo el ancho"
+},
+{
+"cat": "Ver",
+"n": "Mostrar u ocultar la sesión",
+"a": "Ctrl+Mayús+B",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Panel inferior de mensajes"
+},
+{
+"cat": "Ver",
+"n": "Modo oscuro",
+"a": "Ctrl+Mayús+D",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Interruptor junto a los controles de la ventana"
+},
+{
+"cat": "Ver",
+"n": "Pantalla completa",
+"a": "F11",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Oculta la cinta y la barra de título"
+},
+{
+"cat": "Ver",
+"n": "Modo enfoque",
+"a": "Ctrl+Alt+F",
+"c": [
+"F",
+"R"
+],
+"e": "P",
+"d": "Solo el formato o resultado abierto"
+},
+{
+"cat": "Ver",
+"n": "Acercar",
+"a": "Ctrl++",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Aumenta el tamaño de la interfaz"
+},
+{
+"cat": "Ver",
+"n": "Alejar",
+"a": "Ctrl+-",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Reduce el tamaño de la interfaz"
+},
+{
+"cat": "Ver",
+"n": "Tamaño normal",
+"a": "Ctrl+0",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Vuelve al 100 %"
+},
+{
+"cat": "Ver",
+"n": "Contraer la cinta",
+"a": "Ctrl+F1",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Deja solo las pestañas de la cinta"
+},
+{
+"cat": "Ver",
+"n": "Barra de fórmulas",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Muestra el contenido completo de la celda"
+},
+{
+"cat": "Ver",
+"n": "Inmovilizar paneles",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Fija filas o columnas al desplazarse"
+},
+{
+"cat": "Ver",
+"n": "Mostrar números de fila",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Oculta o muestra la numeración"
+},
+{
+"cat": "Ver",
+"n": "Pantalla de inicio",
+"a": "Ctrl+Mayús+H",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Pestaña Inicio: proyectos abiertos y recientes"
+},
+{
+"cat": "Ver",
+"n": "Tablero de indicadores",
+"a": "Ctrl+Mayús+T",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Vista ejecutiva del proyecto"
+},
+{
+"cat": "Ver",
+"n": "Paleta de las gráficas",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Elige la gradación de color de todas las gráficas"
+},
+{
+"cat": "Ver",
+"n": "Módulos del proyecto",
+"a": "Ctrl+Mayús+F",
+"c": [
+"P"
+],
+"e": "D",
+"d": "Ruta DMAIC arriba y módulos de cada fase abajo, en una sola ventana"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Nueva pestaña",
+"a": "Ctrl+T",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Elige qué abrir"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Cerrar pestaña",
+"a": "Ctrl+W",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Cierra la pestaña activa"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Reabrir la última cerrada",
+"a": "Ctrl+Mayús+T",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Recupera la pestaña cerrada"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Siguiente pestaña",
+"a": "Ctrl+Tab",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Cambia a la pestaña de la derecha"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Pestaña anterior",
+"a": "Ctrl+Mayús+Tab",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Cambia a la de la izquierda"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Ir a la pestaña 1 a 8",
+"a": "Ctrl+1 … Ctrl+8",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Salta por posición"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Abrir a la derecha",
+"a": "Ctrl+\\",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Divide la vista en dos columnas"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Abrir abajo",
+"a": "Ctrl+Mayús+\\",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Divide la vista en dos filas"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Mover a la otra vista",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Pasa la pestaña al otro lado"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Abrir en ventana aparte",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Útil con dos monitores"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Duplicar pestaña",
+"a": "—",
+"c": [
+"R",
+"F"
+],
+"e": "P",
+"d": "Copia para comparar versiones"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Fijar pestaña",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "La deja a la izquierda y sin cerrar"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Renombrar pestaña",
+"a": "F2 en la pestaña",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Nombre corto propio"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Cerrar las demás",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Deja solo la activa"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Cerrar las de la derecha",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Cierra desde la activa hacia la derecha"
+},
+{
+"cat": "Ventanas y pestañas",
+"n": "Unir vistas",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Vuelve a una sola vista"
+},
+{
+"cat": "Insertar",
+"n": "Insertar filas",
+"a": "Ctrl++",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Tantas filas como las seleccionadas"
+},
+{
+"cat": "Insertar",
+"n": "Eliminar filas o columnas",
+"a": "Ctrl+-",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Según la selección"
+},
+{
+"cat": "Insertar",
+"n": "Insertar columna",
+"a": "Alt+I, C",
+"c": [
+"H"
+],
+"e": "D",
+"d": "A la izquierda de la activa"
+},
+{
+"cat": "Insertar",
+"n": "Insertar fila en formato",
+"a": "Ctrl+Enter",
+"c": [
+"F"
+],
+"e": "P",
+"d": "Agrega una fila a la tabla del formato"
+},
+{
+"cat": "Insertar",
+"n": "Eliminar fila de formato",
+"a": "Ctrl+Mayús+Supr",
+"c": [
+"F"
+],
+"e": "P",
+"d": "Quita la fila activa del formato"
+},
+{
+"cat": "Insertar",
+"n": "Insertar comentario",
+"a": "Mayús+F2",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Nota en la celda"
+},
+{
+"cat": "Insertar",
+"n": "Insertar gráfica de la selección",
+"a": "Alt+F1",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Gráfica rápida según el tipo de datos"
+},
+{
+"cat": "Insertar",
+"n": "Insertar fecha de hoy",
+"a": "Ctrl+;",
+"c": [
+"H",
+"F"
+],
+"e": "P",
+"d": "Escribe la fecha actual"
+},
+{
+"cat": "Insertar",
+"n": "Insertar hora actual",
+"a": "Ctrl+Mayús+;",
+"c": [
+"H",
+"F"
+],
+"e": "P",
+"d": "Escribe la hora actual"
+},
+{
+"cat": "Insertar",
+"n": "Insertar símbolo",
+"a": "—",
+"c": [
+"F"
+],
+"e": "P",
+"d": "Σ, ≤, ±, μ, σ para textos técnicos"
+},
+{
+"cat": "Formato de texto",
+"n": "Negrita",
+"a": "Ctrl+N en texto",
+"c": [
+"F"
+],
+"e": "P",
+"d": "En campos largos de los formatos"
+},
+{
+"cat": "Formato de texto",
+"n": "Cursiva",
+"a": "Ctrl+K en texto",
+"c": [
+"F"
+],
+"e": "P",
+"d": "En campos largos de los formatos"
+},
+{
+"cat": "Formato de texto",
+"n": "Subrayado",
+"a": "Ctrl+S en texto",
+"c": [
+"F"
+],
+"e": "P",
+"d": "En campos largos de los formatos"
+},
+{
+"cat": "Formato de texto",
+"n": "Lista con viñetas",
+"a": "Ctrl+Mayús+L en texto",
+"c": [
+"F"
+],
+"e": "P",
+"d": "Listas dentro de un campo largo"
+},
+{
+"cat": "Formato de texto",
+"n": "Borrar formato",
+"a": "Ctrl+Espacio",
+"c": [
+"F"
+],
+"e": "P",
+"d": "Texto simple"
+},
+{
+"cat": "Formato de texto",
+"n": "Ajustar texto",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Varias líneas dentro de la celda"
+},
+{
+"cat": "Formato de texto",
+"n": "Formato de número",
+"a": "Ctrl+1",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Decimales, porcentaje, miles"
+},
+{
+"cat": "Formato de texto",
+"n": "Aumentar decimales",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Un decimal más en la vista"
+},
+{
+"cat": "Formato de texto",
+"n": "Disminuir decimales",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Un decimal menos en la vista"
+},
+{
+"cat": "Formato de texto",
+"n": "Formato condicional",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Colorea según reglas (fuera de especificación)"
+},
+{
+"cat": "Datos",
+"n": "Ordenar",
+"a": "Alt+D, O",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Filas completas según una columna"
+},
+{
+"cat": "Datos",
+"n": "Ordenar de menor a mayor",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Por la columna activa"
+},
+{
+"cat": "Datos",
+"n": "Ordenar de mayor a menor",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Por la columna activa"
+},
+{
+"cat": "Datos",
+"n": "Filtrar filas",
+"a": "Ctrl+Mayús+L",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Condiciones; lo oculto no entra a análisis"
+},
+{
+"cat": "Datos",
+"n": "Quitar filtro",
+"a": "Alt+D, Q",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Muestra todas las filas"
+},
+{
+"cat": "Datos",
+"n": "Filtrar por el valor de la celda",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Desde el clic derecho"
+},
+{
+"cat": "Datos",
+"n": "Tipo de columna",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Numérica, texto o fecha"
+},
+{
+"cat": "Datos",
+"n": "Renombrar columna",
+"a": "F2 en el nombre",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Cambia el nombre"
+},
+{
+"cat": "Datos",
+"n": "Asignar rol a la columna",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Respuesta, factor, bloque, fecha"
+},
+{
+"cat": "Datos",
+"n": "Subconjunto a hoja nueva",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Copia las filas que cumplen una condición"
+},
+{
+"cat": "Datos",
+"n": "Dividir hoja por grupo",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Una hoja por nivel de un factor"
+},
+{
+"cat": "Datos",
+"n": "Apilar columnas",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Varias columnas en una con su origen"
+},
+{
+"cat": "Datos",
+"n": "Desapilar columna",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Una columna por nivel de un factor"
+},
+{
+"cat": "Datos",
+"n": "Transponer",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Filas a columnas"
+},
+{
+"cat": "Datos",
+"n": "Codificar valores",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Reemplaza texto por códigos (recodificar)"
+},
+{
+"cat": "Datos",
+"n": "Detectar duplicados",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Marca filas repetidas"
+},
+{
+"cat": "Datos",
+"n": "Eliminar duplicados",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Quita filas repetidas"
+},
+{
+"cat": "Datos",
+"n": "Valores faltantes",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Cuenta y marca vacíos por columna"
+},
+{
+"cat": "Datos",
+"n": "Validación de datos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Límites y listas permitidas por columna"
+},
+{
+"cat": "Datos",
+"n": "Unir hojas por clave",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Combina dos tablas por una columna común"
+},
+{
+"cat": "Calc",
+"n": "Calculadora de columnas",
+"a": "Ctrl+Mayús+K",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Fórmulas con columnas y funciones"
+},
+{
+"cat": "Calc",
+"n": "Serie y patrón",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "1:10, listas y repeticiones"
+},
+{
+"cat": "Calc",
+"n": "Datos aleatorios",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Ocho distribuciones con semilla"
+},
+{
+"cat": "Calc",
+"n": "Estadísticos de columna",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Media, desviación, cuartiles y más"
+},
+{
+"cat": "Calc",
+"n": "Estadísticos por fila",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Media o suma de varias columnas por fila"
+},
+{
+"cat": "Calc",
+"n": "Estandarizar",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Z = (x - media) / desviación (ESTAND)"
+},
+{
+"cat": "Calc",
+"n": "Diferencias y retrasos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "DIF y RETRASO en la calculadora"
+},
+{
+"cat": "Calc",
+"n": "Acumulado",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "ACUM en la calculadora"
+},
+{
+"cat": "Calc",
+"n": "Rangos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "RANGO en la calculadora"
+},
+{
+"cat": "Calc",
+"n": "Distribuciones de probabilidad",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Densidad, acumulada e inversa con fórmula de Excel"
+},
+{
+"cat": "Calc",
+"n": "Convertir unidades",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "mm a pulgadas, °C a °F"
+},
+{
+"cat": "Calc",
+"n": "Matrices",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Producto, inversa y transpuesta"
+},
+{
+"cat": "Estadística",
+"n": "Reproducir versión guardada",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Rehace el resultado con la copia congelada de sus entradas (huella SHA-256)"
+},
+{
+"cat": "Estadística",
+"n": "Repetir el último análisis",
+"a": "Ctrl+E",
+"c": [
+"R"
+],
+"e": "P",
+"d": "Abre el diálogo con lo que usaste (como Minitab)"
+},
+{
+"cat": "Estadística",
+"n": "Estadísticos descriptivos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Tabla completa por grupo"
+},
+{
+"cat": "Estadística",
+"n": "Normalidad y distribuciones",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Anderson-Darling y gráfica de probabilidad"
+},
+{
+"cat": "Estadística",
+"n": "Identificar distribución",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Compara normal, lognormal, Weibull y más"
+},
+{
+"cat": "Estadística",
+"n": "Transformación Box-Cox",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Lambda óptima y datos transformados"
+},
+{
+"cat": "Estadística",
+"n": "Prueba t de una muestra",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Contra un valor objetivo"
+},
+{
+"cat": "Estadística",
+"n": "Prueba t de dos muestras",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Welch o varianzas iguales"
+},
+{
+"cat": "Estadística",
+"n": "Prueba t pareada",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Antes y después"
+},
+{
+"cat": "Estadística",
+"n": "Prueba Z",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Con sigma conocida"
+},
+{
+"cat": "Estadística",
+"n": "Prueba de una proporción",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Exacta"
+},
+{
+"cat": "Estadística",
+"n": "Prueba de dos proporciones",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Separada o combinada; Fisher"
+},
+{
+"cat": "Estadística",
+"n": "Prueba de varianzas",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "F, Levene y Bartlett"
+},
+{
+"cat": "Estadística",
+"n": "Pruebas no paramétricas",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Mann-Whitney, Wilcoxon, Kruskal-Wallis, signo"
+},
+{
+"cat": "Estadística",
+"n": "Tabla cruzada y chi cuadrada",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Independencia de dos variables"
+},
+{
+"cat": "Estadística",
+"n": "Potencia y tamaño de muestra",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "t, proporciones y ANOVA"
+},
+{
+"cat": "Estadística",
+"n": "ANOVA de un factor",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Con bloque opcional"
+},
+{
+"cat": "Estadística",
+"n": "ANOVA de dos factores",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Con interacción"
+},
+{
+"cat": "Estadística",
+"n": "Comparaciones de Tukey",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Qué medias difieren"
+},
+{
+"cat": "Estadística",
+"n": "Correlación",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Pearson y Spearman"
+},
+{
+"cat": "Estadística",
+"n": "Regresión",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Simple, polinomial y múltiple"
+},
+{
+"cat": "Estadística",
+"n": "Regresión por pasos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Selección de variables"
+},
+{
+"cat": "Estadística",
+"n": "Cartas de control",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "I-MR, X̄-R, X̄-S, p, np, c, u"
+},
+{
+"cat": "Estadística",
+"n": "Capacidad de proceso",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Cp, Cpk, Pp, Ppk y PPM"
+},
+{
+"cat": "Estadística",
+"n": "Capacidad no normal",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Weibull, lognormal o transformada"
+},
+{
+"cat": "Estadística",
+"n": "Gage R&R de variable",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Cruzado por ANOVA"
+},
+{
+"cat": "Estadística",
+"n": "Gage R&R anidado",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Pruebas destructivas"
+},
+{
+"cat": "Estadística",
+"n": "MSA de atributos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Acuerdo entre evaluadores"
+},
+{
+"cat": "Estadística",
+"n": "Crear diseño de experimentos",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "DCC, Box-Behnken, factorial y fraccionado"
+},
+{
+"cat": "Estadística",
+"n": "Analizar diseño factorial",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Efectos, alias, Pareto y Lenth"
+},
+{
+"cat": "Estadística",
+"n": "Analizar superficie de respuesta",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Contorno, superficie y punto estacionario"
+},
+{
+"cat": "Estadística",
+"n": "Optimizador de respuestas",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Deseabilidad de varias respuestas"
+},
+{
+"cat": "Estadística",
+"n": "Multi-Vari",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Variación dentro y entre grupos"
+},
+{
+"cat": "Estadística",
+"n": "Intervalos de tolerancia",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Cobertura y confianza"
+},
+{
+"cat": "Estadística",
+"n": "Series de tiempo",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Tendencia y suavizamiento"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de corrida",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Tendencia en el tiempo"
+},
+{
+"cat": "Gráficas",
+"n": "Diagrama de caja",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Por grupo, con puntos"
+},
+{
+"cat": "Gráficas",
+"n": "Histograma",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Dentro de Normalidad"
+},
+{
+"cat": "Gráficas",
+"n": "Pareto",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Con porcentaje acumulado"
+},
+{
+"cat": "Gráficas",
+"n": "Dispersión",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Dentro de Correlación"
+},
+{
+"cat": "Gráficas",
+"n": "Matriz de dispersión",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Varias variables"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de intervalos",
+"a": "—",
+"c": [
+"R"
+],
+"e": "P",
+"d": "Medias con su intervalo de confianza"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de efectos principales",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "En el análisis factorial"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de interacción",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "En el análisis factorial"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de contorno",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "En superficie de respuesta"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de superficie 3D",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "En superficie de respuesta"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de valores individuales",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Cada dato por grupo"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de barras",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Conteos o promedios por categoría"
+},
+{
+"cat": "Gráficas",
+"n": "Gráfica de pastel",
+"a": "—",
+"c": [
+"H"
+],
+"e": "P",
+"d": "Solo para pocas categorías"
+},
+{
+"cat": "Gráficas",
+"n": "Editar título y ejes",
+"a": "—",
+"c": [
+"R"
+],
+"e": "P",
+"d": "Desde el clic derecho de la gráfica"
+},
+{
+"cat": "Gráficas",
+"n": "Copiar gráfica como imagen",
+"a": "—",
+"c": [
+"R"
+],
+"e": "P",
+"d": "Al portapapeles"
+},
+{
+"cat": "Gráficas",
+"n": "Estilo y color de la gráfica",
+"a": "clic derecho",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Estilos, color propio y elementos que se muestran"
+},
+{
+"cat": "Gráficas",
+"n": "Escala original",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Regresa la escala o la vista 3D a como estaba al abrir"
+},
+{
+"cat": "Gráficas",
+"n": "Editar propiedades del gráfico",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Pestaña propia y pestaña «Gráfico» en la cinta"
+},
+{
+"cat": "Gráficas",
+"n": "Guardar gráfica",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "PNG desde Exportar"
+},
+{
+"cat": "Gráficas",
+"n": "Agregar gráfica al reporte",
+"a": "—",
+"c": [
+"R"
+],
+"e": "P",
+"d": "Lista para el PDF"
+},
+{
+"cat": "Calidad",
+"n": "Definición del problema",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Sujeto y predicado, dónde, cuándo y magnitud"
+},
+{
+"cat": "Calidad",
+"n": "Acta del proyecto (Charter)",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Con campos del PMBOK"
+},
+{
+"cat": "Calidad",
+"n": "SIPOC",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Proveedores a clientes"
+},
+{
+"cat": "Calidad",
+"n": "Modelo de Kano",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Clasificación de requisitos"
+},
+{
+"cat": "Calidad",
+"n": "QFD",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Casa de la calidad"
+},
+{
+"cat": "Calidad",
+"n": "Árbol CTQ",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Necesidad a indicador"
+},
+{
+"cat": "Calidad",
+"n": "Hoshin Kanri",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Objetivos, estrategias y proyectos"
+},
+{
+"cat": "Calidad",
+"n": "Mapa de proceso",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Entradas X y salidas Y"
+},
+{
+"cat": "Calidad",
+"n": "Hoja de recolección",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Plantilla de captura"
+},
+{
+"cat": "Calidad",
+"n": "Plan de muestreo",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Tamaño y frecuencia"
+},
+{
+"cat": "Calidad",
+"n": "Desempeño: DPMO y sigma",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Por paso y convertidor"
+},
+{
+"cat": "Calidad",
+"n": "Ishikawa",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Seis emes"
+},
+{
+"cat": "Calidad",
+"n": "5 Porqués",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Cadena de causas"
+},
+{
+"cat": "Calidad",
+"n": "AMEF",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "NPR y acciones"
+},
+{
+"cat": "Calidad",
+"n": "Plan de control",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Qué, cómo y quién controla"
+},
+{
+"cat": "Calidad",
+"n": "Checklist de revisión de fase",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Compuerta de fase"
+},
+{
+"cat": "Calidad",
+"n": "4 Preguntas",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Métrico, porqués y acciones"
+},
+{
+"cat": "Calidad",
+"n": "Informe A3",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Siete secciones"
+},
+{
+"cat": "Calidad",
+"n": "Evaluación financiera",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Cuatro estados y punto de equilibrio"
+},
+{
+"cat": "Calidad",
+"n": "Costo de calidad",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Prevención, evaluación y fallas"
+},
+{
+"cat": "Lean",
+"n": "VSM",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Familias y resultados"
+},
+{
+"cat": "Lean",
+"n": "Medición de tiempos",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Elementos y ciclos"
+},
+{
+"cat": "Lean",
+"n": "Balance contra el takt",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Estaciones y carga"
+},
+{
+"cat": "Lean",
+"n": "Takt time",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Disponible entre demanda"
+},
+{
+"cat": "Lean",
+"n": "OEE",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Por hora y por turno"
+},
+{
+"cat": "Lean",
+"n": "Mudas",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Ocho desperdicios"
+},
+{
+"cat": "Lean",
+"n": "Teoría de restricciones",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Cinco pasos y DBR"
+},
+{
+"cat": "Lean",
+"n": "Trabajo estándar",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Tabla combinada"
+},
+{
+"cat": "Lean",
+"n": "Flujo continuo",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Viabilidad por paso"
+},
+{
+"cat": "Lean",
+"n": "Kanban",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Tarjetas y cantidad"
+},
+{
+"cat": "Lean",
+"n": "SMED",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Interno, externo y desperdicio"
+},
+{
+"cat": "Lean",
+"n": "Espagueti",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Recorridos antes y después"
+},
+{
+"cat": "Lean",
+"n": "5S",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Auditoría"
+},
+{
+"cat": "Lean",
+"n": "TPM",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Fallas y MTBF"
+},
+{
+"cat": "Lean",
+"n": "Poka Yoke",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Errores y dispositivos"
+},
+{
+"cat": "Lean",
+"n": "Gestión visual y Andon",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Señales y respuesta"
+},
+{
+"cat": "Lean",
+"n": "Caminata Gemba",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Observaciones"
+},
+{
+"cat": "Lean",
+"n": "Evento Kaizen",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Ficha del evento"
+},
+{
+"cat": "Lean",
+"n": "Tarjetas de oportunidad",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Con matriz esfuerzo contra valor"
+},
+{
+"cat": "Lean",
+"n": "Tablero Kata",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Reto y ciclos"
+},
+{
+"cat": "Lean",
+"n": "Scrum",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Backlog y sprints"
+},
+{
+"cat": "Lean",
+"n": "Trabajo estándar de líderes",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Rutina diaria y semanal"
+},
+{
+"cat": "Gestión",
+"n": "Justificación de negocio",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "VPN, TIR, recuperación y ROI"
+},
+{
+"cat": "Gestión",
+"n": "Enfoque de desarrollo",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Predictivo, híbrido o adaptativo"
+},
+{
+"cat": "Gestión",
+"n": "Registro de interesados",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Poder, interés y compromiso"
+},
+{
+"cat": "Gestión",
+"n": "Matriz RACI",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Una sola A por actividad"
+},
+{
+"cat": "Gestión",
+"n": "EDT y diccionario",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Con plantilla DMAIC"
+},
+{
+"cat": "Gestión",
+"n": "Cronograma y ruta crítica",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Dependencias y holguras"
+},
+{
+"cat": "Gestión",
+"n": "Monte Carlo del cronograma",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "P50, P80, P90 y tornado"
+},
+{
+"cat": "Gestión",
+"n": "Registro de riesgos",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Probabilidad por impacto"
+},
+{
+"cat": "Gestión",
+"n": "Bitácora",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Supuestos, incidentes y cambios"
+},
+{
+"cat": "Gestión",
+"n": "Seguimiento por valor ganado",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "SPI, CPI y pronósticos"
+},
+{
+"cat": "Gestión",
+"n": "FODA",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Con paso al registro de riesgos"
+},
+{
+"cat": "Gestión",
+"n": "Diagrama de afinidad",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Agrupa ideas"
+},
+{
+"cat": "Gestión",
+"n": "Árbol de decisión",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Valor monetario esperado"
+},
+{
+"cat": "Gestión",
+"n": "Cierre y lecciones aprendidas",
+"a": "—",
+"c": [
+"F"
+],
+"e": "D",
+"d": "Informe final y transición"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Ir a Definir",
+"a": "Ctrl+Alt+1",
+"c": [
+"P"
+],
+"e": "P",
+"d": "Abre la fase en el riel"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Ir a Medir",
+"a": "Ctrl+Alt+2",
+"c": [
+"P"
+],
+"e": "P",
+"d": "Abre la fase en el riel"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Ir a Analizar",
+"a": "Ctrl+Alt+3",
+"c": [
+"P"
+],
+"e": "P",
+"d": "Abre la fase en el riel"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Ir a Mejorar",
+"a": "Ctrl+Alt+4",
+"c": [
+"P"
+],
+"e": "P",
+"d": "Abre la fase en el riel"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Ir a Controlar",
+"a": "Ctrl+Alt+5",
+"c": [
+"P"
+],
+"e": "P",
+"d": "Abre la fase en el riel"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Activar módulo",
+"a": "+ en Inactivos",
+"c": [
+"P"
+],
+"e": "D",
+"d": "Lo pasa a la fase elegida"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Pasar a inactivos",
+"a": "—",
+"c": [
+"P"
+],
+"e": "D",
+"d": "Conserva capturas y resultados"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Marcar como hecho",
+"a": "—",
+"c": [
+"P"
+],
+"e": "D",
+"d": "Avance del módulo"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Marcar en curso",
+"a": "—",
+"c": [
+"P"
+],
+"e": "D",
+"d": "Avance del módulo"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Mover a otra fase",
+"a": "—",
+"c": [
+"P"
+],
+"e": "P",
+"d": "Cambia la fase del módulo"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Siguiente paso sugerido",
+"a": "Ctrl+Alt+→",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Abre el módulo que sigue"
+},
+{
+"cat": "Fases DMAIC",
+"n": "Revisión de compuerta",
+"a": "—",
+"c": [
+"P"
+],
+"e": "D",
+"d": "Checklist de la fase"
+},
+{
+"cat": "Herramientas",
+"n": "Paleta de comandos",
+"a": "Ctrl+K",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Busca cualquier comando, módulo o columna"
+},
+{
+"cat": "Herramientas",
+"n": "Verificar en Excel",
+"a": "—",
+"c": [
+"R"
+],
+"e": "D",
+"d": "Fórmulas de Excel y columna para Minitab"
+},
+{
+"cat": "Herramientas",
+"n": "Comparar dos resultados",
+"a": "—",
+"c": [
+"R"
+],
+"e": "P",
+"d": "Lado a lado con diferencias"
+},
+{
+"cat": "Herramientas",
+"n": "Historial de la sesión",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Exporta lo que se hizo"
+},
+{
+"cat": "Herramientas",
+"n": "Atajos de teclado",
+"a": "Ctrl+/",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Lista de atajos"
+},
+{
+"cat": "Herramientas",
+"n": "Personalizar atajos",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Cambia o agrega atajos"
+},
+{
+"cat": "Herramientas",
+"n": "Personalizar la cinta",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Muestra u oculta grupos"
+},
+{
+"cat": "Herramientas",
+"n": "Opciones",
+"a": "Alt+H, O",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Idioma de números, decimales, carpetas"
+},
+{
+"cat": "Herramientas",
+"n": "Comprobar actualizaciones",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Nueva versión disponible"
+},
+{
+"cat": "Ayuda",
+"n": "Manual de uso",
+"a": "F1",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Esta guía"
+},
+{
+"cat": "Ayuda",
+"n": "Ayuda del módulo abierto",
+"a": "Mayús+F1",
+"c": [
+"R",
+"F"
+],
+"e": "P",
+"d": "Fuente y fórmulas del módulo"
+},
+{
+"cat": "Ayuda",
+"n": "Ejemplos del curso",
+"a": "—",
+"c": [
+"G"
+],
+"e": "P",
+"d": "Abre un proyecto de ejemplo"
+},
+{
+"cat": "Ayuda",
+"n": "Acerca de D-MIKE",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Versión, créditos y licencias"
+}
+]

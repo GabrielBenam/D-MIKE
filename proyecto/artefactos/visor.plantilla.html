@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>D-MIKE · Lo que hemos creado</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#faf8f4;--sup:#fff;--linea:#e2dcd0;--tinta:#2b2620;--suave:#6f675b;--tenue:#a79f92;--acento:#dd5813;--claro:#fbe8dd;--verde:#2e7d32;--vclaro:#e3f1e0;--rojo:#b3261e;--rclaro:#fdecea;--amar:#b7791f;--aclaro:#fff3d6;--sombra:0 1px 2px rgba(43,38,32,.06),0 4px 14px rgba(43,38,32,.07);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--papel:#1f1b17;--sup:#2a2520;--linea:#41392f;--tinta:#f1ece4;--suave:#b3aa9c;--tenue:#82796b;--claro:#4a2a17;--vclaro:#1f3a21;--rclaro:#4a1f1b;--aclaro:#41331a;--verde:#7fcf84;--rojo:#f28b82;--amar:#e8b64f}}
+:root[data-theme="dark"]{--papel:#1f1b17;--sup:#2a2520;--linea:#41392f;--tinta:#f1ece4;--suave:#b3aa9c;--tenue:#82796b;--claro:#4a2a17;--vclaro:#1f3a21;--rclaro:#4a1f1b;--aclaro:#41331a;--verde:#7fcf84;--rojo:#f28b82;--amar:#e8b64f}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--papel);color:var(--tinta);font:13px/1.5 Montserrat,"Segoe UI",sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--papel);border-bottom:1px solid var(--linea);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{margin:0;font-size:15px}h1 b{color:var(--acento)}h1 small{color:var(--suave);font-weight:500;margin-left:6px}
+.tabs{display:flex;gap:4px}.tabs button{font:inherit;border:0;background:none;padding:7px 14px;border-radius:8px;color:var(--suave);cursor:pointer;font-weight:500}.tabs button.on{background:var(--acento);color:#fff;font-weight:600}
+main{max-width:1180px;margin:auto;padding:14px 16px 44px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.chips button{border:1px solid var(--linea);background:var(--sup);color:var(--suave);border-radius:14px;padding:3px 11px;font:inherit;font-size:11.5px;cursor:pointer}.chips button.on{background:var(--acento);border-color:var(--acento);color:#fff}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--sup);border:1px solid var(--linea);border-radius:12px;overflow:hidden;box-shadow:var(--sombra);display:flex;flex-direction:column}
+.card img{width:100%;display:block;cursor:zoom-in;border-bottom:1px solid var(--linea);aspect-ratio:16/9;object-fit:cover;object-position:top}
+.card .c{padding:10px 13px 12px}.card h3{margin:0 0 3px;font-size:13.5px}.card p{margin:3px 0;color:var(--suave);font-size:12px}
+.ruta{display:inline-block;background:var(--claro);color:var(--acento);border-radius:4px;padding:0 7px;font-size:11px;font-weight:600}
+.chip{display:inline-block;border-radius:10px;padding:0 8px;font-size:10.5px;font-weight:700;margin-right:4px}
+.chip.v{background:var(--vclaro);color:var(--verde)}.chip.a{background:var(--aclaro);color:var(--amar)}
+h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--suave);margin:20px 0 8px}
+.panel{background:var(--sup);border:1px solid var(--linea);border-radius:12px;padding:14px;box-shadow:var(--sombra)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}th{font-size:11px;color:var(--suave);text-align:left;padding:6px 6px;border-bottom:2px solid var(--linea)}td{padding:3px 4px;border-bottom:1px solid var(--linea)}
+td input{width:100%;font:inherit;font-size:12.5px;border:1px solid transparent;border-radius:5px;padding:4px 6px;background:transparent;color:var(--tinta)}td input:focus{outline:2px solid var(--acento);background:var(--sup)}
+td.n input{text-align:right;font-variant-numeric:tabular-nums}td.f{text-align:right;font-variant-numeric:tabular-nums;color:var(--suave);white-space:nowrap}
+.btn{font:inherit;font-size:12px;border:1px solid var(--linea);border-radius:8px;background:var(--sup);color:var(--tinta);padding:6px 12px;cursor:pointer}.btn:hover{border-color:var(--acento)}
+.fila-ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.logo{background:var(--sup);border:2px solid var(--linea);border-radius:14px;padding:14px;text-align:center;cursor:pointer;box-shadow:var(--sombra)}.logo:hover{border-color:var(--tenue)}.logo.on{border-color:var(--acento);background:var(--claro)}
+.logo svg{width:112px;height:112px}.logo h3{margin:8px 0 2px;font-size:13px}.logo p{margin:0;color:var(--suave);font-size:11.5px}
+.barra{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:10px;font-weight:700;letter-spacing:.04em;color:var(--acento)}.barra.cl{background:#fffdf9;border:1px solid var(--linea)}.barra.os{background:#2b2620}
+.barra svg{width:26px;height:26px}.ico{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;padding:14px;border-radius:10px}.ico div{text-align:center;font-size:10.5px;color:var(--suave)}
+.ico.cl{background:#fff;border:1px solid var(--linea)}.ico.os{background:#2b2620}.ico.os div{color:#cfc7ba}
+dialog{border:0;border-radius:12px;padding:0;max-width:96vw;background:var(--sup)}dialog::backdrop{background:rgba(0,0,0,.55)}dialog img{display:block;max-width:94vw;max-height:88vh}
+.nota{color:var(--tenue);font-size:11.5px}textarea{width:100%;height:120px;font:12px ui-monospace,monospace;border:1px solid var(--linea);border-radius:8px;padding:8px;background:var(--sup);color:var(--tinta)}
+.pend li{margin:3px 0}
+</style></head><body>
+<header><h1><b>D-MIKE</b> Visor del proyecto<small id="ver"></small></h1><nav class="tabs" id="tabs"></nav></header>
+<main id="m"></main>
+<dialog id="dlg"><img id="dimg" alt=""></dialog>
+<script>
+/* ===== PARA ACTUALIZAR: cambia VERSION, agrega objetos a CREADO (y su captura a IMG), filas a COMPARA y pendientes a PEND ===== */
+const VERSION="0.13.0";
+const IMG=__IMG__;
+const LOGOS=__LOGOS__;
+const NOMBRES_LOGO=[["D con tendencia","Una D sólida sobre naranja con una línea que sube: mejora continua y control estadístico."],["D con cinco barras","Una D que contiene cinco barras crecientes: las cinco fases DMAIC. Fondo oscuro (provisional en la interfaz)."],["Campana de capacidad","La curva normal con límites de especificación: capacidad de proceso."],["Tuerca hexagonal","Un hexágono de manufactura con la D al centro."],["Ciclo de cinco puntos","Cinco puntos en ciclo, uno por fase, con la D al centro."]];
+const V="Verificado con ejemplo del curso",L="Verificado con la salida de Minitab del libro",E="Coincide con Excel recalculado",S="Probado con datos sintéticos";
+const CREADO=[
+{t:"Hoja con rangos y portapapeles",cat:"Hoja",ruta:"Hoja de datos",img:"hoja",d:"Selección de rangos con Mayús, flechas o arrastre; clic en C1 para columnas y en el número para filas; copiar, cortar, pegar, borrar; Ctrl+D y Ctrl+R; Ctrl+flechas; barra con cuenta, suma, promedio, mínimo y máximo. Solo se dibujan las filas visibles: 5,000 filas sin lentitud.",v:[S]},
+{t:"Menú contextual",cat:"Hoja",ruta:"Clic derecho en la hoja",img:"contextual",d:"Cortar, copiar, pegar, rellenar, insertar y eliminar filas o columnas, ordenar, filtrar por el valor de la celda, tipo de columna y buscar y reemplazar.",v:[S]},
+{t:"Panel DMAIC plegable",cat:"Hoja",ruta:"Ctrl+B · Ver · botón de la barra",img:"panel_oculto",d:"El panel de fases se oculta para que la hoja use todo el ancho y se vuelve a mostrar con el mismo estado. También se puede ocultar la sesión. Se recuerda la preferencia.",v:[S]},
+{t:"Calculadora de columnas",cat:"Hoja",ruta:"Calc > Calculadora de columnas",img:"calculadora",d:"Fórmulas con columnas (C1, 'nombre') y funciones: LOG10, LN, RAIZ, SI, REDONDEAR, SUMA, PROMEDIO, DESV, ACUM, DIF, RETRASO, RANGO, ESTAND y más. No ejecuta código arbitrario.",v:[S]},
+{t:"Filtro, importar, deshacer y utilidades de datos",cat:"Hoja",ruta:"Datos · Archivo · Editar · Calc",d:"Filtro de filas con varias condiciones (las filas ocultas no entran a los análisis), importar CSV, TXT y Excel, deshacer y rehacer 50 pasos, serie y patrón, datos aleatorios, recodificar, apilar y detectar duplicados.",v:[S]},
+{t:"Cartas de control",cat:"Análisis",ruta:"Estadística > Cartas de control",img:"SPC",d:"I-MR, X̄-R, X̄-S, p, np, c y u con las 7 pruebas de señales elegibles, límites históricos y tabla de señales.",v:[V]},
+{t:"Capacidad de proceso",cat:"Análisis",ruta:"Estadística > Capacidad de proceso",img:"CAPACIDAD",d:"Cp, Cpk, Pp, Ppk, Cpm, PPM y nivel sigma, con resumen gráfico y revisión de estabilidad.",v:[V,E]},
+{t:"Correlación y regresión",cat:"Análisis",ruta:"Estadística > Correlación · Regresión",img:"REGRESION",d:"Pearson, Spearman, regresión simple, polinomial y múltiple con diagnósticos, predicción con intervalos y observaciones inusuales.",v:[V,E]},
+{t:"Estadísticos, normalidad y ANOVA",cat:"Análisis",ruta:"Calc · Estadística",d:"Estadísticos de columna completos, Anderson-Darling, ANOVA con bloque y supuestos revisados.",v:[E]},
+{t:"Superficie de respuesta",cat:"Optimización",ruta:"Estadística > Analizar superficie de respuesta",img:"RSM",d:"Modelo cuadrático con ANOVA por grupos, falta de ajuste, contorno, superficie 3D, punto estacionario y ruta de ascenso.",v:[L,V]},
+{t:"Superficie 3D",cat:"Optimización",ruta:"Dentro del análisis de superficie",img:"RSM_sup",d:"La misma superficie en tres dimensiones, con los demás factores fijos.",v:[S]},
+{t:"Optimizador de respuestas",cat:"Optimización",ruta:"Estadística > Optimizador de respuestas",img:"OPTIMIZADOR",d:"Busca la combinación de factores que cumple la meta de hasta 3 respuestas con deseabilidad compuesta.",v:[S]},
+{t:"Crear diseño de experimentos",cat:"Optimización",ruta:"Estadística > Crear diseño de experimentos",d:"Central compuesto (rotable o en caras, con bloques), Box-Behnken y factorial 2^k con puntos centrales, en orden aleatorio reproducible.",v:[L]},
+{t:"Gage R&R de variable",cat:"Análisis",ruta:"Estadística > Gage R&R de variable",img:"MSA-VAR",d:"Método ANOVA cruzado: componentes de varianza, % contribución, % variación del estudio, % tolerancia, ndc y 6 gráficas. Criterio 10% y 30% de la base.",v:[L]},
+{t:"SMED",cat:"Formatos",ruta:"Herramientas de calidad > SMED",img:"SMED",d:"Operaciones del cambio con tiempo real y potencial, acumulado, desperdicio, ahorro y avisos de la revisión de calidad de la base.",v:[S]},
+{t:"Cronograma DMAIC (Gantt)",cat:"Formatos",ruta:"Herramientas de calidad > Cronograma DMAIC",img:"GANTT",d:"Cinco fases y 12 semanas; las semanas activas se calculan con las fechas y se dibuja el Gantt.",v:[S]},
+{t:"4 Qs, A3, Kaizen, Tarjetas, Mudas y Kata",cat:"Formatos",ruta:"Herramientas de calidad",d:"Seis formatos de la base con sus campos, cálculos y avisos (folios repetidos, metas no medibles, entregas fuera de la fecha promesa, impacto alto sin acción).",v:[S]},
+{t:"OEE, Takt, Kanban, Charter, SIPOC, Ishikawa, 5 Porqués, AMEF, Plan de control, Tablero, Hoja de recolección",cat:"Formatos",ruta:"Herramientas de calidad",d:"Los formatos de versiones anteriores, con exportación a Excel y datos fijos del proyecto.",v:[V]},
+{t:"Hoja de verificación en Excel",cat:"Comparación",ruta:"Botón «Verificar en Excel…» de un resultado",d:"Genera un libro con las fórmulas vivas de Excel sobre los mismos datos, los valores de D-MIKE y una columna para capturar lo que da Minitab, con diferencias y «Coincide» o «Revisar». Disponible para estadísticos, correlación, regresión simple, capacidad y normalidad.",v:[E]}];
+/* comparaciones ya conocidas: [análisis, concepto, D-MIKE, Excel, Minitab o curso] */
+const COMPARA=[
+["Regresión dureza/temperatura (27_BB)","Pendiente b1",-0.2684,"",-0.2684],["Regresión dureza/temperatura (27_BB)","F",76.63,"",76.63],["Regresión dureza/temperatura (27_BB)","t de la pendiente",-8.75,"",-8.75],["Regresión dureza/temperatura (27_BB)","S",1.48229,"",1.48229],
+["Gage R&R (libro, cap. 13)","% contribución R&R",85.14,"",85.14],["Gage R&R (libro, cap. 13)","% variación del estudio R&R",92.27,"",92.27],["Gage R&R (libro, cap. 13)","% tolerancia R&R",34.63,"",34.63],
+["Superficie (libro, cap. 28)","EE del término T*T",0.1697,"",0.1697],["Superficie (libro, cap. 28)","EE de la constante",0.3673,"",0.3673],
+["Capacidad (Chelsea, 16_GB)","Pp",0.76,"",0.76],["Capacidad (Chelsea, 16_GB)","Ppk",0.62,"",0.62]];
+const PEND=["Modo oscuro completo en el programa (gráficas incluidas).","Formatos faltantes: KANO, QFD, CTQ, VSM, TPM, Poka Yoke, Scrum, Riesgos, 5S, Gemba, Trabajo estándar y otros.","Pruebas de hipótesis, ANOVA de dos factores, Tukey, identificación de distribuciones, Box-Cox, potencia y no paramétricas.","Tablero dentro del programa (primero aprobar el prototipo).","Comparar con datos crudos del curso (helicóptero 284.1279, tornillos).","Probar la ventana real de Windows y la compilación en tu equipo."];
+/* ===== fin de la parte editable ===== */
+const $=s=>document.querySelector(s);let tab="Lo creado",cat="Todo",logo=0,tol=0.0005;
+try{logo=+localStorage.getItem("dmike_logo")||0}catch(e){}
+let filas=null;try{filas=JSON.parse(localStorage.getItem("dmike_compara")||"null")}catch(e){}
+if(!filas)filas=COMPARA.map(r=>({a:r[0],c:r[1],d:r[2],e:r[3],m:r[4]}));
+const guarda=()=>{try{localStorage.setItem("dmike_compara",JSON.stringify(filas))}catch(e){}};
+$("#ver").textContent="Versión "+VERSION;
+$("#tabs").innerHTML=["Lo creado","Comparador","Logo"].map(t=>`<button>${t}</button>`).join("");
+$("#tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.textContent;pinta()});
+const chip=v=>`<span class="chip ${v===S?"a":"v"}">${v}</span>`;
+function pinta(){$("#tabs").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.textContent===tab));
+ if(tab==="Lo creado"){const cats=["Todo",...new Set(CREADO.map(x=>x.cat))];
+  $("#m").innerHTML=`<div class="chips">${cats.map(c=>`<button class="${c===cat?"on":""}" data-c="${c}">${c}</button>`).join("")}</div><div class="gal">${CREADO.filter(x=>cat==="Todo"||x.cat===cat).map(x=>`<div class="card">${x.img?`<img src="data:image/jpeg;base64,${IMG[x.img]}" alt="${x.t}" data-k="${x.img}">`:""}<div class="c"><h3>${x.t}</h3><span class="ruta">${x.ruta}</span><p>${x.d}</p><div>${x.v.map(chip).join("")}</div></div></div>`).join("")}</div>
+  <h2>Pendiente</h2><div class="panel"><ul class="pend" style="margin:0;padding-left:18px">${PEND.map(p=>`<li>${p}</li>`).join("")}</ul></div>`;
+  $("#m").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{cat=b.dataset.c;pinta()});
+  $("#m").querySelectorAll("img").forEach(i=>i.onclick=()=>{$("#dimg").src=i.src;$("#dlg").showModal()});}
+ else if(tab==="Comparador")comparador();else logos();}
+function est(r){const d=parseFloat(r.d);const q=x=>{const v=parseFloat(x);return isNaN(v)?null:v};const e=q(r.e),m=q(r.m);if(isNaN(d))return["","",""];
+ const ok=(o)=>Math.abs(d-o)<=tol*Math.max(1,Math.abs(d)),fe=e===null?"":d-e,fm=m===null?"":d-m;
+ const s=e===null&&m===null?"sin comparar":(e===null||ok(e))&&(m===null||ok(m))?"Coincide":"Revisar";return[fe,fm,s]}
+const f4=x=>x===""?"":(Math.abs(x)<1e-9?"0":x.toPrecision(3));
+function comparador(){$("#m").innerHTML=`<div class="panel"><div class="fila-ctl"><b>Bitácora de comparación contra Excel y Minitab</b><span class="nota">Captura el valor de D-MIKE, el de Excel (por ejemplo, con «Verificar en Excel…») y el de Minitab. Las diferencias y el estado se calculan solos y se guardan en este visor.</span></div>
+ <div class="fila-ctl">Tolerancia relativa <input id="tol" type="number" step="0.0001" value="${tol}" style="width:90px;font:inherit;padding:4px 6px;border:1px solid var(--linea);border-radius:6px;background:var(--sup);color:var(--tinta)"> <button class="btn" id="add">Agregar fila</button> <button class="btn" id="txt">Ver como texto para copiar</button> <button class="btn" id="rst">Restablecer ejemplos</button></div>
+ <div style="overflow-x:auto"><table><thead><tr><th>Análisis</th><th>Concepto</th><th>D-MIKE</th><th>Excel</th><th>Minitab o curso</th><th>Dif. Excel</th><th>Dif. Minitab</th><th>Estado</th><th></th></tr></thead><tbody id="tb"></tbody></table></div><div id="out"></div></div>
+ <p class="nota">Las filas de ejemplo ya traen los valores verificados del curso y de los libros; sirven de modelo. «Revisar» significa que la diferencia supera la tolerancia: anota la causa probable (método de sigma, alfa, tipo de cuartil, redondeo) y avísame para corregirlo.</p>`;
+ const tb=$("#tb");filas.forEach((r,i)=>{const [fe,fm,s]=est(r);const tr=document.createElement("tr");
+  tr.innerHTML=`<td><input data-i="${i}" data-k="a" value="${r.a}"></td><td><input data-i="${i}" data-k="c" value="${r.c}"></td><td class="n"><input data-i="${i}" data-k="d" value="${r.d}"></td><td class="n"><input data-i="${i}" data-k="e" value="${r.e}"></td><td class="n"><input data-i="${i}" data-k="m" value="${r.m}"></td><td class="f">${f4(fe)}</td><td class="f">${f4(fm)}</td><td><span class="chip ${s==="Coincide"?"v":s==="Revisar"?"":"a"}" style="${s==="Revisar"?"background:var(--rclaro);color:var(--rojo)":""}">${s}</span></td><td><button class="btn" data-x="${i}" title="Quitar">×</button></td>`;tb.append(tr)});
+ tb.querySelectorAll("input").forEach(inp=>inp.onchange=()=>{filas[+inp.dataset.i][inp.dataset.k]=inp.value;guarda();comparador()});
+ tb.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{filas.splice(+b.dataset.x,1);guarda();comparador()});
+ $("#tol").onchange=e=>{tol=parseFloat(e.target.value)||0.0005;comparador()};$("#add").onclick=()=>{filas.push({a:"",c:"",d:"",e:"",m:""});guarda();comparador()};
+ $("#rst").onclick=()=>{filas=COMPARA.map(r=>({a:r[0],c:r[1],d:r[2],e:r[3],m:r[4]}));guarda();comparador()};
+ $("#txt").onclick=()=>{$("#out").innerHTML='<textarea readonly id="ta"></textarea>';const t=["Análisis\tConcepto\tD-MIKE\tExcel\tMinitab\tEstado",...filas.map(r=>[r.a,r.c,r.d,r.e,r.m,est(r)[2]].join("\t"))].join("\n");$("#ta").value=t;$("#ta").select()}}
+function logos(){$("#m").innerHTML=`<p>Elige uno. Se muestra como lo verás en la barra del programa, y como ícono en distintos tamaños, sobre fondo claro y oscuro. Cuando decidas, dime en el chat «elijo el logo N».</p><div class="logos">${LOGOS.map((s,i)=>`<div class="logo ${logo===i+1?"on":""}" data-l="${i+1}">${s}<h3>${i+1}. ${NOMBRES_LOGO[i][0]}</h3><p>${NOMBRES_LOGO[i][1]}</p></div>`).join("")}</div>
+ <h2>${logo?"Vista del logo "+logo:"Elige un logo para ver la vista"}</h2>${logo?`<div class="fila-ctl"><div class="barra cl">${LOGOS[logo-1]}<span>D-MIKE</span></div><div class="barra os">${LOGOS[logo-1]}<span>D-MIKE</span></div></div>
+ <div class="fila-ctl"><div class="ico cl">${[16,24,32,48,64,128].map(n=>`<div>${LOGOS[logo-1].replace("<svg ",`<svg width="${n}" height="${n}" `)}<br>${n} px</div>`).join("")}</div><div class="ico os">${[16,32,64,128].map(n=>`<div>${LOGOS[logo-1].replace("<svg ",`<svg width="${n}" height="${n}" `)}<br>${n} px</div>`).join("")}</div></div>`:""}`;
+ $("#m").querySelectorAll("[data-l]").forEach(c=>c.onclick=()=>{logo=+c.dataset.l;try{localStorage.setItem("dmike_logo",logo)}catch(e){}logos()})}
+pinta();
+</script></body></html>

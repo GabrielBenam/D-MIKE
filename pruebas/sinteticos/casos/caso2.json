@@ -1,0 +1,294 @@
+{
+ "perfil_empresa": {
+  "tamano": "50-249",
+  "giro": "manufactura",
+  "n_operadores": 12,
+  "alcance": "linea_area"
+ },
+ "diagnostico": {
+  "sintoma": "S04",
+  "secundarios": [
+   "S02"
+  ],
+  "objetivos": [
+   "entrega"
+  ],
+  "tipo_dato": "variable",
+  "datos": "excel",
+  "volumen": "50-200",
+  "fase_actual": "M",
+  "equipo": "2-4",
+  "semanas": "4-12",
+  "puede_experimentar": null
+ },
+ "modulos": [
+  {
+   "id": "CHARTER",
+   "nombre": "Acta del proyecto (Project/Kaizen Charter)",
+   "fase_asignada": "D",
+   "estado": "disponible",
+   "prioridad": "R",
+   "motivos": [
+    "documentar el acta si aún no existe"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL01, PL14",
+   "datos_minimos": "Caso de negocio, CTQ con línea base y objetivo, alcance, equipo y métricas [CURSO]."
+  },
+  {
+   "id": "VSM",
+   "nombre": "Mapa de valor (VSM actual)",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "P",
+   "motivos": [
+    "síntoma secundario: ver el flujo completo y dónde se acumula",
+    "prerrequisito de TOC"
+   ],
+   "tipo": "grafico",
+   "plantilla": "PL03",
+   "datos_minimos": "Recorrido real del flujo, tiempo de ciclo y de cambio, inventarios, demanda y tiempo disponible [CURSO]."
+  },
+  {
+   "id": "TAKT",
+   "nombre": "Takt time",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "síntoma secundario: ritmo que pide el cliente",
+    "ritmo que exige el cliente",
+    "ritmo de entrega"
+   ],
+   "tipo": "calculo",
+   "plantilla": "PL03",
+   "datos_minimos": "Demanda del cliente por periodo y tiempo disponible neto [CURSO]."
+  },
+  {
+   "id": "HOJA-DATOS",
+   "nombre": "Hoja de recolección de datos",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "registrar causa y duración de cada paro"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL11",
+   "datos_minimos": "Fecha, responsable, instrumento y una columna por variable [CURSO]."
+  },
+  {
+   "id": "OEE",
+   "nombre": "OEE y tablero de OEE",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "cuantificar disponibilidad, rendimiento y calidad"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL09",
+   "datos_minimos": "Por hora, en al menos un turno completo: tiempo programado, paros (causa y minutos), piezas producidas y defectuosas [COMP: el curso muestra ejemplo de 3 horas].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "GEMBA",
+   "nombre": "Caminata Gemba",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "observar el paro en el lugar"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  },
+  {
+   "id": "CINCO-PQ",
+   "nombre": "5 Porqués",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "causa raíz de las mayores pérdidas"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  },
+  {
+   "id": "PARETO",
+   "nombre": "Diagrama de Pareto",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "priorizar causas de paro"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "TOC",
+   "nombre": "Teoría de Restricciones (5 pasos)",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "síntoma secundario: si aparece un cuello de botella claro",
+    "ver si es la restricción del flujo"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  },
+  {
+   "id": "CINCO-S",
+   "nombre": "5S",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "P",
+   "motivos": [
+    "prerrequisito de TPM"
+   ],
+   "tipo": "manual",
+   "plantilla": "",
+   "datos_minimos": ""
+  },
+  {
+   "id": "TPM",
+   "nombre": "TPM",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "mantenimiento autónomo y planificado"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL06",
+   "datos_minimos": ""
+  },
+  {
+   "id": "AMEF",
+   "nombre": "AMEF",
+   "fase_asignada": "I",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "riesgos de falla futuros"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL04",
+   "datos_minimos": "Modos de falla con severidad, ocurrencia y detección (escalas 1-10 del curso) [CURSO]."
+  }
+ ],
+ "sugeridos": [
+  {
+   "id": "MUDAS",
+   "nombre": "Identificación de Mudas",
+   "motivos": [
+    "síntoma secundario: identificar desperdicios"
+   ]
+  },
+  {
+   "id": "FLUJO",
+   "nombre": "Flujo continuo",
+   "motivos": [
+    "síntoma secundario: rediseñar el flujo después del VSM"
+   ]
+  },
+  {
+   "id": "KANBAN",
+   "nombre": "Kanban",
+   "motivos": [
+    "síntoma secundario: reposición por consumo, tras VSM y takt"
+   ]
+  },
+  {
+   "id": "QFD",
+   "nombre": "QFD (matriz 1)",
+   "motivos": [
+    "priorizar requisitos críticos afectados"
+   ]
+  },
+  {
+   "id": "CTQ-TREE",
+   "nombre": "Árbol CTQ",
+   "motivos": [
+    "traducir la necesidad a requisitos"
+   ]
+  }
+ ],
+ "no_recomendados": [],
+ "hoja_datos_sugerida": [
+  {
+   "nombre": "fecha",
+   "tipo": "fecha",
+   "rol": "id",
+   "desc": ""
+  },
+  {
+   "nombre": "turno",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": ""
+  },
+  {
+   "nombre": "equipo_estacion",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Equipo o estación"
+  },
+  {
+   "nombre": "causa_paro",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Causa del paro"
+  },
+  {
+   "nombre": "duracion_min",
+   "tipo": "num",
+   "rol": "respuesta",
+   "desc": "Duración del paro"
+  }
+ ],
+ "advertencias": [],
+ "notas": [],
+ "pendientes_datos": [
+  {
+   "modulo": "OEE",
+   "minimos": "Por hora, en al menos un turno completo: tiempo programado, paros (causa y minutos), piezas producidas y defectuosas [COMP: el curso muestra ejemplo de 3 horas]."
+  },
+  {
+   "modulo": "PARETO",
+   "minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP]."
+  }
+ ],
+ "ruta_sugerida": [
+  "VSM",
+  "TAKT",
+  "HOJA-DATOS",
+  "OEE",
+  "GEMBA",
+  "CINCO-PQ",
+  "PARETO",
+  "TOC",
+  "CINCO-S",
+  "TPM",
+  "AMEF"
+ ],
+ "siguiente_paso": "VSM",
+ "datos_fijos": {
+  "nombre_proyecto": "Caso sintético 2",
+  "cliente_area": null,
+  "responsable": null,
+  "logo": null,
+  "notas": "Generado con simular_arbol.py. Sintético."
+ },
+ "version_perfil": 1,
+ "arbol_version": "1.3",
+ "generado_en": "2026-09-30T00:00:00+00:00"
+}

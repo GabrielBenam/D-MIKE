@@ -17,41 +17,15 @@ jobs:
       - name: Descargar el código
         uses: actions/checkout@v5
 
-      - name: Extraer el código del zip (si se subió como un solo archivo)
-        shell: python
-        run: |
-          import glob, os, re, shutil, zipfile
-          zips = sorted(glob.glob("d-mike_*.zip"))
-          if not zips:
-              print("No hay un zip d-mike_*.zip en la raíz: se usa el código del repositorio tal como está.")
-          else:
-              z = zips[-1]; print("Usando " + z)
-              with zipfile.ZipFile(z) as f: f.extractall("_zip")
-              src = "_zip/d-mike" if os.path.isdir("_zip/d-mike") else "_zip"
-              # se borra primero lo que trae el zip para que no se mezclen archivos de versiones anteriores
-              for nombre in os.listdir(src):
-                  if nombre in (".github",) or nombre.endswith(".zip"): continue
-                  if os.path.isdir(nombre): shutil.rmtree(nombre)
-                  elif os.path.exists(nombre): os.remove(nombre)
-              n = 0
-              for raiz, _, archivos in os.walk(src):
-                  for a in archivos:
-                      o = os.path.join(raiz, a); d = os.path.join(".", os.path.relpath(o, src))
-                      if d.replace(os.sep, "/").startswith("./.github/"): continue
-                      os.makedirs(os.path.dirname(d) or ".", exist_ok=True); shutil.copy2(o, d); n += 1
-              shutil.rmtree("_zip")
-              v = re.search(r'VERSION = "([^"]+)"', open("app/api.py", encoding="utf-8").read())[1]
-              print("Archivos extraídos: %d · versión del código: %s" % (n, v))
-
       - name: Revisar que estén todos los archivos
         shell: python
         run: |
           import os, sys
           if not os.path.exists("MANIFIESTO.txt"):
               print("No encuentro MANIFIESTO.txt en la raíz del repositorio.")
-              print("Sube el archivo d-mike_v0.21.1.zip (sin extraer) a la raíz del repositorio y vuelve a compilar.")
+              print("Regéneralo (ver CLAUDE.md, entrega) y vuelve a compilar.")
               sys.exit(1)
-          # el archivo de compilación se pega aparte en .github/workflows (con cualquier nombre), por eso no se revisa aquí
+          # los archivos de .github/ no se revisan aquí
           lista = [l.strip() for l in open("MANIFIESTO.txt", encoding="utf-8") if l.strip() and not l.startswith("#") and not l.strip().startswith(".github/")]
           faltan = [f for f in lista if not os.path.exists(f)]
           if faltan:

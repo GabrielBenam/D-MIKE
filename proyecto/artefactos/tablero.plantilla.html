@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>D-MIKE · Prototipo del tablero</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#faf8f4;--panel:#f3efe7;--sup:#fff;--linea:#e2dcd0;--tinta:#2b2620;--suave:#6f675b;--tenue:#a79f92;--acento:#dd5813;--claro:#fbe8dd;--verde:#2e7d32;--vclaro:#e3f1e0;--amar:#b7791f;--aclaro:#fff3d6;--rojo:#b3261e;--rclaro:#fdecea;--sombra:0 1px 2px rgba(43,38,32,.06),0 4px 14px rgba(43,38,32,.07);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--papel:#1f1b17;--panel:#272220;--sup:#2a2520;--linea:#41392f;--tinta:#f1ece4;--suave:#b3aa9c;--tenue:#82796b;--claro:#4a2a17;--vclaro:#1f3a21;--aclaro:#41331a;--rclaro:#4a1f1b;--verde:#7fcf84;--amar:#e8b64f;--rojo:#f28b82}}
+:root[data-theme="dark"]{--papel:#1f1b17;--panel:#272220;--sup:#2a2520;--linea:#41392f;--tinta:#f1ece4;--suave:#b3aa9c;--tenue:#82796b;--claro:#4a2a17;--vclaro:#1f3a21;--aclaro:#41331a;--rclaro:#4a1f1b;--verde:#7fcf84;--amar:#e8b64f;--rojo:#f28b82}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--papel);color:var(--tinta);font:13px/1.45 Montserrat,"Segoe UI",sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--papel);border-bottom:1px solid var(--linea);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+h1{margin:0;font-size:15px}h1 b{color:var(--acento)}h1 small{color:var(--suave);font-weight:500;margin-left:6px}
+.seg{display:flex;border:1px solid var(--linea);border-radius:8px;overflow:hidden;background:var(--sup)}
+.seg button,.btn,select{font:inherit;font-size:12px;border:0;background:none;color:var(--suave);padding:6px 12px;cursor:pointer}
+.seg button.on{background:var(--acento);color:#fff;font-weight:600}
+.btn{border:1px solid var(--linea);border-radius:8px;background:var(--sup);color:var(--tinta)}.btn:hover{border-color:var(--acento)}
+select{border:1px solid var(--linea);border-radius:8px;background:var(--sup);color:var(--tinta)}
+.esp{flex:1}
+main{max-width:1180px;margin:auto;padding:14px 16px 40px}
+.resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.res{background:var(--sup);border:1px solid var(--linea);border-radius:10px;padding:10px 14px;box-shadow:var(--sombra)}
+.res b{font-size:22px;display:block}.res span{color:var(--suave);font-size:11.5px}
+.res.v b{color:var(--verde)}.res.a b{color:var(--amar)}.res.r b{color:var(--rojo)}
+h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--suave);margin:18px 0 8px}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.rejilla.grande{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.kpi{background:var(--sup);border:1px solid var(--linea);border-left:4px solid var(--tenue);border-radius:10px;padding:11px 13px;box-shadow:var(--sombra);cursor:pointer;position:relative;transition:transform .12s,border-color .12s}
+.kpi:hover{transform:translateY(-1px);border-color:var(--acento)}
+.kpi.v{border-left-color:var(--verde)}.kpi.a{border-left-color:var(--amar)}.kpi.r{border-left-color:var(--rojo)}
+.kpi .n{font-size:11.5px;color:var(--suave);padding-right:22px;min-height:32px}
+.kpi .v{font-size:24px;font-weight:700;margin:2px 0}.kpi .m{font-size:11px;color:var(--tenue);display:flex;justify-content:space-between}
+.kpi .d{font-size:11px;font-weight:600}.d.bien{color:var(--verde)}.d.mal{color:var(--rojo)}
+.kpi .x{position:absolute;top:6px;right:8px;border:0;background:none;color:var(--tenue);font-size:15px;cursor:pointer}.kpi .x:hover{color:var(--rojo)}
+.chip{display:inline-block;border-radius:10px;padding:0 8px;font-size:10.5px;font-weight:700}
+.chip.v{background:var(--vclaro);color:var(--verde)}.chip.a{background:var(--aclaro);color:var(--amar)}.chip.r{background:var(--rclaro);color:var(--rojo)}
+svg text{font-family:Montserrat,"Segoe UI",sans-serif}
+.panel{background:var(--sup);border:1px solid var(--linea);border-radius:12px;padding:14px;box-shadow:var(--sombra)}
+.dos{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.alerta{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--linea);cursor:pointer}.alerta:last-child{border:0}
+.proy{padding:8px 0;border-bottom:1px solid var(--linea)}.proy:last-child{border:0}
+.fases{display:flex;gap:3px;margin-top:5px}.fases i{flex:1;height:6px;border-radius:3px;background:var(--linea)}.fases i.h{background:var(--verde)}.fases i.c{background:var(--acento)}
+.filtros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.filtros button{border:1px solid var(--linea);background:var(--sup);color:var(--suave);border-radius:14px;padding:3px 11px;font:inherit;font-size:11.5px;cursor:pointer}.filtros button.on{background:var(--acento);color:#fff;border-color:var(--acento)}
+input[type=search],input[type=number]{font:inherit;border:1px solid var(--linea);border-radius:8px;padding:6px 10px;background:var(--sup);color:var(--tinta)}
+dialog{border:1px solid var(--linea);border-radius:14px;background:var(--sup);color:var(--tinta);padding:0;width:min(760px,94vw);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(43,38,32,.4)}
+.dlg{padding:16px 18px}.dlg h3{margin:0 0 4px;font-size:16px}.dlg p{margin:4px 0;color:var(--suave)}
+table{border-collapse:collapse;width:100%;font-size:12px}td,th{padding:4px 8px;border-bottom:1px solid var(--linea);text-align:right}th:first-child,td:first-child{text-align:left}
+.nota{color:var(--tenue);font-size:11.5px;margin-top:18px}
+@media(max-width:760px){.resumen{grid-template-columns:repeat(2,1fr)}.dos{grid-template-columns:1fr}}
+</style></head><body>
+<header>
+ <h1><b>D-MIKE</b> Tablero<small>prototipo con datos sintéticos</small></h1>
+ <div class="seg" id="nivel"></div>
+ <span class="esp"></span>
+ <select id="periodo" aria-label="Periodo"><option value="4">Últimas 4 semanas</option><option value="12" selected>Últimas 12 semanas</option><option value="26">Últimas 26 semanas</option><option value="52">Último año</option></select>
+ <select id="area" aria-label="Área" hidden></select>
+ <button class="btn" id="agregar">Agregar indicadores</button>
+ <button class="btn" id="tema">Tema</button>
+ <button class="btn" id="reset">Restablecer</button>
+</header>
+<main id="m"></main>
+<dialog id="dlg"><div class="dlg" id="dlgc"></div></dialog>
+<script>
+/* Catálogo real de D-MIKE (109 indicadores): [id, nombre, categoría, unidad, sentido, fórmula, de la base (1) o general (0)] */
+const KPIS = __KPIS__;
+const POR_DEFECTO = ["OEE","ENTREGAS-TIEMPO","NIVEL-SIGMA","LEADTIME","WIP","DISPONIBILIDAD","MTTR","PCE"];
+const $=s=>document.querySelector(s);
+let est={nivel:"Ejecutivo",per:12,area:"Todas",sel:POR_DEFECTO.slice(),metas:{},busca:"",cat:"Todas"};
+try{const g=JSON.parse(localStorage.getItem("dmike_tablero")||"null");if(g)est=Object.assign(est,g)}catch(e){}
+const guardar=()=>{try{localStorage.setItem("dmike_tablero",JSON.stringify(est))}catch(e){}};
+/* datos sintéticos reproducibles */
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function prng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const cache={};
+function serie(k){if(cache[k[0]])return cache[k[0]];const h=hash(k[0]),r=prng(h),pct=k[3]==="%";
+ const sg=k[3]==="sigma",meta=pct?85+h%12:sg?3.4+(h%12)/10:40+h%160,alto=k[4]!==">=";const esc=pct?1.8:sg?.07:meta*0.045;let v=meta*(alto?1.02:0.985)+(r()-.5)*esc*3;const drift=((h>>3)%7-3)*(pct?.12:meta*.003)*(alto?1:-1)*-1;
+ const s=[];for(let i=0;i<52;i++){v+=drift*.35+(r()-.5)*esc*.9+(meta*(alto?1:1)-v)*.08*(alto?-0:0)+(meta-v)*.06;s.push(Math.max(0,pct?Math.min(100,v):v))}
+ return cache[k[0]]={meta,s}}
+const meta=k=>est.metas[k[0]]??serie(k).meta;
+function estado(k,v){const m=meta(k),w=k[3]==="%"?3:m*.05;if(k[4]===">=")return v>=m?"v":v>=m-w?"a":"r";return v<=m?"v":v<=m+w?"a":"r"}
+const fmt=(k,v)=>(k[3]==="sigma"?v.toFixed(2):Math.abs(v)>=100?v.toFixed(0):v.toFixed(1))+(k[3]==="%"?"%":" "+k[3]);
+function datos(k){const n=est.per,s=serie(k).s,ult=s.slice(-n),prev=s.slice(-2*n,-n),val=ult[ult.length-1];
+ const pm=prev.length?prev.reduce((a,b)=>a+b)/prev.length:null,um=ult.reduce((a,b)=>a+b)/ult.length;return{ult,val,delta:pm===null?null:um-pm,prom:um}}
+function spark(a,k,w=170,h=34){const mn=Math.min(...a,meta(k)),mx=Math.max(...a,meta(k)),sx=i=>2+i*(w-4)/(a.length-1||1),sy=v=>h-3-(v-mn)/(mx-mn||1)*(h-6);
+ const col=({v:"var(--verde)",a:"var(--amar)",r:"var(--rojo)"})[estado(k,a[a.length-1])];
+ return`<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}"><line x1="0" x2="${w}" y1="${sy(meta(k))}" y2="${sy(meta(k))}" stroke="var(--tenue)" stroke-dasharray="3 3"/><polyline fill="none" stroke="${col}" stroke-width="1.8" points="${a.map((v,i)=>sx(i)+","+sy(v)).join(" ")}"/><circle cx="${sx(a.length-1)}" cy="${sy(a[a.length-1])}" r="2.8" fill="${col}"/></svg>`}
+function tarjeta(k,quitar=true){const d=datos(k),e=estado(k,d.val),m=meta(k),bien=d.delta===null?null:(k[4]===">="?d.delta>=0:d.delta<=0);
+ return`<div class="kpi ${e}" data-id="${k[0]}"><div class="n">${k[1]}</div>${quitar?`<button class="x" data-q="${k[0]}" title="Quitar del tablero" aria-label="Quitar">×</button>`:""}
+ <div class="v">${fmt(k,d.val)}</div>${spark(d.ult,k)}<div class="m"><span>Meta ${k[4]} ${fmt(k,m)}</span><span class="d ${bien===null?"":bien?"bien":"mal"}">${d.delta===null?"":(d.delta>=0?"▲ ":"▼ ")+Math.abs(d.delta).toFixed(1)}</span></div></div>`}
+const sel=()=>est.sel.map(id=>KPIS.find(k=>k[0]===id)).filter(Boolean);
+const PROY=[["Reducir retrabajo en línea 3","M",.55],["Cambio rápido de molde (SMED)","I",.3],["Capacidad del proceso de torneado","A",.7],["Gage R&R del calibrador","M",.9],["Optimizar temperatura de curado","I",.15]];
+const FASES="DMAIC";
+function vistaEjecutivo(){const L=sel(),c={v:0,a:0,r:0};L.forEach(k=>c[estado(k,datos(k).val)]++);
+ const rojos=L.filter(k=>estado(k,datos(k).val)==="r");
+ return`<div class="resumen"><div class="res"><b>${L.length}</b><span>indicadores en el tablero</span></div><div class="res v"><b>${c.v}</b><span>en meta</span></div><div class="res a"><b>${c.a}</b><span>en advertencia</span></div><div class="res r"><b>${c.r}</b><span>fuera de meta</span></div></div>
+ <div class="dos"><div><h2>Indicadores clave</h2><div class="rejilla grande">${L.map(k=>tarjeta(k)).join("")||'<p class="nota">No hay indicadores: usa «Agregar indicadores».</p>'}</div></div>
+ <div><h2>Requiere atención</h2><div class="panel">${rojos.map(k=>`<div class="alerta" data-id="${k[0]}"><span>${k[1]}</span><span class="chip r">${fmt(k,datos(k).val)}</span></div>`).join("")||'<p style="margin:0;color:var(--verde)">Todo en meta o advertencia.</p>'}</div>
+ <h2>Proyectos en curso (WIP)</h2><div class="panel">${PROY.map(p=>`<div class="proy"><b>${p[0]}</b><div class="fases">${[...FASES].map((f,i)=>`<i class="${i<FASES.indexOf(p[1])?"h":i===FASES.indexOf(p[1])?"c":""}" title="${f}"></i>`).join("")}</div><small style="color:var(--suave)">Fase ${p[1]} · ${Math.round(p[2]*100)}% de la fase</small></div>`).join("")}</div></div></div>`}
+function vistaArea(){const L=sel(),cats=["Todas",...new Set(L.map(k=>k[2]))];if(!cats.includes(est.area))est.area="Todas";
+ const por={};L.filter(k=>est.area==="Todas"||k[2]===est.area).forEach(k=>(por[k[2]]=por[k[2]]||[]).push(k));
+ return`<div class="filtros">${cats.map(c=>`<button class="${c===est.area?"on":""}" data-area="${c}">${c}</button>`).join("")}</div>`+
+ (Object.entries(por).map(([c,l])=>`<h2>${c} · ${l.length}</h2><div class="rejilla">${l.map(k=>tarjeta(k)).join("")}</div>`).join("")||'<p class="nota">No hay indicadores en esta área.</p>')}
+function vistaExplora(){const cats=["Todas",...new Set(KPIS.map(k=>k[2]))],q=est.busca.toLowerCase();
+ const L=KPIS.filter(k=>(est.cat==="Todas"||k[2]===est.cat)&&(k[1]+k[5]).toLowerCase().includes(q));
+ return`<div class="filtros"><input type="search" id="b" placeholder="Buscar en los 109 indicadores…" value="${est.busca}" style="min-width:260px">${cats.map(c=>`<button class="${c===est.cat?"on":""}" data-cat="${c}">${c}</button>`).join("")}</div>
+ <p class="nota" style="margin:0 0 8px">${L.length} indicadores. Clic en una tarjeta para ver su historia, definición y editar la meta. Con la estrella se agrega o se quita del tablero.</p>
+ <div class="rejilla">${L.map(k=>tarjeta(k,false).replace('<div class="n">',`<button class="x" data-t="${k[0]}" style="font-size:16px;color:${est.sel.includes(k[0])?"var(--acento)":"var(--tenue)"}" title="Agregar o quitar del tablero">${est.sel.includes(k[0])?"★":"☆"}</button><div class="n">`)).join("")}</div>`}
+function detalle(id){const k=KPIS.find(x=>x[0]===id),d=datos(k),s=serie(k).s,a=s.slice(-52),W=680,H=200,mn=Math.min(...a,meta(k))*.97,mx=Math.max(...a,meta(k))*1.03,sx=i=>36+i*(W-46)/51,sy=v=>H-22-(v-mn)/(mx-mn||1)*(H-34);
+ const cuenta=est.per,x0=sx(52-cuenta);
+ $("#dlgc").innerHTML=`<h3>${k[1]} <span class="chip ${estado(k,d.val)}">${({v:"En meta",a:"Advertencia",r:"Fuera de meta"})[estado(k,d.val)]}</span></h3><p>${k[2]} · ${k[5]}</p><p style="font-size:11px">Fuente: ${k[6]?"fórmula de la base LSS":"catálogo general; la fórmula y la meta las define el proyecto"}.</p>
+ <svg viewBox="0 0 ${W} ${H}" width="100%"><rect x="${x0}" y="6" width="${W-10-x0}" height="${H-28}" fill="var(--claro)" opacity=".5"/><line x1="36" x2="${W-10}" y1="${sy(meta(k))}" y2="${sy(meta(k))}" stroke="var(--acento)" stroke-dasharray="4 4"/><text x="38" y="${sy(meta(k))-4}" font-size="10" fill="var(--acento)">meta ${fmt(k,meta(k))}</text>
+ <polyline fill="none" stroke="var(--tinta)" stroke-width="1.6" points="${a.map((v,i)=>sx(i)+","+sy(v)).join(" ")}"/>${a.map((v,i)=>`<circle cx="${sx(i)}" cy="${sy(v)}" r="2.4" fill="${({v:"var(--verde)",a:"var(--amar)",r:"var(--rojo)"})[estado(k,v)]}"/>`).join("")}
+ ${[0,13,26,39,51].map(i=>`<text x="${sx(i)}" y="${H-6}" font-size="10" fill="var(--suave)" text-anchor="middle">S${i+1}</text>`).join("")}<text x="6" y="14" font-size="10" fill="var(--suave)">${fmt(k,mx)}</text><text x="6" y="${H-24}" font-size="10" fill="var(--suave)">${fmt(k,mn)}</text></svg>
+ <p>Periodo sombreado: últimas ${cuenta} semanas. Promedio del periodo ${fmt(k,d.prom)}; último valor ${fmt(k,d.val)}.</p>
+ <p>Meta: <input type="number" id="meta" step="any" value="${meta(k).toFixed(2)}" style="width:110px"> ${k[3]} (${k[4]==="<="?"menor o igual":"mayor o igual"} es mejor) <button class="btn" id="gm">Guardar meta</button> <button class="btn" id="tg">${est.sel.includes(k[0])?"Quitar del tablero":"Agregar al tablero"}</button> <button class="btn" id="cd">Cerrar</button></p>`;
+ $("#dlg").showModal();$("#cd").onclick=()=>$("#dlg").close();$("#gm").onclick=()=>{est.metas[id]=parseFloat($("#meta").value);guardar();$("#dlg").close();pintar()};
+ $("#tg").onclick=()=>{alternar(id);$("#dlg").close();pintar()}}
+function alternar(id){est.sel=est.sel.includes(id)?est.sel.filter(x=>x!==id):[...est.sel,id];guardar()}
+function pintar(){$("#nivel").innerHTML=["Ejecutivo","Por área","Exploración"].map(n=>`<button class="${n===est.nivel?"on":""}">${n}</button>`).join("");
+ $("#nivel").querySelectorAll("button").forEach(b=>b.onclick=()=>{est.nivel=b.textContent;guardar();pintar()});$("#periodo").value=est.per;
+ $("#m").innerHTML=est.nivel==="Ejecutivo"?vistaEjecutivo():est.nivel==="Por área"?vistaArea():vistaExplora();
+ $("#m").insertAdjacentHTML("beforeend",'<p class="nota">Prototipo: los datos son sintéticos y reproducibles; no representan ningún proceso real. En el programa, cada tarjeta se alimentará de la hoja de datos y del formato «Tablero semanal», con la meta y el límite de advertencia que defina el proyecto.</p>');
+ $("#m").querySelectorAll(".kpi,.alerta").forEach(e=>e.onclick=ev=>{if(ev.target.closest("[data-q],[data-t]"))return;detalle(e.dataset.id)});
+ $("#m").querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{alternar(b.dataset.q);pintar()});$("#m").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{alternar(b.dataset.t);pintar()});
+ $("#m").querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{est.area=b.dataset.area;guardar();pintar()});$("#m").querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{est.cat=b.dataset.cat;guardar();pintar()});
+ const b=$("#b");if(b)b.oninput=()=>{est.busca=b.value;const p=b.selectionStart;pintar();const n=$("#b");n.focus();n.setSelectionRange(p,p)}}
+$("#periodo").onchange=e=>{est.per=+e.target.value;guardar();pintar()};
+$("#agregar").onclick=()=>{est.nivel="Exploración";guardar();pintar()};
+$("#reset").onclick=()=>{est={nivel:"Ejecutivo",per:12,area:"Todas",sel:POR_DEFECTO.slice(),metas:{},busca:"",cat:"Todas"};guardar();pintar()};
+$("#tema").onclick=()=>{const d=document.documentElement,o=d.dataset.theme==="dark"||(!d.dataset.theme&&matchMedia("(prefers-color-scheme:dark)").matches);d.dataset.theme=o?"light":"dark"};
+pintar();
+</script></body></html>

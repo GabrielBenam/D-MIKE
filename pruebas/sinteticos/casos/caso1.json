@@ -1,0 +1,344 @@
+{
+ "perfil_empresa": {
+  "tamano": "10-49",
+  "giro": "ingenieria_documentacion",
+  "n_operadores": 2,
+  "alcance": "puntual"
+ },
+ "diagnostico": {
+  "sintoma": "S14",
+  "secundarios": [
+   "S07"
+  ],
+  "objetivos": [
+   "tiempo",
+   "errores"
+  ],
+  "tipo_dato": "mixto",
+  "datos": "manual",
+  "volumen": "50-200",
+  "fase_actual": "M",
+  "equipo": "1",
+  "semanas": "4-12",
+  "puede_experimentar": "si"
+ },
+ "modulos": [
+  {
+   "id": "CHARTER",
+   "nombre": "Acta del proyecto (Project/Kaizen Charter)",
+   "fase_asignada": "D",
+   "estado": "disponible",
+   "prioridad": "R",
+   "motivos": [
+    "documentar el acta si aún no existe"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL01, PL14",
+   "datos_minimos": "Caso de negocio, CTQ con línea base y objetivo, alcance, equipo y métricas [CURSO]."
+  },
+  {
+   "id": "HOJA-DATOS",
+   "nombre": "Hoja de recolección de datos",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "registrar cada unidad con y sin la condición"
+   ],
+   "tipo": "manual",
+   "plantilla": "PL11",
+   "datos_minimos": "Fecha, responsable, instrumento y una columna por variable [CURSO]."
+  },
+  {
+   "id": "MSA-ATR",
+   "nombre": "MSA de atributos",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "validar el criterio de revisión",
+    "validar la inspección antes de analizar"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL16",
+   "datos_minimos": "30 a 50 muestras (5-10 marginales, 5-10 evidentemente defectuosas, resto buenas), 2-3 evaluadores, al menos 2 rondas; valor de referencia si existe; coincidencia >= 0.75 (ideal > 0.90) [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "DISTRIB",
+   "nombre": "Distribuciones y normalidad",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "verificar normalidad de los tiempos"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "El curso no fija mínimo; sus ejemplos usan de 30 a 150 datos [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "CORRIDA",
+   "nombre": "Gráfica de corrida / tendencia",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "ver la tendencia en el tiempo"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Datos en orden cronológico; el curso no fija mínimo [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "TABLERO",
+   "nombre": "Tablero de seguimiento semanal (KPI)",
+   "fase_asignada": "M",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "seguimiento semanal"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Indicadores con meta y resultado por semana, y trabajos en proceso [COMP].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "PARETO",
+   "nombre": "Diagrama de Pareto",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "R",
+   "motivos": [
+    "síntoma secundario: priorizar tipos de defecto",
+    "tipos de error"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "BOXPLOT",
+   "nombre": "Diagrama de caja",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "comparar las condiciones"
+   ],
+   "tipo": "datos",
+   "plantilla": "",
+   "datos_minimos": "Dos o más grupos comparables; los ejemplos del curso usan de 10 a 25 datos por grupo [CURSO].",
+   "estado_datos": "por_cargar"
+  },
+  {
+   "id": "ANOVA",
+   "nombre": "ANOVA (1, 2 y 3 factores; con o sin bloqueo)",
+   "fase_asignada": "A",
+   "estado": "activo",
+   "prioridad": "N",
+   "motivos": [
+    "probar si la diferencia es real"
+   ],
+   "tipo": "datos",
+   "plantilla": "PL12",
+   "datos_minimos": "Réplicas por nivel (las plantillas admiten hasta 5) con orden aleatorizado; con 2 niveles equivale a la prueba t de dos muestras [COMP].",
+   "estado_datos": "por_cargar"
+  }
+ ],
+ "sugeridos": [
+  {
+   "id": "ISHIKAWA",
+   "nombre": "Diagrama de Ishikawa",
+   "motivos": [
+    "síntoma secundario: causas potenciales"
+   ]
+  },
+  {
+   "id": "CINCO-PQ",
+   "nombre": "5 Porqués",
+   "motivos": [
+    "síntoma secundario: causa raíz"
+   ]
+  },
+  {
+   "id": "DEF-PROBLEMA",
+   "nombre": "Definición del problema (3 pasos)",
+   "motivos": [
+    "síntoma secundario: definir el criterio de defecto"
+   ]
+  },
+  {
+   "id": "POKAYOKE",
+   "nombre": "Poka Yoke",
+   "motivos": [
+    "síntoma secundario: prevenir el error"
+   ]
+  },
+  {
+   "id": "AMEF",
+   "nombre": "AMEF",
+   "motivos": [
+    "síntoma secundario: riesgos futuros"
+   ]
+  },
+  {
+   "id": "TRABAJO-EST",
+   "nombre": "Trabajo estándar",
+   "motivos": [
+    "síntoma secundario: estandarizar el método"
+   ]
+  },
+  {
+   "id": "TIEMPOS",
+   "nombre": "Medición de tiempos",
+   "motivos": [
+    "solo si se cronometra por observación"
+   ]
+  },
+  {
+   "id": "MSA-VAR",
+   "nombre": "MSA de variable (R&R)",
+   "motivos": [
+    "el tiempo se mide con reloj; opcional"
+   ]
+  }
+ ],
+ "no_recomendados": [],
+ "hoja_datos_sugerida": [
+  {
+   "nombre": "fecha",
+   "tipo": "fecha",
+   "rol": "id",
+   "desc": ""
+  },
+  {
+   "nombre": "unidad_id",
+   "tipo": "id",
+   "rol": "id",
+   "desc": "Unidad de trabajo (p. ej. DCN, dibujo u orden)"
+  },
+  {
+   "nombre": "condicion",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Con o sin la mejora"
+  },
+  {
+   "nombre": "operador",
+   "tipo": "cat",
+   "rol": "bloque",
+   "desc": "Quién ejecuta"
+  },
+  {
+   "nombre": "familia_elemento",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Familia o tipo de elemento (p. ej. flag note, callout, tabla)"
+  },
+  {
+   "nombre": "tamano_unidad",
+   "tipo": "num",
+   "rol": "covariable",
+   "desc": "Tamaño o dificultad de la unidad (p. ej. longitud o cantidad de elementos)"
+  },
+  {
+   "nombre": "tiempo",
+   "tipo": "num",
+   "rol": "respuesta",
+   "desc": "Tiempo dedicado"
+  },
+  {
+   "nombre": "errores",
+   "tipo": "num",
+   "rol": "respuesta",
+   "desc": "Errores detectados"
+  },
+  {
+   "nombre": "tipo_error",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Tipo de error detectado (si aplica)"
+  },
+  {
+   "nombre": "origen_error",
+   "tipo": "cat",
+   "rol": "factor",
+   "desc": "Humano o de la propia herramienta"
+  },
+  {
+   "nombre": "tiempo_no_afectado",
+   "tipo": "num",
+   "rol": "covariable",
+   "desc": "Tiempo del trabajo que la mejora no cambia (control)"
+  },
+  {
+   "nombre": "contexto",
+   "tipo": "cat",
+   "rol": "covariable",
+   "desc": "Notas que puedan confundir el resultado"
+  }
+ ],
+ "advertencias": [
+  "Con menos de 3 operadores no se puede estimar bien la variación entre operadores: usa el elemento o la orden como unidad de análisis y, si comparas un método, cruza (cada operador con y sin)."
+ ],
+ "notas": [
+  "Reparte el orden al azar: cada operador ejecuta unidades con y sin la mejora; en el ANOVA usa el operador como bloque.",
+  "La unidad de análisis es el documento, la orden o la transacción, no la pieza."
+ ],
+ "pendientes_datos": [
+  {
+   "modulo": "MSA-ATR",
+   "minimos": "30 a 50 muestras (5-10 marginales, 5-10 evidentemente defectuosas, resto buenas), 2-3 evaluadores, al menos 2 rondas; valor de referencia si existe; coincidencia >= 0.75 (ideal > 0.90) [CURSO]."
+  },
+  {
+   "modulo": "DISTRIB",
+   "minimos": "El curso no fija mínimo; sus ejemplos usan de 30 a 150 datos [CURSO]."
+  },
+  {
+   "modulo": "CORRIDA",
+   "minimos": "Datos en orden cronológico; el curso no fija mínimo [CURSO]."
+  },
+  {
+   "modulo": "TABLERO",
+   "minimos": "Indicadores con meta y resultado por semana, y trabajos en proceso [COMP]."
+  },
+  {
+   "modulo": "PARETO",
+   "minimos": "Conteo o costo por categoría de defecto, causa de paro o tipo de error [COMP]."
+  },
+  {
+   "modulo": "BOXPLOT",
+   "minimos": "Dos o más grupos comparables; los ejemplos del curso usan de 10 a 25 datos por grupo [CURSO]."
+  },
+  {
+   "modulo": "ANOVA",
+   "minimos": "Réplicas por nivel (las plantillas admiten hasta 5) con orden aleatorizado; con 2 niveles equivale a la prueba t de dos muestras [COMP]."
+  }
+ ],
+ "ruta_sugerida": [
+  "HOJA-DATOS",
+  "MSA-ATR",
+  "DISTRIB",
+  "CORRIDA",
+  "TABLERO",
+  "PARETO",
+  "BOXPLOT",
+  "ANOVA"
+ ],
+ "siguiente_paso": "HOJA-DATOS",
+ "datos_fijos": {
+  "nombre_proyecto": "Caso sintético 1",
+  "cliente_area": null,
+  "responsable": null,
+  "logo": null,
+  "notas": "Generado con simular_arbol.py. Sintético."
+ },
+ "version_perfil": 1,
+ "arbol_version": "1.3",
+ "generado_en": "2026-09-30T00:00:00+00:00"
+}
