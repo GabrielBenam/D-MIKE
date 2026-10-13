@@ -158,25 +158,41 @@ window.addEventListener("unhandledrejection", ev => {
 });
 
 // Receta del diagnóstico en línea: se muestra qué trae y se pide confirmación antes de armar el proyecto
+const NOMBRE_MODO = { real: "Real", demostracion: "Demostración" };
 function preguntarReceta(rc) {
   const filas = rc.hojas.map(h => el("li", {}, `${h.hoja}: ${h.filas ? h.filas + " filas con datos" : "sin datos (quedará pendiente)"}`));
+  const elegir = el("select", { id: "receta-modo", "aria-label": "Modo del proyecto" },
+    el("option", { value: rc.modo }, `${NOMBRE_MODO[rc.modo]} (detectado)`),
+    el("option", { value: rc.modo === "real" ? "demostracion" : "real" }, NOMBRE_MODO[rc.modo === "real" ? "demostracion" : "real"]));
+  const abiertos = rc.abiertos || [];
+  const destino = el("select", { id: "receta-destino", "aria-label": "Proyecto abierto a actualizar" },
+    abiertos.map(d => el("option", { value: String(d.id), selected: rc.actualizable ? rc.actualizable.id === d.id : false }, d.nombre)));
+  const hayConflicto = !!(rc.actualizable || rc.conflicto_id);
   const cuerpo = el("div", { class: "ficha" },
-    el("p", {}, el("b", {}, rc.nombre), rc.folio ? el("span", { class: "vacio" }, `  · folio ${rc.folio}`) : ""), rc.origen ? el("p", { class: "vacio" }, rc.origen) : "",
+    el("p", {}, el("b", {}, rc.nombre)), rc.origen ? el("p", { class: "vacio" }, rc.origen) : "",
+    el("p", {}, el("b", {}, "Modo del proyecto: "), `${NOMBRE_MODO[rc.modo]} · ${rc.deteccion === "declarado" ? "declarado por la receta (no se puede cambiar)" : "inferido del origen de la receta"}.`),
+    rc.puede_cambiar_modo ? el("p", {}, "Si no es correcto, cámbialo ahora; solo se permite UNA vez y antes de cargar datos: ", elegir) : "",
+    rc.modo === "demostracion" || rc.puede_cambiar_modo ? el("p", { class: "vacio" }, `En demostración todo resultado y exportación lleva la etiqueta «${rc.etiqueta}». En modo real se rechazan los datos sintéticos.`) : "",
+    rc.trae_folio ? el("p", { class: "aviso-ficha" }, "Esta receta trae un folio. Es la llave de una sesión web: D-MIKE lo ignora, no lo compara ni lo guarda. No lo compartas.") : "",
     el("p", {}, `La receta trae ${rc.formatos} formatos, ${rc.disenos} diseños de experimentos y ${rc.analisis} análisis. Los análisis sin datos quedan como pendientes.`),
     el("ul", {}, filas),
-    rc.actualizable ? el("p", {}, `Ya está abierto el proyecto «${rc.actualizable.nombre}» con este folio: puedes agregarle solo lo nuevo, sin sobrescribir lo que ya escribiste.`) : "",
+    rc.actualizable ? el("p", {}, `El proyecto abierto «${rc.actualizable.nombre}» tiene el mismo id_proyecto: se propone actualizarlo, sin sobrescribir lo que ya escribiste.`)
+      : rc.conflicto_id ? el("p", {}, `El id_proyecto de esta receta ya pertenece al proyecto reciente «${rc.conflicto_id.nombre}». Ábrelo para actualizarlo, o crea uno nuevo sin id_proyecto.`)
+      : (abiertos.length ? el("p", {}, "Para actualizar, confirma a mano cuál de los proyectos abiertos es (esta receta no identifica uno por sí sola): ", destino) : ""),
     el("p", { class: "vacio" }, "«Solo abrir los datos» carga las hojas en la hoja de datos para que hagas todo a mano; la receta queda guardada en el proyecto."));
-  const correr = async (modo) => {
+  const correr = async (modo, sinId) => {
+    const modoElegido = rc.puede_cambiar_modo ? elegir.value : null;
+    const idDoc = modo === "actualizar" ? parseInt(destino.value, 10) : null;
     document.querySelectorAll(".velo").forEach(v => v.remove());
-    const r = await aplicarProyecto(api().ejecutar_receta(rc.ruta, modo, rc.actualizable ? rc.actualizable.id : null));
+    const r = await aplicarProyecto(api().ejecutar_receta(rc.ruta, modo, idDoc, modoElegido, !!sinId));
     if (!r.error) { cerrarPestanas(); document.getElementById("inicio")?.remove(); if (modo !== "datos") document.body.classList.add("sesion-abierta"); window.pintarDocs && pintarDocs(); }
   };
-  dialogo("¿Ejecutar la receta?", cuerpo, () => correr("nuevo"), "Ejecutar en un proyecto nuevo");
+  dialogo("¿Ejecutar la receta?", cuerpo, () => correr("nuevo", hayConflicto), hayConflicto ? "Crear nuevo sin id_proyecto" : "Ejecutar en un proyecto nuevo");
   const botones = document.querySelector(".dialogo[aria-label='¿Ejecutar la receta?'] .dialogo-botones");
   if (botones) {
     const prim = botones.querySelector(".primario");
-    botones.insertBefore(el("button", { class: "boton", onclick: () => correr("datos") }, "Solo abrir los datos"), prim);
-    if (rc.actualizable) botones.insertBefore(el("button", { class: "boton", onclick: () => correr("actualizar") }, `Actualizar «${rc.actualizable.nombre.slice(0, 28)}»`), prim);
+    botones.insertBefore(el("button", { class: "boton", onclick: () => correr("datos", hayConflicto) }, "Solo abrir los datos"), prim);
+    if (abiertos.length) botones.insertBefore(el("button", { class: "boton", id: "receta-actualizar", onclick: () => correr("actualizar") }, "Actualizar el proyecto elegido"), prim);
   }
 }
 window.preguntarReceta = preguntarReceta;

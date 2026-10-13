@@ -214,6 +214,9 @@ class Aleatorios(ModuloDialogo):
 
     @classmethod
     def ejecutar(cls, hoja, p, proyecto=None):
+        from ..nucleo import modo as MD
+        if proyecto is not None and not MD.es_demo(proyecto):
+            raise ErrorEntrada("bloqueado en un proyecto real: genera datos sintéticos. Solo se permite en un proyecto de demostración.")
         n = int(cls.numero(p, "n", "La cantidad", opcional=False, minimo=0)); a = cls.numero(p, "a", "El parámetro 1") or 0.0
         b = cls.numero(p, "b", "El parámetro 2"); b = 1.0 if b is None else b
         if n > 1_000_000: raise ErrorEntrada("Máximo 1,000,000 de valores.")
@@ -247,7 +250,8 @@ class Aleatorios(ModuloDialogo):
         except ValueError as e:
             raise ErrorEntrada(str(e))
         j = escribir_columna(hoja, p.get("dest"), [float(v) for v in x], "num")
-        return f"Columna C{j + 1} {hoja.columnas[j].nombre}: {n} datos {dict(DISTS)[d].split(' (')[0].lower()} generados (datos de simulación, no reales)."
+        if proyecto is not None: hoja.columnas[j].desc = (hoja.columnas[j].desc + " · " if hoja.columnas[j].desc else "") + MD.ETIQUETA
+        return f"Columna C{j + 1} {hoja.columnas[j].nombre}: {n} datos {dict(DISTS)[d].split(' (')[0].lower()} generados (datos de simulación, no reales). {MD.ETIQUETA}."
 
 
 # ---------------- recodificar, apilar, duplicados ----------------

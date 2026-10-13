@@ -60,6 +60,15 @@ def _celda(v):
     return v
 
 
+def _marca(ws, proyecto, wb=None, fila=2):
+    """Etiqueta de proyecto de demostración (E1-R7): bien visible bajo el título y en las propiedades del libro. En un proyecto real no escribe nada."""
+    from ..nucleo import modo as MD
+    et = MD.etiqueta(proyecto)
+    if not et: return
+    c = ws.cell(fila, 1, et); c.font = Font(name=FUENTE, size=12, bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="B3261E")
+    if wb is not None: wb.properties.subject = et
+
+
 def _datos_fijos(proyecto):
     f = {k: v["valor"] for k, v in proyecto.fijos.items()}
     return [("Proyecto", f.get("nombre_proyecto")), ("Cliente o área", f.get("cliente_area")), ("Responsable", f.get("responsable"))]
@@ -73,6 +82,7 @@ def reporte_resultado(ruta, res, proyecto, hoja_datos):
     """Reporte con cabecera de datos fijos, tablas, textos e imagen; hoja «Datos» plana para Minitab."""
     wb = Workbook(); ws = wb.active; ws.title = "Reporte"
     fila = _cabecera(ws, res["titulo"], _datos_fijos(proyecto) + [("Fecha del análisis", res["fecha"]), ("Módulo", res["modulo"])])
+    _marca(ws, proyecto, wb)
     for a in res.get("avisos", []):
         ws.cell(fila, 1, "Aviso: " + a).font = T_NOTA; fila += 1
     if res.get("avisos"): fila += 1
@@ -94,6 +104,7 @@ def reporte_resultado(ruta, res, proyecto, hoja_datos):
     _anchos(ws, 12)
     if hoja_datos:
         wd = wb.create_sheet("Datos")
+        if res.get("etiqueta"): wb.create_sheet("AVISO").cell(1, 1, res["etiqueta"]).font = Font(name=FUENTE, bold=True, color="B3261E")    # la hoja Datos queda limpia para Minitab
         for j, col in enumerate(hoja_datos, 1):
             wd.cell(1, j, col["nombre"]).font = Font(bold=True)
             for i, v in enumerate(col["valores"], 2):
@@ -115,6 +126,7 @@ def reporte_formato(ruta, cls, datos, calc, proyecto, hoja=None):
             if c.get("tipo") == "opcion": v = dict(map(tuple, c["opciones"])).get(v, v)
         pares.append((c["etiqueta"], v))
     fila = _cabecera(ws, cls.TITULO, pares)
+    _marca(ws, proyecto, wb)
     for a in calc.get("avisos", []):
         ws.cell(fila, 1, "Aviso: " + a).font = T_NOTA; fila += 1
     fila += 1

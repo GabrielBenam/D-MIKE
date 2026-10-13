@@ -1,12 +1,15 @@
-"""Recetas del diagnóstico (contrato v1). Una receta es un archivo DECLARATIVO (datos y parámetros, nunca código) que genera el
+"""Recetas del diagnóstico (contrato v1 y v2; ver ESPEC_receta_v2.md). Una receta es un archivo DECLARATIVO (datos y parámetros, nunca código) que genera el
 artefacto en línea «Diagnóstico de proyecto D-MIKE». D-MIKE la valida contra su catálogo y la ejecuta: datos fijos, perfil,
 columnas y datos, diseños de experimentos con sus respuestas, formatos, análisis y avance.
 La receta viaja sola (.json) o dentro de un libro de Excel (.xlsx) en la hoja oculta «_receta», junto con las hojas de datos
 que el usuario llenó. En un parámetro, «@nombre» es una columna de la hoja y «#id» el resultado de un análisis anterior."""
-import json
+import hashlib, json, re
 
-TIPO, VERSION_SOPORTADA = "dmike-receta", 1
+TIPO, VERSION_SOPORTADA = "dmike-receta", 2
 HOJA_RECETA = "_receta"
+_UUID4 = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+ORIGEN_DATOS = ("real", "vacia", "sintetico")
+EVIDENCIA = ("REAL_VERIFICADO", "REAL_NO_VALIDADO", "PENDIENTE_RECOLECCION", "DESCONOCIDO", "NO_APLICA", "SINTETICO_DEMO")
 
 
 class RecetaInvalida(ValueError):
@@ -43,18 +46,67 @@ def es_receta(ruta):
         return False
 
 
-def validar(receta, registro, version_programa):
-    """Errores que impiden ejecutar (lista vacía = válida)."""
+def huella_receta(receta):
+    """SHA-256 del JSON canónico (claves ordenadas, sin espacios, UTF-8) sin el campo «huella». Formato «sha256:<hex>»."""
+    base = {k: v for k, v in receta.items() if k != "huella"}
+    return "sha256:" + hashlib.sha256(json.dumps(base, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def huella_sintetica(receta):
+    """Huella del CONTENIDO de una receta, sin huella, fecha de generación ni folio: identifica las recetas sintéticas que distribuye el repositorio."""
+    base = {k: v for k, v in receta.items() if k not in ("huella", "generado_en", "folio")}
+    return "sha256:" + hashlib.sha256(json.dumps(base, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def errores_modo(receta, modo):
+    """E1-R2/R6: con un modo distinto de «demostracion» no se aceptan hojas sintéticas ni variables SINTETICO_DEMO."""
+    err = []
+    if modo == "demostracion": return err
+    for h in receta.get("hojas") or []:
+        if isinstance(h, dict) and h.get("origen_datos") == "sintetico":
+            err.append(f"la hoja «{h.get('hoja')}» es sintética y el proyecto es real: en modo real no se cargan datos sintéticos (no se cargó nada)")
+    for v in receta.get("variables") or []:
+        if isinstance(v, dict) and v.get("estado_evidencia") == "SINTETICO_DEMO":
+            err.append(f"la variable «{v.get('nombre')}» es SINTETICO_DEMO y el proyecto es real: en modo real no se cargan datos sintéticos (no se cargó nada)")
+    return err
+
+
+def validar(receta, registro, version_programa, modo=None):
+    """Errores que impiden ejecutar (lista vacía = válida). modo: el modo con que se ejecutará (por omisión, el de la receta)."""
+    from . import modo as MD
     err = []
     if receta.get("tipo") != TIPO: err.append("no es una receta de D-MIKE")
-    if int(receta.get("receta_version") or 0) > VERSION_SOPORTADA: err.append(f"versión de receta {receta.get('receta_version')} más nueva que la que entiende este programa")
+    try: rv = int(receta.get("receta_version") or 0)
+    except (TypeError, ValueError): rv = 0
+    if rv > VERSION_SOPORTADA: err.append(f"versión de receta {receta.get('receta_version')} más nueva que la que entiende este programa (soporta hasta la {VERSION_SOPORTADA}); actualiza D-MIKE")
     if _version(receta.get("dmike_minimo") or "0") > _version(version_programa): err.append(f"requiere D-MIKE {receta.get('dmike_minimo')} o posterior")
+    declarado = receta.get("modo_proyecto")
+    if declarado is not None and declarado not in MD.MODOS: err.append(f"modo_proyecto «{declarado}» no válido (real o demostracion)")
+    if rv >= 2 and declarado is None: err.append("la receta v2 debe declarar modo_proyecto (real o demostracion)")
+    idp = receta.get("id_proyecto")
+    if idp is not None and not (isinstance(idp, str) and _UUID4.fullmatch(idp)): err.append("id_proyecto no es un UUID v4 en minúsculas")
+    if receta.get("huella") is not None:
+        h = str(receta["huella"]); h = h if h.startswith("sha256:") else "sha256:" + h
+        if h != huella_receta(receta): err.append("la huella no coincide: la receta fue alterada o está dañada")
+    for h in receta.get("hojas") or []:
+        if isinstance(h, dict) and h.get("origen_datos") is not None and h["origen_datos"] not in ORIGEN_DATOS:
+            err.append(f"origen_datos «{h['origen_datos']}» no válido en la hoja «{h.get('hoja')}»")
+    for v in receta.get("variables") or []:
+        if isinstance(v, dict) and v.get("estado_evidencia") is not None and v["estado_evidencia"] not in EVIDENCIA:
+            err.append(f"estado_evidencia «{v['estado_evidencia']}» no válido en la variable «{v.get('nombre')}»")
+    err += errores_modo(receta, modo or MD.detectar(receta, huella_sintetica(receta))[0])
     for paso in receta.get("disenos", []) + receta.get("analisis", []):
         if paso.get("modulo") not in registro: err.append(f"módulo desconocido: {paso.get('modulo')}")
     from ..modulos.formatos import FORMATOS
     for f in receta.get("formatos", []):
         if f.get("id") not in FORMATOS: err.append(f"formato desconocido: {f.get('id')}")
     return err
+
+
+def guardable(receta, id_proyecto=None):
+    """Registro «_receta» que se guarda en el proyecto. El folio de una receta v1 se ignora: no se escribe en ninguna parte nueva (E1-R8)."""
+    sin = {k: v for k, v in receta.items() if k != "folio"}
+    return {"ids": {}, "json": json.dumps(sin, ensure_ascii=False), "origen": receta.get("origen") or "", "id_proyecto": id_proyecto}
 
 
 def resumen(receta, datos):  # noqa: C901
@@ -87,7 +139,7 @@ def _tiene_datos(a, nombre):
     return j is not None and any(a.hoja.columnas[j].valor(i)[2] is not None for i in range(a.hoja.n))
 
 
-def solo_datos(api, receta, datos):
+def solo_datos(api, receta, datos, id_proyecto=None):
     """Carga las hojas de la plantilla como columnas, sin formatos ni análisis (para trabajar a mano). La receta queda guardada."""
     n = 0
     if receta.get("datos_fijos"): api.fijar_datos({k: v or "" for k, v in receta["datos_fijos"].items() if k != "logo"})
@@ -96,18 +148,21 @@ def solo_datos(api, receta, datos):
         if not filas: continue
         cab = [str(x).strip() if x is not None else "" for x in filas[0]]
         api.pegar(-1, len(api.hoja.columnas), _tsv([cab] + filas[1:])); n += 1
-    api.proyecto.formatos["_receta"] = {"folio": receta.get("folio") or "", "ids": {}, "json": json.dumps(receta, ensure_ascii=False)}
+    api.proyecto.formatos["_receta"] = guardable(receta, id_proyecto)
     return n
 
 
 def _vacio(v): return v in (None, "", [], {})
 
 
-def ejecutar(api, receta, datos, actualizar=False):
+def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
     """Arma el proyecto en la sesión actual. Con actualizar=True agrega solo lo nuevo al proyecto abierto: no sobrescribe columnas
     con datos ni campos de formatos ya escritos, y no repite análisis ya corridos con esta receta (se reconocen por su id)."""
     from .perfil import validar as validar_perfil
     from .hoja import Hoja
+    from . import modo as MD
+    malos = errores_modo(receta, MD.valor(api.proyecto))
+    if malos: raise RecetaInvalida("; ".join(malos))
     log, avisos, pend = [], [], []
     a = api
     previo = a.proyecto.formatos.get("_receta") or {} if actualizar else {}
@@ -244,5 +299,7 @@ def ejecutar(api, receta, datos, actualizar=False):
         if actualizar and ORDEN.get(actual, 0) >= ORDEN.get(av, 0): continue
         try: a.proyecto.marcar_avance(mid, av)
         except ValueError: pass
-    a.proyecto.formatos["_receta"] = {"folio": receta.get("folio") or previo.get("folio") or "", "ids": ref, "json": json.dumps(receta, ensure_ascii=False)}
+    nuevo = guardable(receta, id_proyecto if id_proyecto is not None else previo.get("id_proyecto")); nuevo["ids"] = ref
+    if "folio" in previo: nuevo["folio"] = previo["folio"]          # E1-R8: el folio que ya traía un .dmike anterior se conserva intacto
+    a.proyecto.formatos["_receta"] = nuevo
     return {"log": log, "avisos": avisos, "pendientes": pend}

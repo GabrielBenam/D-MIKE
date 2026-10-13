@@ -6,12 +6,13 @@ from .nucleo import menus
 from .nucleo.perfil import validar, PerfilInvalido
 from .nucleo.proyecto import Proyecto, FusionRechazada
 from .nucleo import archivo
+from .nucleo import modo as MD
 from . import modulos
 from .modulos.base import ErrorEntrada
 import json, os
 from datetime import datetime
 
-VERSION = "0.25.0"
+VERSION = "0.26.0"
 NOMBRE_TIPO = {"num": "numérico", "texto": "texto", "fecha": "fecha"}
 
 
@@ -320,7 +321,39 @@ class Api:
     def proyectos(self):
         self._guardar_doc()
         return {"proyectos": [{"id": d["id"], "nombre": self._nombre_doc(d), "ruta": d["ruta"], "modificado": bool(d["_sucio"]),
-                               "activo": d["id"] == self._activo} for d in self._docs]}
+                               "activo": d["id"] == self._activo, "sintetico": MD.es_demo(d["proyecto"]),
+                               "etiqueta": MD.etiqueta(d["proyecto"])} for d in self._docs]}
+
+    # ---------- modo del proyecto: real o demostración (0.26) ----------
+    def modo_proyecto(self):
+        e = MD.estado(self.proyecto); ok, motivo = MD.puede_cambiar(self.proyecto, self.hoja)
+        return {**e, "etiqueta": MD.etiqueta(self.proyecto), "puede_cambiar": ok, "motivo": motivo}
+
+    def cambiar_modo(self, valor):
+        """Cambia el modo UNA vez, solo si fue inferido y antes de cargar datos (E1-R4)."""
+        if valor not in MD.MODOS: return self._resp("El modo debe ser «real» o «demostracion».", "aviso", error="modo", hoja=False)
+        ok, motivo = MD.puede_cambiar(self.proyecto, self.hoja)
+        if not ok: return self._resp(motivo, "aviso", error="modo", hoja=False)
+        if valor == MD.valor(self.proyecto): return self._resp(f"El proyecto ya está en modo {valor}; no se consumió el cambio.", hoja=False)
+        MD.fijar(self.proyecto, valor, MD.INFERIDO, cambiado=True); self._sucio = True
+        return self._resp(f"Modo del proyecto: {valor}. Ya no se puede cambiar.", proyecto=True, hoja=False)
+
+    def _con_marca(self, res):
+        """Copia del resultado con la etiqueta «SINTÉTICO / NO EMPRESARIAL» si el proyecto es de demostración (nunca en un proyecto real)."""
+        et = MD.etiqueta(self.proyecto)
+        return {**res, "etiqueta": et} if (res is not None and et) else res
+
+    def _doc_con_id(self, idp, excluir=None):
+        self._guardar_doc()
+        return next((d for d in self._docs if d["id"] != excluir and (d["proyecto"].formatos.get("_receta") or {}).get("id_proyecto") == idp), None)
+
+    def _reciente_con_id(self, idp):
+        """Proyecto reciente (guardado, no abierto) que ya tiene ese id_proyecto: lee solo el JSON del proyecto, sin cargar la hoja."""
+        abiertas = {os.path.abspath(d["ruta"]) for d in self._docs if d["ruta"]}
+        for r in self.recientes():
+            if os.path.abspath(r["ruta"]) in abiertas: continue
+            if archivo.id_proyecto_de(r["ruta"]) == idp: return r
+        return None
 
     def cambiar_proyecto(self, id_doc):
         d = next((x for x in self._docs if x["id"] == id_doc), None)
@@ -390,34 +423,77 @@ class Api:
         if not ruta: return self._resp("Apertura cancelada.")
         try: rc, datos = RC.leer(ruta)
         except Exception as e: return self._resp(f"No se pudo leer la receta: {e}", "aviso", error="receta")
-        errores = RC.validar(rc, modulos.cargar(), VERSION)
+        modo, det = MD.detectar(rc, RC.huella_sintetica(rc))
+        # un modo inferido todavía puede cambiarse en el diálogo: la prueba de datos sintéticos se repite al ejecutar
+        errores = RC.validar(rc, modulos.cargar(), VERSION, modo=modo if det == MD.DECLARADO else MD.DEMO)
         if errores: return self._resp("La receta no se puede ejecutar: " + "; ".join(errores[:6]) + ".", "aviso", error="receta")
-        r = self._resp(f"Receta leída: {os.path.basename(ruta)}. Elige cómo abrirla.")
-        r["receta"] = RC.resumen(rc, datos); r["receta"]["ruta"] = ruta; r["receta"]["folio"] = rc.get("folio") or ""
+        msgs = [("Esta receta trae un folio. Es la llave de una sesión web, no una referencia del proyecto: D-MIKE lo ignora y no lo guarda. No lo compartas.", "aviso")] if rc.get("folio") else []
+        r = self._resp(f"Receta leída: {os.path.basename(ruta)}. Elige cómo abrirla.", mensajes=msgs)
+        r["receta"] = RC.resumen(rc, datos); r["receta"]["ruta"] = ruta
+        r["receta"].update(modo=modo, deteccion=det, puede_cambiar_modo=(det == MD.INFERIDO), trae_folio=bool(rc.get("folio")),
+                           id_proyecto=rc.get("id_proyecto"), etiqueta=MD.ETIQUETA,
+                           sintetico_en_receta=bool(RC.errores_modo(rc, MD.REAL)))
         self._guardar_doc()
-        if rc.get("folio"):
-            d = next((d for d in self._docs if (d["proyecto"].formatos.get("_receta") or {}).get("folio") == rc["folio"]), None)
+        r["receta"]["abiertos"] = [{"id": d["id"], "nombre": self._nombre_doc(d)} for d in self._docs]
+        idp = rc.get("id_proyecto")
+        if idp:
+            d = self._doc_con_id(idp)
             if d: r["receta"]["actualizable"] = {"id": d["id"], "nombre": self._nombre_doc(d)}
+            elif (rec := self._reciente_con_id(idp)): r["receta"]["conflicto_id"] = {"nombre": rec.get("nombre") or os.path.basename(rec["ruta"]), "ruta": rec["ruta"]}
         return r
 
-    def ejecutar_receta(self, ruta, modo="nuevo", id_doc=None):
-        """modo «nuevo» (proyecto nuevo), «actualizar» (agrega lo nuevo al proyecto id_doc) o «datos» (solo las hojas, para trabajar a mano)."""
+    def ejecutar_receta(self, ruta, modo="nuevo", id_doc=None, modo_proyecto=None, sin_id=False):
+        """modo «nuevo» (proyecto nuevo), «actualizar» (agrega lo nuevo al proyecto id_doc, que el usuario confirma) o «datos» (solo las hojas).
+        modo_proyecto: el modo que elige el usuario; solo se acepta si el de la receta fue inferido (v1), y una vez.
+        sin_id: crea el proyecto nuevo sin id_proyecto cuando ese id ya pertenece a otro proyecto."""
         from .nucleo import receta as RC
         try: rc, datos = RC.leer(ruta)
         except Exception as e: return self._resp(f"No se pudo leer la receta: {e}", "aviso", error="receta")
-        errores = RC.validar(rc, modulos.cargar(), VERSION)
+        det_modo, det = MD.detectar(rc, RC.huella_sintetica(rc))
+        efectivo, cambiado = det_modo, False
+        objetivo = None
+        if modo == "actualizar":
+            self._guardar_doc()
+            objetivo = next((d for d in self._docs if d["id"] == id_doc), None)
+            if objetivo is None: return self._resp("Para actualizar elige uno de los proyectos abiertos.", "aviso", error="proyecto")
+            efectivo = MD.valor(objetivo["proyecto"])
+            if det_modo != efectivo:
+                return self._resp(f"No se actualiza: el proyecto es de modo {efectivo} y la receta es de modo {det_modo}. Un proyecto real no recibe datos sintéticos ni uno de demostración datos reales.", "aviso", error="modo")
+        elif modo_proyecto is not None and modo_proyecto != det_modo:
+            if modo_proyecto not in MD.MODOS: return self._resp("El modo debe ser «real» o «demostracion».", "aviso", error="modo")
+            if det != MD.INFERIDO: return self._resp("El modo de esta receta fue declarado por la receta y no se puede cambiar.", "aviso", error="modo")
+            efectivo, cambiado = modo_proyecto, True
+        errores = RC.validar(rc, modulos.cargar(), VERSION, modo=efectivo)
         if errores and modo != "datos": return self._resp("La receta no se puede ejecutar: " + "; ".join(errores[:6]) + ".", "aviso", error="receta")
+        bloqueo = RC.errores_modo(rc, efectivo)
+        if bloqueo: return self._resp("La receta no se puede abrir: " + "; ".join(bloqueo[:6]) + ".", "aviso", error="receta")
+        # id_proyecto (E1-R9): nunca se asigna uno que ya pertenezca a otro proyecto abierto o reciente
+        idp = rc.get("id_proyecto")
+        if idp:
+            otro = self._doc_con_id(idp, excluir=objetivo["id"] if objetivo else None)
+            previo = (objetivo["proyecto"].formatos.get("_receta") or {}).get("id_proyecto") if objetivo else None
+            if otro and not (sin_id and modo != "actualizar"):
+                return self._resp(f"El id_proyecto de la receta ya pertenece al proyecto abierto «{self._nombre_doc(otro)}». Actualízalo o crea uno nuevo sin id_proyecto.", "aviso", error="id_conflicto")
+            if modo == "actualizar" and previo and previo != idp:
+                return self._resp("El proyecto elegido ya tiene otro id_proyecto: la receta no es de este proyecto. No se cambió nada.", "aviso", error="id_conflicto")
+            if not otro and modo != "actualizar" and not sin_id and (rec := self._reciente_con_id(idp)):
+                return self._resp(f"El id_proyecto de la receta ya pertenece al proyecto reciente «{rec.get('nombre') or os.path.basename(rec['ruta'])}». Ábrelo y actualízalo, o crea uno nuevo sin id_proyecto.", "aviso", error="id_conflicto")
+            if sin_id and modo != "actualizar": idp = None
         if modo == "datos":
-            self.nuevo_proyecto(); n = RC.solo_datos(self, rc, datos); self._sucio = True
+            self.nuevo_proyecto(); MD.fijar(self.proyecto, efectivo, det, cambiado)
+            n = RC.solo_datos(self, rc, datos, idp); self._sucio = True
             return self._resp(f"Datos de la plantilla abiertos: {n} hojas en la hoja de datos. La receta queda guardada en el proyecto.", proyecto=True)
-        if modo == "actualizar" and id_doc is not None:
+        if modo == "actualizar":
             r0 = self.cambiar_proyecto(id_doc)
             if r0["error"]: return r0
-        else: self.nuevo_proyecto()
-        try: out = RC.ejecutar(self, rc, datos, actualizar=(modo == "actualizar"))
+            if "_modo" not in self.proyecto.formatos: e0 = MD.estado(self.proyecto); MD.fijar(self.proyecto, e0["valor"], e0["deteccion"], e0["cambiado"])
+        else:
+            self.nuevo_proyecto(); MD.fijar(self.proyecto, efectivo, det, cambiado)
+        try: out = RC.ejecutar(self, rc, datos, actualizar=(modo == "actualizar"), id_proyecto=idp)
         except Exception as e: return self._resp(f"La receta se detuvo: {e}. Revisa la plantilla.", "aviso", error="receta", proyecto=True)
         self._sucio = True
         msgs = [(t, "info") for t in out["log"]] + [(t, "aviso") for t in out["avisos"]] + [("Pendiente: " + t, "aviso") for t in out["pendientes"]]
+        if rc.get("folio"): msgs.append(("La receta traía un folio: se ignoró y no se guardó en el proyecto. Es la llave de una sesión web; no la compartas.", "aviso"))
         r = self._resp(f"Receta ejecutada: {(rc.get('datos_fijos') or {}).get('nombre_proyecto') or 'proyecto'}. Guárdalo con Archivo › Guardar como.", mensajes=msgs, proyecto=True)
         r["receta_resultado"] = out
         return r
@@ -431,7 +507,7 @@ class Api:
         ext = os.path.splitext(ruta)[1].lower()
         if ext not in (".xlsx", ".csv"): ruta, ext = ruta + ".xlsx", ".xlsx"
         try:
-            (archivo.exportar_xlsx if ext == ".xlsx" else archivo.exportar_csv)(ruta, cols, self.hoja.n)
+            (archivo.exportar_xlsx if ext == ".xlsx" else archivo.exportar_csv)(ruta, cols, self.hoja.n, MD.etiqueta(self.proyecto))
         except OSError as e:
             return self._resp(f"No se pudo exportar: {e}", "aviso", error="exportar")
         msgs = []
@@ -451,8 +527,16 @@ class Api:
         if cls is None: raise ValueError(f"Módulo desconocido: {mid}")
         return cls
 
+    def _bloqueo_modo(self, mid):
+        """E1-R6: Calc › Datos aleatorios genera datos sintéticos; en un proyecto real no se permite."""
+        if mid == "ALEATORIOS" and not MD.es_demo(self.proyecto):
+            return self._resp("Datos aleatorios genera datos sintéticos y está bloqueado en un proyecto real: nunca se mezclan datos inventados con datos de la empresa. "
+                              "Solo se permite en un proyecto de demostración.", "aviso", error="entrada", hoja=False)
+        return None
+
     def dialogo_modulo(self, mid):
         cls = self._modulo(mid)
+        if (b := self._bloqueo_modo(mid)): return b
         if not self.hoja.columnas and not getattr(cls, "HOJA_VACIA_OK", False):
             return {"error": "vacia", "sesion": [self.sesion.registrar(
                 f"{cls.TITULO}: la hoja de datos está vacía. Captura o pega los datos primero.", "aviso")]}
@@ -460,6 +544,7 @@ class Api:
 
     def ejecutar_modulo(self, mid, params):
         cls = self._modulo(mid)
+        if (b := self._bloqueo_modo(mid)): return b
         try:
             res = cls.ejecutar(self.hoja, params, self.proyecto)
         except ErrorEntrada as e:
@@ -472,7 +557,7 @@ class Api:
         avance = self._auto_avance(mid)
         r = self._resp(f"{res['titulo']}: listo.", mensajes=[(a, "aviso") for a in res["avisos"]], proyecto=avance,
                        hoja=bool(getattr(cls, "CAMBIA_HOJA", False)))
-        r["resultado"] = res
+        r["resultado"] = self._con_marca(res)
         return r
 
     def _definicion(self, cls, mid, params):
@@ -570,7 +655,7 @@ class Api:
         """Resultado en texto con tabuladores, para copiar y pegar en Excel o en un reporte."""
         res = self.resultado(uid)
         if res is None: return ""
-        lineas = [res["titulo"], res["fecha"], ""] + [f"Aviso: {a}" for a in res["avisos"]]
+        lineas = [res["titulo"], res["fecha"]] + ([res["etiqueta"]] if res.get("etiqueta") else []) + [""] + [f"Aviso: {a}" for a in res["avisos"]]
         for b in res["bloques"]:
             if b["tipo"] == "texto": lineas += [b["texto"], ""]
             elif b["tipo"] == "tabla":
@@ -587,10 +672,10 @@ class Api:
         return {"ok": True}
 
     def resultados(self):
-        return [{"uid": r["uid"], "titulo": r["titulo"], "fecha": r["fecha"], "modulo": r["modulo"]} for r in self.proyecto.resultados]
+        return [{"uid": r["uid"], "titulo": r["titulo"], "fecha": r["fecha"], "modulo": r["modulo"], "etiqueta": MD.etiqueta(self.proyecto)} for r in self.proyecto.resultados]
 
     def resultado(self, uid):
-        return next((r for r in self.proyecto.resultados if r["uid"] == uid), None)
+        return self._con_marca(next((r for r in self.proyecto.resultados if r["uid"] == uid), None))
 
     def borrar_resultado(self, uid):
         antes = len(self.proyecto.resultados)
@@ -610,7 +695,9 @@ class Api:
             if ext == ".png":
                 if not res.get("png"): return self._resp("Este resultado no tiene gráfica.", "aviso", error="sin_grafica")
                 import base64
-                with open(ruta, "wb") as f: f.write(base64.b64decode(res["png"]))
+                png = base64.b64decode(res["png"])
+                if res.get("etiqueta"): png = MD.estampar_png(png, res["etiqueta"])
+                with open(ruta, "wb") as f: f.write(png)
             else:
                 from .modulos.exportar import reporte_resultado
                 cols = [c for c in res.get("datos", {}).get("columnas", []) if c is not None and c < len(self.hoja.columnas)]

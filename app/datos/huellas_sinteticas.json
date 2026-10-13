@@ -1,0 +1,10 @@
+{
+ "nota": "Huellas (huella_sintetica) de las recetas sintéticas del repositorio. Regenerar con herramientas/huellas_sinteticas.py.",
+ "recetas": {
+  "pruebas/sinteticos/caso_integral_plantilla.xlsx": "sha256:e410bd0794aa02bdd77b6fd60ff19205c07f4efb87ed7920145fddb36a197b43",
+  "pruebas/sinteticos/caso_integral_datos_llenos.xlsx": "sha256:e410bd0794aa02bdd77b6fd60ff19205c07f4efb87ed7920145fddb36a197b43"
+ },
+ "huellas": [
+  "sha256:e410bd0794aa02bdd77b6fd60ff19205c07f4efb87ed7920145fddb36a197b43"
+ ]
+}

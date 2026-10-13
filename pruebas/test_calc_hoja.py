@@ -42,12 +42,12 @@ def test_calculadora_rechaza_codigo_y_errores(a):
 
 
 def test_patron_aleatorios_recodificar_apilar_duplicados():
-    a = Api()
+    a = Api(); a.cambiar_modo("demostracion")          # 0.26: Datos aleatorios solo existe en proyectos de demostración
     a.ejecutar_modulo("PATRON", {"dest": "p", "lista": "1:3", "cada": "2", "veces": "2"})
     assert col(a, "p") == ["1", "1", "2", "2", "3", "3", "1", "1", "2", "2", "3", "3"]
     a.ejecutar_modulo("PATRON", {"dest": "g", "lista": "A, B", "cada": "6"}); assert col(a, "g")[:7] == ["A"] * 6 + ["B"]
     a.ejecutar_modulo("ALEATORIOS", {"dest": "n", "n": "12", "dist": "normal", "a": "10", "b": "2", "semilla": "5"})
-    v1 = col(a, "n"); b = Api(); b.ejecutar_modulo("PATRON", {"dest": "p", "lista": "1:12"})
+    v1 = col(a, "n"); b = Api(); b.cambiar_modo("demostracion"); b.ejecutar_modulo("PATRON", {"dest": "p", "lista": "1:12"})
     b.ejecutar_modulo("ALEATORIOS", {"dest": "n", "n": "12", "dist": "normal", "a": "10", "b": "2", "semilla": "5"}); assert col(b, "n") == v1
     for d, pa, pb in (("uniforme", "2", "5"), ("enteros", "2", "5"), ("exponencial", "2", "1"), ("weibull", "2", "5"), ("binomial", "10", "0.5"),
                       ("poisson", "3", "1"), ("lognormal", "0", "1")):

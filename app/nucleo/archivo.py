@@ -105,7 +105,21 @@ def tabla_limpia(hoja, columnas=None):
     return cols, cambios, faltantes
 
 
-def exportar_xlsx(ruta, cols, n):
+def id_proyecto_de(ruta):
+    """id_proyecto guardado en «_receta» de un .dmike, leyendo solo el JSON del proyecto (sin cargar la hoja). None si no hay o no se puede leer."""
+    try:
+        from pathlib import Path
+        con = sqlite3.connect(Path(ruta).resolve().as_uri() + "?mode=ro", uri=True)
+        try: fila = con.execute("SELECT json FROM proyecto WHERE clave = 'estado'").fetchone()
+        finally: con.close()
+        rec = (json.loads(fila[0]).get("formatos") or {}).get("_receta") if fila else None
+        return rec.get("id_proyecto") if isinstance(rec, dict) else None
+    except (sqlite3.DatabaseError, ValueError, TypeError, AttributeError, OSError):
+        return None
+
+
+def exportar_xlsx(ruta, cols, n, etiqueta=None):
+    """etiqueta: marca de proyecto de demostración. Va en una hoja «AVISO» (la hoja «Datos» sigue limpia para Minitab) y en las propiedades del libro."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
     wb = Workbook(); ws = wb.active; ws.title = "Datos"
@@ -115,10 +129,18 @@ def exportar_xlsx(ruta, cols, n):
             if v is None: continue
             cel = ws.cell(i, j, v)
             if c["tipo"] == "fecha": cel.number_format = "DD/MM/YYYY"
+    if etiqueta:
+        wa = wb.create_sheet("AVISO"); wa.cell(1, 1, etiqueta).font = Font(bold=True, color="C00000")
+        wa.cell(2, 1, "Los datos de la hoja «Datos» son sintéticos y no pertenecen a ninguna empresa.")
+        wb.properties.subject = etiqueta
     wb.save(ruta)
 
 
-def exportar_csv(ruta, cols, n):
+def exportar_csv(ruta, cols, n, etiqueta=None):
+    """etiqueta: el CSV debe quedar limpio para Minitab, así que la marca va en un archivo vecino «<nombre>_AVISO.txt»."""
+    if etiqueta:
+        with open(os.path.splitext(ruta)[0] + "_AVISO.txt", "w", encoding="utf-8") as f:
+            f.write(f"{etiqueta}\nLos datos de {os.path.basename(ruta)} son sintéticos y no pertenecen a ninguna empresa.\n")
     with open(ruta, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
         w.writerow([c["nombre"] for c in cols])

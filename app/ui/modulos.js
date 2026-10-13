@@ -115,6 +115,7 @@ async function dialogoModulo(id, previo) {
 function pintarResultado(res) {
   const v = $("#vista"); v.innerHTML = "";
   const barra = el("div", { class: "vista-barra" }, el("span", { class: "vista-titulo" }, res.titulo),
+    res.etiqueta ? el("span", { class: "etiqueta-sint", title: "Este resultado se calculó con datos sintéticos" }, res.etiqueta) : "",
     el("span", { class: "vista-fecha" }, res.fecha),
     res.definicion ? el("button", { class: "boton chico", title: "Vuelve a correr el análisis con los datos actuales de la hoja",
       onclick: async () => { const r = await aplicarProyecto(api().repetir_resultado(res.uid)); if (!r.error && r.resultado) abrirPestana(`res:${r.resultado.uid}`, r.resultado); } }, "Repetir con datos actuales") : "",

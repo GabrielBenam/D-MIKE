@@ -7,6 +7,7 @@ app/datos/arbol_diagnostico.json
 app/datos/comandos.json
 app/datos/fuentes/Montserrat-Bold.ttf
 app/datos/fuentes/Montserrat-Regular.ttf
+app/datos/huellas_sinteticas.json
 app/datos/icono.ico
 app/modulos/__init__.py
 app/modulos/analisis.py
@@ -45,6 +46,7 @@ app/nucleo/catalogo.py
 app/nucleo/hoja.py
 app/nucleo/importar.py
 app/nucleo/menus.py
+app/nucleo/modo.py
 app/nucleo/perfil.py
 app/nucleo/powerbi.py
 app/nucleo/proyecto.py
@@ -74,6 +76,7 @@ herramientas/aplicar_logo.py
 herramientas/exportar_catalogo.py
 herramientas/generar_caso_integral.py
 herramientas/generar_ejemplos.py
+herramientas/huellas_sinteticas.py
 herramientas/manual/gen.py
 herramientas/manual/textos.json
 herramientas/receta_caso_integral.py
@@ -100,6 +103,8 @@ pruebas/conftest.py
 pruebas/maquetas/maquetas.py
 pruebas/sinteticos/caso_integral_datos_llenos.xlsx
 pruebas/sinteticos/caso_integral_plantilla.xlsx
+pruebas/sinteticos/caso_integral_v0.25.0.dmike.gz
+pruebas/sinteticos/caso_integral_v0.25.0.esperado.json
 pruebas/sinteticos/casos/caso1.json
 pruebas/sinteticos/casos/caso2.json
 pruebas/sinteticos/casos/caso3.json
@@ -128,6 +133,7 @@ pruebas/test_inferencia.py
 pruebas/test_inferencia_libro.py
 pruebas/test_interfaz.py
 pruebas/test_lean.py
+pruebas/test_modo_v026.py
 pruebas/test_modulos.py
 pruebas/test_modulos_interfaz.py
 pruebas/test_motor_estadistico.py
