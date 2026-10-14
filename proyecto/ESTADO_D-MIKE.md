@@ -212,7 +212,7 @@ Método de cuartiles de Minitab; valor p de Anderson-Darling; pruebas de corrida
 
 ## Generador del manual (13/10/2026, sin cambio de contenido del manual)
 - herramientas/manual/gen.py ya corre desde cualquier directorio: rutas relativas al script, salida en herramientas/manual/salida/ (ignorada por git), opciones --salida, --entradas y --permitir-faltantes, README.md con el comando. Las rutas absolutas que tenía (R1) eran 12 líneas de gen.py; textos.json no tenía ninguna. markdown se declaró en requirements-dev.txt; además necesita poppler-utils (pdfinfo, pdftotext) en el sistema.
-- Faltan en el repositorio tres entradas del manual completo: D-MIKE_caso_integral_paso_a_paso.md (sección 6), svgs.json (figuras del caso) y 08_GLOSARIO.md (apéndice B, base del curso). Van en herramientas/manual/entradas/. Sin ellas solo se genera un PDF parcial con --permitir-faltantes (117 páginas, con esas secciones marcadas «no generada»). PENDIENTE: que el usuario las aporte para generar el manual completo.
+- Entradas del manual completo: D-MIKE_caso_integral_paso_a_paso.md (texto del usuario, versionado en herramientas/manual/entradas/), svgs.json (se genera con herramientas/manual/generar_svgs.py corriendo la receta sintética del caso; gen.py lo genera solo si falta; no se versiona) y 08_GLOSARIO.md (raíz del repositorio). Con las tres, `python herramientas/manual/gen.py` produce el manual completo (138 páginas, 10 figuras, índice 30/30).
 - Prueba: pruebas/test_manual_gen.py (sin rutas absolutas; mismo PDF desde la raíz y desde herramientas/manual/).
 
 ## Pendiente (en orden)

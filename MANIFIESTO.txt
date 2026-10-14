@@ -1,6 +1,7 @@
 # Lista de archivos de D-MIKE. La compilación revisa que todos estén en el repositorio.
 .github/workflows/main.yml
 .gitignore
+08_GLOSARIO.md
 CLAUDE.md
 ESPEC_receta_v2.md
 README.md
