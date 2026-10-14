@@ -58,8 +58,11 @@ def test_receta_con_folio_actualiza_el_mismo_proyecto(tmp_path):
     destino = v["receta"]["abiertos"][0]["id"]                                                                         # ahora: confirmación manual
     r = a.ejecutar_receta(llena, "actualizar", destino)
     assert r["receta_resultado"]["log"][-1] == "Análisis corridos: 15 de 15." and len(a.proyectos()["proyectos"]) == 1 and len(a.resultados()) == 17
-    r = a.ejecutar_receta(llena, "actualizar", destino)          # no repite lo ya corrido
-    assert r["receta_resultado"]["log"][-1] == "Análisis corridos: 0 de 15." and len(a.resultados()) == 17
+    # 0.27 (12.5, regla 2): la misma receta, sin datos nuevos, ya está aplicada y no se vuelve a ejecutar
+    assert a.ejecutar_receta(llena, "actualizar", destino)["error"] == "ya_aplicada" and len(a.resultados()) == 17
+    from app.nucleo import receta as RC           # el motor, por su lado, tampoco repite lo ya corrido
+    rc, datos = RC.leer(llena)
+    assert RC.ejecutar(a, rc, datos, actualizar=True)["log"][-1] == "Análisis corridos: 0 de 15." and len(a.resultados()) == 17
 
 
 def test_receta_solo_datos():

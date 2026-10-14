@@ -55,6 +55,7 @@ app/nucleo/powerbi.py
 app/nucleo/proyecto.py
 app/nucleo/receta.py
 app/nucleo/rutas.py
+app/nucleo/seguimiento.py
 app/nucleo/sesion.py
 app/nucleo/tokens.py
 app/ui/app.js
@@ -105,7 +106,7 @@ proyecto/artefactos/diagnostico/index.html
 proyecto/artefactos/guia_dmike.html
 proyecto/artefactos/tablero.plantilla.html
 proyecto/artefactos/visor.plantilla.html
-proyecto/catalogo/catalogo_dmike_0.26.0.json
+proyecto/catalogo/catalogo_dmike_0.27.0.json
 proyecto/especificaciones/ESPEC_flujo_real_dmaic.md
 proyecto/especificaciones/ESPEC_manual_v026.md
 proyecto/especificaciones/ESPEC_receta_v2.md
@@ -116,6 +117,8 @@ pruebas/sinteticos/caso_integral_datos_llenos.xlsx
 pruebas/sinteticos/caso_integral_plantilla.xlsx
 pruebas/sinteticos/caso_integral_v0.25.0.dmike.gz
 pruebas/sinteticos/caso_integral_v0.25.0.esperado.json
+pruebas/sinteticos/caso_integral_v0.26.0.dmike.gz
+pruebas/sinteticos/caso_integral_v0.26.0.esperado.json
 pruebas/sinteticos/casos/caso1.json
 pruebas/sinteticos/casos/caso2.json
 pruebas/sinteticos/casos/caso3.json
@@ -154,6 +157,7 @@ pruebas/test_motor_estadistico_interfaz.py
 pruebas/test_perfil.py
 pruebas/test_perfil_interfaz.py
 pruebas/test_receta.py
+pruebas/test_receta_e2.py
 pruebas/test_revision_integral.py
 pruebas/test_spc_capacidad.py
 pruebas/test_superficies.py

@@ -7,12 +7,13 @@ from .nucleo.perfil import validar, PerfilInvalido
 from .nucleo.proyecto import Proyecto, FusionRechazada
 from .nucleo import archivo
 from .nucleo import modo as MD
+from .nucleo import seguimiento as SG
 from . import modulos
 from .modulos.base import ErrorEntrada
 import json, os
 from datetime import datetime
 
-VERSION = "0.26.0"
+VERSION = "0.27.0"
 NOMBRE_TIPO = {"num": "numérico", "texto": "texto", "fecha": "fecha"}
 
 
@@ -432,20 +433,26 @@ class Api:
         r["receta"] = RC.resumen(rc, datos); r["receta"]["ruta"] = ruta
         r["receta"].update(modo=modo, deteccion=det, puede_cambiar_modo=(det == MD.INFERIDO), trae_folio=bool(rc.get("folio")),
                            id_proyecto=rc.get("id_proyecto"), etiqueta=MD.ETIQUETA,
-                           sintetico_en_receta=bool(RC.errores_modo(rc, MD.REAL)))
+                           sintetico_en_receta=bool(RC.errores_modo(rc, MD.REAL)),
+                           revision={"recibida": RC.entero(rc.get("revision")), "base": rc.get("revision_base")},
+                           variables=len(rc.get("variables") or []), tareas=len(rc.get("tareas") or []))
         self._guardar_doc()
         r["receta"]["abiertos"] = [{"id": d["id"], "nombre": self._nombre_doc(d)} for d in self._docs]
         idp = rc.get("id_proyecto")
         if idp:
             d = self._doc_con_id(idp)
-            if d: r["receta"]["actualizable"] = {"id": d["id"], "nombre": self._nombre_doc(d)}
+            if d:
+                r["receta"]["actualizable"] = {"id": d["id"], "nombre": self._nombre_doc(d)}
+                r["receta"]["estado_revision"] = SG.decidir_revision(d["proyecto"], d["hoja"], rc, datos)
             elif (rec := self._reciente_con_id(idp)): r["receta"]["conflicto_id"] = {"nombre": rec.get("nombre") or os.path.basename(rec["ruta"]), "ruta": rec["ruta"]}
         return r
 
-    def ejecutar_receta(self, ruta, modo="nuevo", id_doc=None, modo_proyecto=None, sin_id=False):
+    def ejecutar_receta(self, ruta, modo="nuevo", id_doc=None, modo_proyecto=None, sin_id=False, resolucion=None, forzar=False):
         """modo «nuevo» (proyecto nuevo), «actualizar» (agrega lo nuevo al proyecto id_doc, que el usuario confirma) o «datos» (solo las hojas).
         modo_proyecto: el modo que elige el usuario; solo se acepta si el de la receta fue inferido (v1), y una vez.
-        sin_id: crea el proyecto nuevo sin id_proyecto cuando ese id ya pertenece a otro proyecto."""
+        sin_id: crea el proyecto nuevo sin id_proyecto cuando ese id ya pertenece a otro proyecto.
+        Al actualizar se controla la revisión (12.5): «ya aplicada» y «más antigua» (salvo forzar=True) no se aplican; un conflicto exige resolucion
+        «solo_nuevo» (aplicar solo lo nuevo) o «cancelar»; sin ella no se aplica nada y se devuelve el conflicto para que la interfaz pregunte."""
         from .nucleo import receta as RC
         try: rc, datos = RC.leer(ruta)
         except Exception as e: return self._resp(f"No se pudo leer la receta: {e}", "aviso", error="receta")
@@ -480,6 +487,16 @@ class Api:
             if not otro and modo != "actualizar" and not sin_id and (rec := self._reciente_con_id(idp)):
                 return self._resp(f"El id_proyecto de la receta ya pertenece al proyecto reciente «{rec.get('nombre') or os.path.basename(rec['ruta'])}». Ábrelo y actualízalo, o crea uno nuevo sin id_proyecto.", "aviso", error="id_conflicto")
             if sin_id and modo != "actualizar": idp = None
+        if modo == "actualizar":
+            dec = SG.decidir_revision(objetivo["proyecto"], objetivo["hoja"], rc, datos, forzar=bool(forzar))
+            if dec["accion"] == "ya_aplicada":
+                r = self._resp("Receta ya aplicada al proyecto «" + self._nombre_doc(objetivo) + "» (misma huella): no se cambió nada.", "aviso", error="ya_aplicada"); r["revision"] = dec; return r
+            if dec["accion"] == "mas_antigua":
+                r = self._resp(dec["motivo"] + " Puedes forzarla si de verdad quieres volver a esa revisión; la actual pasa al historial.", "aviso", error="revision_antigua"); r["revision"] = dec; return r
+            if dec["accion"] == "conflicto":
+                if resolucion == "cancelar": return self._resp("Actualización cancelada: no se cambió nada.", error="cancelado")
+                if resolucion != "solo_nuevo":
+                    r = self._resp(dec["motivo"] + " Elige cancelar o aplicar solo lo nuevo; no se cambió nada.", "aviso", error="conflicto_revision"); r["revision"] = dec; return r
         if modo == "datos":
             self.nuevo_proyecto(); MD.fijar(self.proyecto, efectivo, det, cambiado)
             n = RC.solo_datos(self, rc, datos, idp); self._sucio = True
@@ -494,10 +511,31 @@ class Api:
         except Exception as e: return self._resp(f"La receta se detuvo: {e}. Revisa la plantilla.", "aviso", error="receta", proyecto=True)
         self._sucio = True
         msgs = [(t, "info") for t in out["log"]] + [(t, "aviso") for t in out["avisos"]] + [("Pendiente: " + t, "aviso") for t in out["pendientes"]]
+        if out.get("tareas_cerradas"): msgs.append((f"Tareas cerradas porque ya se cumplieron: {len(out['tareas_cerradas'])}.", "info"))
         if rc.get("folio"): msgs.append(("La receta traía un folio: se ignoró y no se guardó en el proyecto. Es la llave de una sesión web; no la compartas.", "aviso"))
         r = self._resp(f"Receta ejecutada: {(rc.get('datos_fijos') or {}).get('nombre_proyecto') or 'proyecto'}. Guárdalo con Archivo › Guardar como.", mensajes=msgs, proyecto=True)
         r["receta_resultado"] = out
         return r
+
+    # ---------- seguimiento y paquete de avance (0.27, secciones 12 y 13) ----------
+    def seguimiento(self):
+        """Vista de solo lectura: variables con su estado, tareas abiertas y estado de cada análisis (calculado contra la hoja y los resultados actuales)."""
+        return SG.vista(self.proyecto, self.hoja)
+
+    def exportar_avance(self, ruta=None):
+        """Paquete de avance v1 para el diagnóstico en línea: solo estado, con huella. Sin id_proyecto no se exporta."""
+        pkg, motivo = SG.paquete_avance(self.proyecto, self.hoja)
+        if pkg is None: return self._resp("No se exportó el paquete de avance. " + motivo, "aviso", error="sin_id_proyecto", hoja=False)
+        base = ((self.proyecto.fijos["nombre_proyecto"]["valor"] or "proyecto") + "_avance.json")
+        ruta = ruta or self._elegir("guardar", ["Paquete de avance (*.json)"], base)
+        if not ruta: return self._resp("Exportación cancelada.", hoja=False)
+        if not ruta.lower().endswith(".json"): ruta += ".json"
+        try:
+            with open(ruta, "w", encoding="utf-8") as f: json.dump(pkg, f, ensure_ascii=False, indent=1)
+        except OSError as e:
+            return self._resp(f"No se pudo exportar el paquete de avance: {e}", "aviso", error="exportar", hoja=False)
+        return self._resp(f"Paquete de avance exportado a {ruta}: solo estado (sin datos, valores medidos ni resultados). Revisión aplicada: "
+                          f"{pkg['revision_aplicada'] if pkg['revision_aplicada'] is not None else 'ninguna'}.", hoja=False)
 
     def exportar(self, ruta=None):
         cols, cambios, faltantes = archivo.tabla_limpia(self.hoja)

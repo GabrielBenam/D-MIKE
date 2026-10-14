@@ -21,6 +21,16 @@
 },
 {
 "cat": "Archivo",
+"n": "Importar receta del diagnóstico",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Abre una receta .json o .xlsx del diagnóstico en línea: nuevo, actualizar o solo datos"
+},
+{
+"cat": "Archivo",
 "n": "Abrir reciente",
 "a": "Alt+A, R",
 "c": [
@@ -111,6 +121,16 @@
 },
 {
 "cat": "Archivo",
+"n": "Exportar paquete de avance",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "JSON con solo el estado del proyecto (sin datos ni resultados) para el diagnóstico en línea"
+},
+{
+"cat": "Archivo",
 "n": "Exportar resultado o formato",
 "a": "Ctrl+Mayús+E",
 "c": [
@@ -162,6 +182,16 @@
 ],
 "e": "D",
 "d": "Nombre, área, responsable y notas"
+},
+{
+"cat": "Archivo",
+"n": "Seguimiento del proyecto",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Solo lectura: variables con su estado, tareas abiertas y estado de cada análisis"
 },
 {
 "cat": "Archivo",

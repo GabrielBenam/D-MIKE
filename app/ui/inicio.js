@@ -78,6 +78,8 @@ const ACCIONES_UI = {
   abrir_proyecto: async () => { if (window.guardarTabs) guardarTabs(); const r = await aplicarProyecto(api().abrir_proyecto()); if (r.receta) return preguntarReceta(r.receta); if (!r.error && r.sesion && !/cancelada/.test(r.sesion[0].texto)) { cerrarPestanas(); document.getElementById("inicio")?.remove(); window.pintarDocs && pintarDocs(); } },
   guardar: () => aplicarProyecto(api().guardar(false)), guardar_como: () => aplicarProyecto(api().guardar(true)),
   exportar: () => aplicarProyecto(api().exportar()), exportar_powerbi: () => aplicarProyecto(api().exportar_powerbi()),
+  exportar_avance: () => aplicarProyecto(api().exportar_avance()), seguimiento: () => dialogoSeguimiento(),
+  importar_receta: async () => { if (window.guardarTabs) guardarTabs(); const r = await aplicarProyecto(api().abrir_receta()); if (r.receta) preguntarReceta(r.receta); },
   deshacer: () => aplicar(api().deshacer()), rehacer: () => aplicar(api().rehacer()), importar: () => aplicar(api().importar()),
 };
 
@@ -176,6 +178,7 @@ function preguntarReceta(rc) {
     rc.trae_folio ? el("p", { class: "aviso-ficha" }, "Esta receta trae un folio. Es la llave de una sesión web: D-MIKE lo ignora, no lo compara ni lo guarda. No lo compartas.") : "",
     el("p", {}, `La receta trae ${rc.formatos} formatos, ${rc.disenos} diseños de experimentos y ${rc.analisis} análisis. Los análisis sin datos quedan como pendientes.`),
     el("ul", {}, filas),
+    rc.actualizable && rc.estado_revision && rc.estado_revision.accion !== "aplicar" ? el("p", { class: "aviso-ficha", id: "receta-revision" }, rc.estado_revision.motivo) : "",
     rc.actualizable ? el("p", {}, `El proyecto abierto «${rc.actualizable.nombre}» tiene el mismo id_proyecto: se propone actualizarlo, sin sobrescribir lo que ya escribiste.`)
       : rc.conflicto_id ? el("p", {}, `El id_proyecto de esta receta ya pertenece al proyecto reciente «${rc.conflicto_id.nombre}». Ábrelo para actualizarlo, o crea uno nuevo sin id_proyecto.`)
       : (abiertos.length ? el("p", {}, "Para actualizar, confirma a mano cuál de los proyectos abiertos es (esta receta no identifica uno por sí sola): ", destino) : ""),
@@ -184,8 +187,9 @@ function preguntarReceta(rc) {
     const modoElegido = rc.puede_cambiar_modo ? elegir.value : null;
     const idDoc = modo === "actualizar" ? parseInt(destino.value, 10) : null;
     document.querySelectorAll(".velo").forEach(v => v.remove());
+    if (modo === "actualizar") return actualizarReceta(rc, idDoc, modoElegido, null, false);
     const r = await aplicarProyecto(api().ejecutar_receta(rc.ruta, modo, idDoc, modoElegido, !!sinId));
-    if (!r.error) { cerrarPestanas(); document.getElementById("inicio")?.remove(); if (modo !== "datos") document.body.classList.add("sesion-abierta"); window.pintarDocs && pintarDocs(); }
+    if (!r.error) trasReceta(modo);
   };
   dialogo("¿Ejecutar la receta?", cuerpo, () => correr("nuevo", hayConflicto), hayConflicto ? "Crear nuevo sin id_proyecto" : "Ejecutar en un proyecto nuevo");
   const botones = document.querySelector(".dialogo[aria-label='¿Ejecutar la receta?'] .dialogo-botones");
@@ -196,6 +200,48 @@ function preguntarReceta(rc) {
   }
 }
 window.preguntarReceta = preguntarReceta;
+
+function trasReceta(modo) { cerrarPestanas(); document.getElementById("inicio")?.remove(); if (modo !== "datos") document.body.classList.add("sesion-abierta"); window.pintarDocs && pintarDocs(); }
+
+// Control de revisión al actualizar (ESPEC_receta_v2 12.5): ya aplicada y más antigua avisan en la sesión; el conflicto se resuelve aquí, sin fusión automática
+async function actualizarReceta(rc, idDoc, modoElegido, resolucion, forzar) {
+  const r = await aplicarProyecto(api().ejecutar_receta(rc.ruta, "actualizar", idDoc, modoElegido, false, resolucion || null, !!forzar));
+  if (r.error === "conflicto_revision") dialogoConflictoRevision(rc, r.revision, idDoc, modoElegido);
+  else if (r.error === "revision_antigua") dialogoRevisionAntigua(rc, r.revision, idDoc, modoElegido);
+  else if (!r.error) trasReceta("actualizar");
+  return r;
+}
+function dialogoConflictoRevision(rc, dec, idDoc, modoElegido) {
+  const cuerpo = el("div", { class: "ficha", id: "conflicto-revision" },
+    el("p", { class: "aviso-ficha" }, dec.motivo),
+    (dec.variables || []).length ? el("ul", {}, dec.variables.map(v => el("li", {}, `${v.nombre}: ${v.actual} no baja a ${v.recibido} en silencio (se conserva ${v.actual}).`))) : "",
+    el("p", {}, "No hay fusión automática de campos. «Cancelar» no cambia nada. «Aplicar solo lo nuevo» agrega lo que falta sin sobrescribir lo que el proyecto ya tiene; la receta anterior pasa al historial de revisiones."));
+  dialogo("Conflicto de revisión", cuerpo, async () => { await actualizarReceta(rc, idDoc, modoElegido, "solo_nuevo", false); return true; }, "Aplicar solo lo nuevo");
+}
+function dialogoRevisionAntigua(rc, dec, idDoc, modoElegido) {
+  const cuerpo = el("div", { class: "ficha", id: "revision-antigua" }, el("p", { class: "aviso-ficha" }, dec.motivo),
+    el("p", {}, "Por omisión no se aplica. Si de verdad quieres volver a esa revisión, fuérzala: la que está aplicada pasa al historial de revisiones."));
+  dialogo("Receta más antigua", cuerpo, async () => { await actualizarReceta(rc, idDoc, modoElegido, null, true); return true; }, "Forzar y aplicar");
+}
+
+// Seguimiento del proyecto: solo lectura (variables, pendientes abiertos y estado de cada análisis)
+async function dialogoSeguimiento() {
+  const s = await api().seguimiento();
+  const tabla = (cab, filas, vacio) => filas.length
+    ? el("table", { class: "tabla-seg" }, el("thead", {}, el("tr", {}, cab.map(c => el("th", {}, c)))),
+        el("tbody", {}, filas.map(f => el("tr", {}, f.map(c => el("td", {}, c === null || c === undefined ? "" : String(c)))))))
+    : el("p", { class: "vacio" }, vacio);
+  const cuerpo = el("div", { class: "ficha", id: "seguimiento" },
+    el("p", {}, `Revisión aplicada: ${s.revision ?? "ninguna"} · revisiones anteriores guardadas: ${s.revisiones_guardadas} · tareas cerradas: ${s.tareas_cerradas}`),
+    el("h4", {}, "Variables"), tabla(["Variable", "Hoja", "Unidad", "Estado de la evidencia", "Ensayo destructivo"],
+      s.variables.map(v => [v.nombre, v.hoja, v.unidad, v.estado_evidencia, v.ensayo_destructivo ? "sí" : "no"]), "Este proyecto no tiene variables registradas."),
+    el("h4", {}, "Pendientes abiertos"), tabla(["Pendiente", "Responsable", "Acción sugerida", "Origen"],
+      s.tareas_abiertas.map(t => [t.descripcion, t.responsable, t.accion, t.origen]), "No hay pendientes abiertos."),
+    el("h4", {}, "Análisis"), tabla(["Análisis", "Módulo", "Estado", "Motivo"],
+      s.analisis.map(a => [a.id, a.modulo, a.estado, a.motivo]), "Este proyecto no tiene análisis registrados por una receta."));
+  dialogo("Seguimiento del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
+}
+window.dialogoSeguimiento = dialogoSeguimiento;
 
 async function iniciar() {
   const e = await api().estado_inicial();
