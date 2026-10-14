@@ -44,4 +44,4 @@ def test_manual_mismo_pdf_desde_distintos_directorios(tmp_path):
 def test_manual_sin_entradas_se_detiene_con_mensaje(tmp_path):
     r = subprocess.run([sys.executable, str(MANUAL / "gen.py"), "--entradas", str(tmp_path), "--salida", str(tmp_path / "s")], capture_output=True, text=True, timeout=120)
     if "No module named" in r.stderr: pytest.skip("faltan dependencias del generador")
-    assert r.returncode != 0 and "Faltan entradas" in r.stderr and "08_GLOSARIO.md" in r.stderr and "--permitir-faltantes" in r.stderr
+    assert r.returncode != 0 and "Faltan entradas" in r.stderr and "svgs.json" in r.stderr and "paso_a_paso.md" in r.stderr and "--permitir-faltantes" in r.stderr
