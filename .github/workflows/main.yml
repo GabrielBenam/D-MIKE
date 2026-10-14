@@ -27,6 +27,10 @@ jobs:
               sys.exit(1)
           # los archivos de .github/ no se revisan aquí
           lista = [l.strip() for l in open("MANIFIESTO.txt", encoding="utf-8") if l.strip() and not l.startswith("#") and not l.strip().startswith(".github/")]
+          # el catálogo vigente se deduce de VERSION, sin número escrito a mano
+          import re
+          v = re.search(r'VERSION = "([^"]+)"', open("app/api.py", encoding="utf-8").read())[1]
+          lista.append("proyecto/catalogo/catalogo_dmike_%s.json" % v)
           faltan = [f for f in lista if not os.path.exists(f)]
           if faltan:
               print("Faltan %d archivos:" % len(faltan))
