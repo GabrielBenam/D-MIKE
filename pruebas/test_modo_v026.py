@@ -34,12 +34,14 @@ def v1(tmp, origen, folio=None, nombre="r1.json"):
     return escribir(tmp, nombre, rc)
 
 
-def v2(tmp, modo, idp=UUID_A, hojas_sinteticas=False, variables=None, nombre="r2.json", huella=True):
+def v2(tmp, modo, idp=UUID_A, hojas_sinteticas=False, variables=None, nombre="r2.json", huella=True, revision=None, rev_base=None):
     rc = base(); rc.pop("folio", None)
     rc.update(receta_version=2, dmike_minimo="0.26", modo_proyecto=modo, origen="Diagnóstico en línea")
     if idp: rc["id_proyecto"] = idp
     if hojas_sinteticas: rc["hojas"][0]["origen_datos"] = "sintetico"
     if variables: rc["variables"] = variables
+    if revision: rc["revision"] = revision
+    if rev_base is not None: rc["revision_base"] = rev_base
     if huella: rc["huella"] = RC.huella_receta(rc)
     return escribir(tmp, nombre, rc)
 
@@ -303,7 +305,10 @@ def test_a6_id_proyecto_se_guarda_y_se_propone_para_actualizar(tmp_path):
     r = a.abrir_receta(ruta)["receta"]
     assert r["actualizable"]["id"] == a.proyectos()["proyectos"][0]["id"] and r["id_proyecto"] == UUID_A and len(r["abiertos"]) == 2
     n = len(a.proyectos()["proyectos"])
-    out = a.ejecutar_receta(ruta, "actualizar", r["actualizable"]["id"]); assert out["error"] is None and len(a.proyectos()["proyectos"]) == n
+    # 0.27 (12.5, regla 2): la misma receta, byte por byte, ya está aplicada; para actualizar se usa una revisión nueva de la receta
+    assert a.ejecutar_receta(ruta, "actualizar", r["actualizable"]["id"])["error"] == "ya_aplicada"
+    ruta2 = v2(tmp_path, "demostracion", revision=1, nombre="r2b.json")
+    out = a.ejecutar_receta(ruta2, "actualizar", r["actualizable"]["id"]); assert out["error"] is None and len(a.proyectos()["proyectos"]) == n
     assert a.proyecto.formatos["_receta"]["id_proyecto"] == UUID_A and a.proyecto.formatos["_receta"]["origen"] == "Diagnóstico en línea"
 
 
@@ -314,7 +319,7 @@ def test_a6_confirmacion_manual_con_v1_o_sin_coincidencia(tmp_path):
     assert a.ejecutar_receta(ruta, "actualizar", destino)["error"] is None           # el usuario confirma a mano
     assert a.proyecto.formatos["_receta"]["id_proyecto"] == UUID_B                   # el proyecto elegido queda con ese id
     # v1: nunca se propone nada; se confirma a mano
-    r1 = v1(tmp_path, "Caso maestro", nombre="c.json"); assert "actualizable" not in a.abrir_receta(r1)["receta"]
+    r1 = v1(tmp_path, "Caso maestro (segunda versión)", nombre="c.json"); assert "actualizable" not in a.abrir_receta(r1)["receta"]
     assert a.ejecutar_receta(r1, "actualizar", destino)["error"] is None
     assert a.proyecto.formatos["_receta"]["id_proyecto"] == UUID_B                   # una v1 no borra el id ya guardado
 
@@ -390,11 +395,11 @@ def test_a8_folio_previo_en_receta_se_conserva(dmike_025, tmp_path):
     nuevo = str(tmp_path / "re.dmike"); archivo.guardar(nuevo, a.hoja, a.proyecto, "0.26.0")
     b = Api(); b.abrir_proyecto(nuevo); assert b.proyecto.formatos["_receta"]["folio"] == "DMK-PRUEBA-0001"
     # actualizar con una receta nueva (sin folio) tampoco lo quita ni lo reescribe
-    ruta_r = v1(tmp_path, "Caso maestro", nombre="act.json"); id_doc = b.proyectos()["proyectos"][0]["id"]
+    ruta_r = v1(tmp_path, "Caso maestro (segunda versión)", nombre="act.json"); id_doc = b.proyectos()["proyectos"][0]["id"]
     assert b.ejecutar_receta(ruta_r, "actualizar", id_doc)["error"] is None
     assert b.proyecto.formatos["_receta"]["folio"] == "DMK-PRUEBA-0001"
     # una receta con otro folio: el de la receta se ignora, el que ya estaba en el .dmike queda como estaba
-    ruta_f = v1(tmp_path, "Caso maestro", folio="DMK-OTRO-OTRO-OTRO", nombre="otro.json")
+    ruta_f = v1(tmp_path, "Caso maestro (tercera versión)", folio="DMK-OTRO-OTRO-OTRO", nombre="otro.json")
     assert b.ejecutar_receta(ruta_f, "actualizar", id_doc)["error"] is None and b.proyecto.formatos["_receta"]["folio"] == "DMK-PRUEBA-0001"
     assert "DMK-OTRO" not in json.dumps(b.proyecto.a_dict())
 

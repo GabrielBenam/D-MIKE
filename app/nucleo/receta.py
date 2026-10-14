@@ -1,14 +1,17 @@
-"""Recetas del diagnóstico (contrato v1 y v2; ver ESPEC_receta_v2.md). Una receta es un archivo DECLARATIVO (datos y parámetros, nunca código) que genera el
+"""Recetas del diagnóstico (contrato v1 y v2; ver ESPEC_receta_v2.md; 0.27: variables, tareas, estados y revisiones, secciones 12 a 15). Una receta es un archivo DECLARATIVO (datos y parámetros, nunca código) que genera el
 artefacto en línea «Diagnóstico de proyecto D-MIKE». D-MIKE la valida contra su catálogo y la ejecuta: datos fijos, perfil,
 columnas y datos, diseños de experimentos con sus respuestas, formatos, análisis y avance.
 La receta viaja sola (.json) o dentro de un libro de Excel (.xlsx) en la hoja oculta «_receta», junto con las hojas de datos
 que el usuario llenó. En un parámetro, «@nombre» es una columna de la hoja y «#id» el resultado de un análisis anterior."""
 import hashlib, json, re
+from datetime import datetime
 
 TIPO, VERSION_SOPORTADA = "dmike-receta", 2
 HOJA_RECETA = "_receta"
 _UUID4 = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 ORIGEN_DATOS = ("real", "vacia", "sintetico")
+ESTADOS_ANALISIS = ("pendiente", "disponible", "analizado", "aprobado")
+ESTADOS_TAREA = ("abierta", "cerrada")
 EVIDENCIA = ("REAL_VERIFICADO", "REAL_NO_VALIDADO", "PENDIENTE_RECOLECCION", "DESCONOCIDO", "NO_APLICA", "SINTETICO_DEMO")
 
 
@@ -52,6 +55,18 @@ def huella_receta(receta):
     return "sha256:" + hashlib.sha256(json.dumps(base, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
+def huella_efectiva(receta):
+    """Huella con que se reconoce una receta aplicada (12.5): la del campo «huella» si la trae; si no, la calculada sin folio (el folio nunca se guarda)."""
+    h = receta.get("huella")
+    if h: h = str(h); return h if h.startswith("sha256:") else "sha256:" + h
+    return huella_receta({k: v for k, v in receta.items() if k != "folio"})
+
+
+def entero(v):
+    """El valor si es un entero (no booleano); si no, None."""
+    return v if isinstance(v, int) and not isinstance(v, bool) else None
+
+
 def huella_sintetica(receta):
     """Huella del CONTENIDO de una receta, sin huella, fecha de generación ni folio: identifica las recetas sintéticas que distribuye el repositorio."""
     base = {k: v for k, v in receta.items() if k not in ("huella", "generado_en", "folio")}
@@ -68,6 +83,44 @@ def errores_modo(receta, modo):
     for v in receta.get("variables") or []:
         if isinstance(v, dict) and v.get("estado_evidencia") == "SINTETICO_DEMO":
             err.append(f"la variable «{v.get('nombre')}» es SINTETICO_DEMO y el proyecto es real: en modo real no se cargan datos sintéticos (no se cargó nada)")
+    return err
+
+
+def errores_v2(receta):
+    """12 / E2-R1: estructura de variables, tareas, revision, revision_base y analisis[].estado / requiere. Las claves desconocidas se toleran."""
+    err = []
+    vs = receta.get("variables")
+    if vs is not None and not isinstance(vs, list): err.append("variables debe ser una lista")
+    for i, v in enumerate(vs if isinstance(vs, list) else [], 1):
+        if not isinstance(v, dict): err.append(f"la variable {i} debe ser un objeto con nombre y estado_evidencia"); continue
+        if not isinstance(v.get("nombre"), str) or not v["nombre"].strip(): err.append(f"la variable {i} no tiene nombre (debe ser un texto no vacío)")
+        if v.get("ensayo_destructivo") is not None and not isinstance(v["ensayo_destructivo"], bool):
+            err.append(f"ensayo_destructivo de la variable «{v.get('nombre')}» debe ser verdadero o falso")
+    ts = receta.get("tareas")
+    if ts is not None and not isinstance(ts, list): err.append("tareas debe ser una lista")
+    vistos = set()
+    for i, t in enumerate(ts if isinstance(ts, list) else [], 1):
+        if not isinstance(t, dict): err.append(f"la tarea {i} debe ser un objeto con id y descripcion"); continue
+        tid = t.get("id")
+        if not isinstance(tid, str) or not tid.strip(): err.append(f"la tarea {i} no tiene id (debe ser un texto no vacío)")
+        elif tid in vistos: err.append(f"el id de tarea «{tid}» está repetido")
+        else: vistos.add(tid)
+        if t.get("estado") is not None and t["estado"] not in ESTADOS_TAREA:
+            err.append(f"estado «{t['estado']}» no válido en la tarea «{tid}» (abierta o cerrada)")
+    rev, base = receta.get("revision"), receta.get("revision_base")
+    if rev is not None and (entero(rev) is None or rev < 1): err.append("revision debe ser un entero mayor o igual a 1")
+    if base is not None:
+        if entero(base) is None: err.append("revision_base debe ser nula o un entero menor que revision")
+        elif entero(rev) is None: err.append("revision_base solo tiene sentido con una revision válida")
+        elif base >= rev: err.append(f"revision_base ({base}) debe ser menor que revision ({rev})")
+    for i, a in enumerate(receta.get("analisis") or [], 1):
+        if not isinstance(a, dict): continue
+        nom = a.get("id") or a.get("modulo") or i
+        if a.get("estado") is not None and a["estado"] not in ESTADOS_ANALISIS:
+            err.append(f"estado «{a['estado']}» no válido en el análisis «{nom}» (pendiente, disponible, analizado o aprobado)")
+        rq = a.get("requiere")
+        if rq is not None and (not isinstance(rq, list) or any(not (isinstance(x, str) and x.startswith("@") and len(x) > 1) for x in rq)):
+            err.append(f"requiere del análisis «{nom}» debe ser una lista de columnas con el prefijo @ (por ejemplo \"@Espesor\")")
     return err
 
 
@@ -91,12 +144,13 @@ def validar(receta, registro, version_programa, modo=None):
     for h in receta.get("hojas") or []:
         if isinstance(h, dict) and h.get("origen_datos") is not None and h["origen_datos"] not in ORIGEN_DATOS:
             err.append(f"origen_datos «{h['origen_datos']}» no válido en la hoja «{h.get('hoja')}»")
-    for v in receta.get("variables") or []:
+    for v in receta.get("variables") if isinstance(receta.get("variables"), list) else []:
         if isinstance(v, dict) and v.get("estado_evidencia") is not None and v["estado_evidencia"] not in EVIDENCIA:
             err.append(f"estado_evidencia «{v['estado_evidencia']}» no válido en la variable «{v.get('nombre')}»")
+    err += errores_v2(receta)
     err += errores_modo(receta, modo or MD.detectar(receta, huella_sintetica(receta))[0])
     for paso in receta.get("disenos", []) + receta.get("analisis", []):
-        if paso.get("modulo") not in registro: err.append(f"módulo desconocido: {paso.get('modulo')}")
+        if isinstance(paso, dict) and paso.get("modulo") not in registro: err.append(f"módulo desconocido: {paso.get('modulo')}")
     from ..modulos.formatos import FORMATOS
     for f in receta.get("formatos", []):
         if f.get("id") not in FORMATOS: err.append(f"formato desconocido: {f.get('id')}")
@@ -106,7 +160,8 @@ def validar(receta, registro, version_programa, modo=None):
 def guardable(receta, id_proyecto=None):
     """Registro «_receta» que se guarda en el proyecto. El folio de una receta v1 se ignora: no se escribe en ninguna parte nueva (E1-R8)."""
     sin = {k: v for k, v in receta.items() if k != "folio"}
-    return {"ids": {}, "json": json.dumps(sin, ensure_ascii=False), "origen": receta.get("origen") or "", "id_proyecto": id_proyecto}
+    return {"ids": {}, "json": json.dumps(sin, ensure_ascii=False), "origen": receta.get("origen") or "", "id_proyecto": id_proyecto,
+            "revision": entero(receta.get("revision")), "huella": huella_efectiva(receta), "aplicada_en": datetime.now().isoformat(timespec="seconds")}
 
 
 def resumen(receta, datos):  # noqa: C901
@@ -160,11 +215,15 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
     con datos ni campos de formatos ya escritos, y no repite análisis ya corridos con esta receta (se reconocen por su id)."""
     from .perfil import validar as validar_perfil
     from .hoja import Hoja
-    from . import modo as MD
+    from . import modo as MD, seguimiento as SG
     malos = errores_modo(receta, MD.valor(api.proyecto))
     if malos: raise RecetaInvalida("; ".join(malos))
-    log, avisos, pend = [], [], []
+    log, avisos, pend, pend_t = [], [], [], []
     a = api
+
+    def pendiente(texto, tipo, objeto, accion, liga):
+        """El pendiente sigue saliendo como texto (mismo texto en el registro) y además queda como tarea auto con id estable (12.3)."""
+        pend.append(texto); pend_t.append({"tipo": tipo, "objeto": objeto, "texto": texto, "accion": accion, "liga": liga})
     previo = a.proyecto.formatos.get("_receta") or {} if actualizar else {}
     hechos_antes = dict(previo.get("ids") or {})
     if receta.get("datos_fijos"):
@@ -198,7 +257,8 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
         jf = [a.hoja.indice(n) for n in factores]
         filas_dis = [i for i in range(a.hoja.n) if a.hoja.columnas[jf[0]].valor(i)[2] is not None]
         if not filas or len(filas) <= 1:
-            pend.append(f"Correr el diseño «{d.get('id')}» en el orden de la hoja y capturar {', '.join(d.get('respuestas', []))}."); log.append(f"Diseño «{d.get('id')}» creado; respuestas por capturar.")
+            pendiente(f"Correr el diseño «{d.get('id')}» en el orden de la hoja y capturar {', '.join(d.get('respuestas', []))}.", "diseno", d.get("id"),
+                      "Correr el diseño en el orden de la hoja y capturar sus respuestas", f"diseno:{d.get('id')}"); log.append(f"Diseño «{d.get('id')}» creado; respuestas por capturar.")
             continue
         cab = [str(x).strip() if x is not None else "" for x in filas[0]]; cuerpo = filas[1:]
         ok = len(cuerpo) == len(filas_dis)
@@ -213,7 +273,7 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
             avisos.append(f"Diseño «{d.get('id')}»: las corridas de la plantilla no coinciden con el diseño creado; captura las respuestas a mano."); continue
         n_resp = 0
         for resp in d.get("respuestas", []):
-            if resp not in cab: pend.append(f"Capturar {resp} del diseño «{d.get('id')}»."); continue
+            if resp not in cab: pendiente(f"Capturar {resp} del diseño «{d.get('id')}».", "respuesta", f"{d.get('id')}:{resp}", "Capturar la respuesta del diseño", f"diseno:{d.get('id')}"); continue
             c = cab.index(resp)
             if a.hoja.indice(resp) is None: a.pegar(-1, len(a.hoja.columnas), resp)
             j = a.hoja.indice(resp); n = 0
@@ -222,7 +282,7 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
                 v = cuerpo[k][c]
                 if v not in (None, ""): a.hoja.editar(i, j, str(v)); n += 1
             n_resp += n
-            if n < len(filas_dis): pend.append(f"Diseño «{d.get('id')}»: faltan {len(filas_dis) - n} valores de {resp}.")
+            if n < len(filas_dis): pendiente(f"Diseño «{d.get('id')}»: faltan {len(filas_dis) - n} valores de {resp}.", "respuesta", f"{d.get('id')}:{resp}", "Capturar la respuesta del diseño", f"diseno:{d.get('id')}")
         log.append(f"Diseño «{d.get('id')}»: {len(filas_dis)} corridas" + (" con sus respuestas." if n_resp else "; respuestas por capturar."))
     # 2) datos capturados por el usuario (por nombre de columna)
     for h in receta.get("hojas", []):
@@ -247,9 +307,9 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
             cuerpo = [[(f[i] if i is not None and i < len(f) else None) for i in idx] for f in filas[1:]]
             a.pegar(-1, len(a.hoja.columnas), _tsv([nombres] + cuerpo))
             log.append(f"Hoja «{h['hoja']}»: {len(cuerpo)} filas en {len(nombres)} columnas.")
-            if not cuerpo: pend.append(f"Llenar la hoja «{h['hoja']}» ({', '.join(nombres)}).")
+            if not cuerpo: pendiente(f"Llenar la hoja «{h['hoja']}» ({', '.join(nombres)}).", "hoja", h["hoja"], "Llenar la hoja con las mediciones", f"hoja:{h['hoja']}")
         else:
-            a.pegar(-1, len(a.hoja.columnas), "\t".join(nombres)); pend.append(f"Llenar la hoja «{h['hoja']}» ({', '.join(nombres)}).")
+            a.pegar(-1, len(a.hoja.columnas), "\t".join(nombres)); pendiente(f"Llenar la hoja «{h['hoja']}» ({', '.join(nombres)}).", "hoja", h["hoja"], "Llenar la hoja con las mediciones", f"hoja:{h['hoja']}")
     # 3) formatos
     for f in receta.get("formatos", []):
         base = a.abrir_formato(f["id"])["datos"]
@@ -282,16 +342,30 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
         return v
     for k, v in hechos_antes.items(): ref.setdefault(k, v)
     for p in receta.get("analisis", []):
-        if actualizar and p.get("id") in hechos_antes: continue
+        aid, req = p.get("id") or p["modulo"], SG.requiere_de(p)
+        if actualizar and p.get("id") in hechos_antes:
+            SG.registrar_analisis(a.proyecto, aid, p["modulo"], "analizado", req, "", hechos_antes[p["id"]]); continue
+
+        def sin_correr(texto, motivo, bloqueado, como_pendiente=True):
+            """12.4: el análisis queda «pendiente» con su motivo; no se corre sin los datos mínimos."""
+            if como_pendiente: pendiente(texto, "analisis", aid, "Reunir los datos y correr el análisis", f"analisis:{aid}")
+            else: avisos.append(texto)
+            SG.registrar_analisis(a.proyecto, aid, p["modulo"], "pendiente", req, motivo, None, bloqueado)
         try: params = {k: resolver(v) for k, v in p["parametros"].items()}
         except KeyError as e:
-            pend.append(f"Análisis «{p.get('id')}» ({p['modulo']}): falta {e.args[0]}."); continue
+            x = e.args[0]
+            sin_correr(f"Análisis «{p.get('id')}» ({p['modulo']}): falta {x}.", f"Falta el resultado del análisis «{x[1:]}»." if x.startswith("#") else (SG.motivo_columnas(*SG.sin_datos(a.hoja, req)) or f"Falta la columna {x}."), x.startswith("#")); continue
         vacias = [v[1:] for v in _columnas_citadas(p["parametros"]) if not _tiene_datos(a, v[1:])]
-        if vacias: pend.append(f"Análisis «{p.get('id')}» ({p['modulo']}): sin datos en {', '.join(vacias)}."); continue
+        if vacias: sin_correr(f"Análisis «{p.get('id')}» ({p['modulo']}): sin datos en {', '.join(vacias)}.", SG.motivo_columnas(*SG.sin_datos(a.hoja, req)), False); continue
+        faltan, vacias = SG.sin_datos(a.hoja, req)          # columnas que la receta declara en «requiere» aunque los parámetros no las citen
+        if faltan or vacias:
+            m = SG.motivo_columnas(faltan, vacias); sin_correr(f"Análisis «{p.get('id')}» ({p['modulo']}): {m[0].lower() + m[1:]}", m, False); continue
         try: r = a.ejecutar_modulo(p["modulo"], params)
-        except Exception as e: pend.append(f"Análisis «{p.get('id')}»: no se pudo correr ({e})."); continue
-        if r["error"]: (pend if p.get("si_faltan_datos", "dejar_pendiente") == "dejar_pendiente" else avisos).append(f"Análisis «{p.get('id')}»: {r['sesion'][0]['texto']}"); continue
-        ref[p.get("id") or p["modulo"]] = r["resultado"]["uid"]; hechos += 1
+        except Exception as e: sin_correr(f"Análisis «{p.get('id')}»: no se pudo correr ({e}).", f"No se pudo correr: {e}", True); continue
+        if r["error"]:
+            msg = r["sesion"][0]["texto"]; sin_correr(f"Análisis «{p.get('id')}»: {msg}", msg, True, p.get("si_faltan_datos", "dejar_pendiente") == "dejar_pendiente"); continue
+        ref[aid] = r["resultado"]["uid"]; hechos += 1
+        SG.registrar_analisis(a.proyecto, aid, p["modulo"], "analizado", req, "", ref[aid])
     log.append(f"Análisis corridos: {hechos} de {len(receta.get('analisis', []))}.")
     ORDEN = {"pendiente": 0, "en_curso": 1, "hecho": 2}
     for mid, av in (receta.get("avance") or {}).items():
@@ -299,7 +373,18 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
         if actualizar and ORDEN.get(actual, 0) >= ORDEN.get(av, 0): continue
         try: a.proyecto.marcar_avance(mid, av)
         except ValueError: pass
+    # seguimiento (0.27, secciones 12.2 a 12.5): variables, tareas y revisión
+    avisos += SG.fusionar_variables(a.proyecto, receta.get("variables"))
+    SG.fusionar_tareas_receta(a.proyecto, receta.get("tareas"))
+    SG.registrar_pendientes(a.proyecto, pend_t)
+    guardada = a.proyecto.formatos.get("_receta") if isinstance(a.proyecto.formatos.get("_receta"), dict) else {}
+    mismo = SG.aplicada(a.proyecto)["huella"] == huella_efectiva(receta)
+    avisos += SG.archivar_receta_previa(a.proyecto, receta)         # la receta anterior pasa a «_revisiones» antes de reemplazarse
     nuevo = guardable(receta, id_proyecto if id_proyecto is not None else previo.get("id_proyecto")); nuevo["ids"] = ref
+    if mismo and guardada.get("aplicada_en"): nuevo["aplicada_en"] = guardada["aplicada_en"]
     if "folio" in previo: nuevo["folio"] = previo["folio"]          # E1-R8: el folio que ya traía un .dmike anterior se conserva intacto
     a.proyecto.formatos["_receta"] = nuevo
-    return {"log": log, "avisos": avisos, "pendientes": pend}
+    try: anterior = json.loads(guardada.get("json") or "{}")
+    except (ValueError, TypeError): anterior = {}
+    cerradas = SG.cerrar_cumplidas(a.proyecto, a.hoja, receta, anterior)
+    return {"log": log, "avisos": avisos, "pendientes": pend, "tareas_cerradas": cerradas}

@@ -1,9 +1,9 @@
 """Menú principal tipo Minitab. 'accion' None = aún no construido."""
 # Cada menú se divide en subgrupos («§Nombre»): en la cinta son grupos con su nombre debajo; en el menú desplegable, encabezados.
 MENUS = [
-    ("Archivo", [("§Proyecto", None), ("Nuevo proyecto", "nuevo_proyecto"), ("Abrir proyecto…", "abrir_proyecto"), ("Guardar", "guardar"), ("Guardar como…", "guardar_como"),
+    ("Archivo", [("§Proyecto", None), ("Nuevo proyecto", "nuevo_proyecto"), ("Abrir proyecto…", "abrir_proyecto"), ("Importar receta del diagnóstico…", "importar_receta"), ("Guardar", "guardar"), ("Guardar como…", "guardar_como"),
                  ("Gestionar proyectos", "gestionar_proyectos"),
-                 ("§Datos externos", None), ("Importar archivo (CSV, TXT, Excel)…", "importar"), ("Exportar para Minitab…", "exportar"), ("Exportar para Power BI…", "exportar_powerbi"),
+                 ("§Datos externos", None), ("Importar archivo (CSV, TXT, Excel)…", "importar"), ("Exportar para Minitab…", "exportar"), ("Exportar para Power BI…", "exportar_powerbi"), ("Exportar paquete de avance…", "exportar_avance"),
                  ("§Programa", None), ("Salir", "salir")]),
     ("Editar", [("§Historial", None), ("Deshacer", "deshacer"), ("Rehacer", "rehacer"),
                 ("§Portapapeles", None), ("Cortar", "cortar"), ("Copiar", "copiar"), ("Pegar", "pegar"), ("Borrar contenido", "borrar"),
@@ -51,7 +51,8 @@ MENUS = [
                  ("Costo de calidad", "mod:COSTO-CALIDAD"), ("Revisión de compuerta de fase", "mod:CHECKLIST-FASE"),
                  ("§Cierre", None), ("Cierre y lecciones aprendidas", "mod:LECCIONES")]),
     ("Proyecto", [("§Indicadores", None), ("Tablero de indicadores", "tablero_vista"),
-                  ("§Proyecto", None), ("Abrir perfil del diagnóstico…", "abrir_perfil"), ("Datos fijos del proyecto…", "datos_fijos"), ("Resultados del proyecto…", "resultados")]),
+                  ("§Proyecto", None), ("Abrir perfil del diagnóstico…", "abrir_perfil"), ("Datos fijos del proyecto…", "datos_fijos"), ("Resultados del proyecto…", "resultados"),
+                  ("Seguimiento del proyecto…", "seguimiento")]),
     ("Ver", [("§Navegar", None), ("Gestionar proyectos (Inicio)", "gestionar_proyectos"), ("Paleta de comandos (Ctrl+K)", "paleta"),
              ("§Módulos", None), ("Módulos del proyecto (Ctrl+Mayús+F)", "ventana_modulos"),
              ("§Disposición", None), ("Mostrar u ocultar el riel DMAIC (Ctrl+B)", "panel"), ("Riel DMAIC compacto o panel ancho", "alternar_riel"),
