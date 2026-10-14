@@ -15,7 +15,7 @@ async function pintarDocs() {
   for (const p of lista) {
     const t = el("button", { class: "doc-tab" + (p.activo && !document.getElementById("inicio") ? " activo" : ""), title: p.ruta || p.nombre, "data-doc": String(p.id), onclick: () => cambiarDoc(p.id) },
       el("span", { class: "doc-nom" }, p.nombre + (p.modificado ? " *" : "")),
-      p.etiqueta ? el("span", { class: "etiqueta-sint", title: "Los datos de este proyecto son sintéticos" }, p.etiqueta) : "");
+      p.etiqueta ? el("span", { class: "etiqueta-sint etiqueta-mini", title: p.etiqueta, "aria-label": p.etiqueta }, "SINTÉTICO") : "");
     const x = el("span", { class: "doc-x", role: "button", "aria-label": "Cerrar " + p.nombre, title: "Cerrar", onclick: ev => { ev.stopPropagation(); cerrarDoc(p.id); } }, "×");
     t.append(x); t.addEventListener("auxclick", ev => { if (ev.button === 1) cerrarDoc(p.id); }); c.append(t);
   }

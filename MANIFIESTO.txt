@@ -83,7 +83,9 @@ herramientas/generar_ejemplos.py
 herramientas/generar_manifiesto.py
 herramientas/huellas_sinteticas.py
 herramientas/manual/README.md
+herramientas/manual/entradas/D-MIKE_caso_integral_paso_a_paso.md
 herramientas/manual/gen.py
+herramientas/manual/generar_svgs.py
 herramientas/manual/textos.json
 herramientas/receta_caso_integral.py
 herramientas_arbol/engine.js

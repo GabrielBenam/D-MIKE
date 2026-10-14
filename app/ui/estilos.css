@@ -670,5 +670,6 @@ body.sin-panel .columna-dmaic { display: none !important; }
 .g-pal i { display: block; height: 10px; border-radius: 4px; } .g-pal.on { border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento-suave); }
 
 /* Marca de proyecto de demostración (E1-R7): visible en la pestaña del proyecto y en cada resultado */
+.doc-tab .etiqueta-mini { margin-left: 0; padding: 0 4px; font-size: 8px; line-height: 12px; letter-spacing: .03em; border-radius: 2px; flex: none; }
 .etiqueta-sint { display: inline-block; margin-left: 8px; padding: 1px 6px; border-radius: 3px; background: #B3261E; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
 .aviso-ficha { color: var(--aviso, #8a5a00); font-weight: 600; }

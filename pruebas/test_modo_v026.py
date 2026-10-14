@@ -1,6 +1,6 @@
 """D-MIKE 0.26, Entrega 1: modo real/demostración, recetas v1 y v2, id_proyecto, marca sintética y migración (E1-R1 a E1-R10).
 Datos SINTÉTICOS (caso maestro y recetas armadas aquí)."""
-import copy, gzip, hashlib, json, shutil, sqlite3, subprocess, sys
+import copy, os, gzip, hashlib, json, shutil, sqlite3, subprocess, sys
 from pathlib import Path
 import openpyxl, pytest
 from app.api import Api
@@ -322,7 +322,6 @@ def test_a6_confirmacion_manual_con_v1_o_sin_coincidencia(tmp_path):
 def test_a6_id_duplicado_se_rechaza_o_se_crea_sin_id(tmp_path):
     ruta = v2(tmp_path, "demostracion"); a = Api(); a.ejecutar_receta(ruta)
     r = a.ejecutar_receta(ruta); assert r["error"] == "id_conflicto" and len(a.proyectos()["proyectos"]) == 1
-    r = a.ejecutar_receta(ruta, "datos"); assert r["error"] == "id_conflicto" and len(a.proyectos()["proyectos"]) == 1
     r = a.ejecutar_receta(ruta, "nuevo", None, None, True); assert r["error"] is None and len(a.proyectos()["proyectos"]) == 2
     assert a.proyecto.formatos["_receta"]["id_proyecto"] is None
     # actualizar un proyecto que tiene OTRO id, o con un id que ya tiene otro proyecto abierto
@@ -330,6 +329,27 @@ def test_a6_id_duplicado_se_rechaza_o_se_crea_sin_id(tmp_path):
     ids = {p["nombre"]: p["id"] for p in a.proyectos()["proyectos"]}
     docs = [d for d in a._docs if (d["proyecto"].formatos.get("_receta") or {}).get("id_proyecto") == UUID_A]
     assert a.ejecutar_receta(ruta_b, "actualizar", docs[0]["id"])["error"] == "id_conflicto"
+
+
+def test_e13_r3_solo_datos_no_comprueba_ni_asigna_id(tmp_path):
+    ruta = v2(tmp_path, "demostracion"); a = Api(); a.ejecutar_receta(ruta)
+    r = a.ejecutar_receta(ruta, "datos"); assert r["error"] is None and len(a.proyectos()["proyectos"]) == 2
+    assert not (a.proyecto.formatos.get("_receta") or {}).get("id_proyecto")
+
+
+def test_e13_r4_id_proyecto_de_no_lanza_excepcion(tmp_path):
+    import sqlite3
+    ruta = v2(tmp_path, "demostracion"); a = Api(); a.ejecutar_receta(ruta)
+    dm = str(tmp_path / "ok.dmike"); archivo.guardar(dm, a.hoja, a.proyecto, "0.26.0")
+    assert archivo.id_proyecto_de(dm) == UUID_A
+    os.remove(dm); assert archivo.id_proyecto_de(dm) is None                        # borrado
+    (tmp_path / "vacio.dmike").write_bytes(b""); assert archivo.id_proyecto_de(str(tmp_path / "vacio.dmike")) is None
+    (tmp_path / "basura.dmike").write_bytes(b"no es sqlite" * 50); assert archivo.id_proyecto_de(str(tmp_path / "basura.dmike")) is None
+    for nombre, js in (("jsondanado", "{no es json"), ("sinreceta", json.dumps({"formatos": {}})), ("lista", "[1,2]"), ("formatos_nulo", json.dumps({"formatos": None}))):
+        ruta_x = str(tmp_path / (nombre + ".dmike")); con = sqlite3.connect(ruta_x)
+        con.execute("CREATE TABLE proyecto (clave TEXT PRIMARY KEY, json TEXT)"); con.execute("INSERT INTO proyecto VALUES ('estado', ?)", (js,)); con.commit(); con.close()
+        assert archivo.id_proyecto_de(ruta_x) is None, nombre
+    ruta_y = str(tmp_path / "sintabla.dmike"); sqlite3.connect(ruta_y).close(); assert archivo.id_proyecto_de(ruta_y) is None
 
 
 def test_a6_id_de_proyecto_reciente_tambien_se_rechaza(tmp_path, monkeypatch):
@@ -430,7 +450,9 @@ def test_interfaz_muestra_modo_y_permite_un_cambio(pagina, tmp_path):
     pagina.wait_for_function("document.querySelector('#sesion').textContent.includes('Receta ejecutada')", timeout=60000)
     assert MD.valor(pagina.api.proyecto) == "demostracion" and formato_modo(pagina.api)["cambiado"] is True
     pagina.wait_for_selector("#docs .etiqueta-sint")
-    assert pagina.inner_text("#docs .doc-tab.activo .etiqueta-sint") == ETQ
+    et = pagina.locator("#docs .doc-tab.activo .etiqueta-sint")          # E1.3-R2: insignia corta; el texto completo en title y aria-label
+    assert et.inner_text() == "SINTÉTICO" and et.get_attribute("title") == ETQ and et.get_attribute("aria-label") == ETQ
+    assert float(et.evaluate("e => getComputedStyle(e).fontSize").replace("px", "")) <= 9
 
 
 def test_interfaz_v2_declarado_sin_selector_y_actualizacion_manual(pagina, tmp_path):

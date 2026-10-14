@@ -21,7 +21,7 @@ def test_captura_incremento_3(pagina):
     SALIDA.mkdir(exist_ok=True)
     pagina.api._elegir = lambda *a, **k: str(Path(__file__).parent / "sinteticos" / "perfil_prueba_sintetico.json")
     pagina.click(".menu > button:text-is('Proyecto')"); pagina.click("text=Abrir perfil del diagnóstico…")
-    pagina.wait_for_selector("#franja:not([hidden])")
+    pagina.wait_for_selector("#franja:not([hidden])", state="attached")
     pagina.click(".fase[data-fase='A'] > button")
     pagina.wait_for_timeout(300)
     pagina.screenshot(path=str(SALIDA / "inc3_perfil.png"))
