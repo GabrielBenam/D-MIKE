@@ -1,6 +1,6 @@
 # ESPEC_receta_v2 — Contrato de receta v2 de D-MIKE
 
-Versión del documento: 1.0 (13/10/2026). Programa objetivo: D-MIKE 0.26.0. Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; nada de lo descrito como «nuevo» está implementado todavía. Lo no verificado en código se marca «pendiente de validación».
+Versión del documento: 1.1 (14/10/2026). Programa objetivo: D-MIKE 0.26.0 (secciones 1 a 11, entregadas) y 0.27.0 (secciones 12 a 15, Entrega 2). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; nada de lo descrito como «nuevo» está implementado todavía. Lo no verificado en código se marca «pendiente de validación».
 
 ## 1. Alcance
 
@@ -77,7 +77,9 @@ Opciones al abrir una receta (las tres de la v1): ejecutar en un proyecto nuevo,
 
 Actualizar. Si la receta trae `id_proyecto` y coincide con un proyecto abierto, D-MIKE propone ese proyecto. Si no hay coincidencia, o la receta es v1, D-MIKE pide confirmación manual eligiendo uno de los proyectos abiertos. Nunca actualiza por folio. Solo se buscan proyectos abiertos (comportamiento actual, Entrega 0, 2.2).
 
-Ejecutar en un proyecto nuevo. Si no hay proyecto abierto con ese `id_proyecto`, el proyecto nuevo lo guarda en `_receta.id_proyecto`. Si ya hay un proyecto abierto con ese `id_proyecto`, no se asigna en silencio ni se rechaza sin salida: D-MIKE ofrece actualizar ese proyecto o crear uno nuevo sin `id_proyecto` (queda nulo). La unicidad se verifica solo contra proyectos abiertos; verificar contra `.dmike` cerrados queda fuera de esta entrega porque no se abren sin elegirlos.
+Ejecutar en un proyecto nuevo. Si ningún proyecto abierto ni reciente tiene ese `id_proyecto`, el proyecto nuevo lo guarda en `_receta.id_proyecto`. Si ya lo tiene un proyecto abierto o reciente, no se asigna en silencio: D-MIKE avisa y ofrece crear uno nuevo sin `id_proyecto` (queda nulo) y, solo si el coincidente está abierto, también actualizar ese proyecto. Si el coincidente es un reciente cerrado, para actualizarlo hay que abrirlo primero (D-MIKE solo actualiza proyectos abiertos).
+
+Comprobación contra recientes (decisión del usuario, 13/10/2026). Se hace leyendo solo el `id_proyecto` guardado en el JSON de cada `.dmike` reciente, sin abrirlo. Es un aviso y nunca bloquea: un archivo borrado, movido, en unidad de red, ilegible o dañado se ignora y la ejecución continúa. Solo avisa; la decisión es del usuario.
 
 Conflicto de revisión. Si `revision_base` de la receta no coincide con la última revisión aplicada en el `.dmike`, D-MIKE declara el conflicto y pide resolución explícita. No hay fusión automática. Antes de reemplazar `_receta.json`, la receta anterior pasa a `_revisiones` con su huella (Entrega 2). Ningún merge borra datos ni resultados válidos sin confirmación y copia histórica.
 
@@ -115,8 +117,80 @@ Comprueba, además de lo de v1 (tipo, versión, `dmike_minimo`, módulos y forma
 
 ## 10. Pendientes y límites
 
-Pendiente de validación: la lista de huellas de recetas sintéticas, las rutas de código para la etiqueta sintética en exportaciones, y el comportamiento del artefacto una vez cambiado (sus secciones de entrevista, retoma y aislamiento entre folios se auditan en la matriz TO-BE). Fuera de alcance de esta especificación: Gage R&R anidado, quitar el folio de `.dmike` antiguos, verificar `id_proyecto` contra `.dmike` cerrados, paquete de avance.
+Pendiente de validación: la lista de huellas de recetas sintéticas, las rutas de código para la etiqueta sintética en exportaciones, y el comportamiento del artefacto una vez cambiado (sus secciones de entrevista, retoma y aislamiento entre folios se auditan en la matriz TO-BE). Fuera de alcance de esta especificación: Gage R&R anidado, quitar el folio de `.dmike` antiguos, paquete de avance. Abierto para decisión del usuario: ruta de menú para crear o pasar a modo demostración un proyecto sin receta (hoy Calc › Datos aleatorios solo se usa abriendo una receta de demostración).
 
 ## 11. Trazabilidad con ESPEC_flujo_real_dmaic.md (sección 10)
 
 Criterios 4 y 16: secciones 6 y 9. Criterio 11: sección 6, punto 5. Criterios 1, 2, 3, 12: Entrega 2 con las secciones 2 y 5. Criterios 5 a 10: Entrega 3 con las secciones 2, 7 y 8. Criterios 13 y 14: Entrega 4. Criterio 17: sección 3 (folio) y matriz TO-BE.
+
+## 12. Entrega 2 (D-MIKE 0.27.0) — variables, pendientes, estados y revisiones
+
+Punto de partida verificado en el código de 0.26.0 (app/nucleo/receta.py): `ejecutar(..., actualizar=True)` agrega solo lo nuevo y no sobrescribe columnas con datos; los pendientes salen como texto de la ejecución y no se guardan; `variables` solo se valida (valores de `estado_evidencia`), no se guarda; la receta anterior se reemplaza en `proyecto.formatos["_receta"]` sin copia histórica; no hay control de `revision`.
+
+### 12.1 Dónde se guarda (dentro de `proyecto.formatos`; `version_formato` sigue en 1)
+
+- `_variables`: lista de `{nombre, hoja, unidad, unidad_analisis, fuente, responsable, estado_evidencia, ensayo_destructivo}`.
+- `_tareas`: lista de `{id, descripcion, responsable, accion, liga, estado, origen}`; `estado` es `abierta` o `cerrada`; `origen` es `receta` o `auto`.
+- `_analisis`: diccionario `{id: {modulo, estado, requiere, motivo, uid}}`; `estado` es `pendiente`, `disponible`, `analizado` o `aprobado` (este último reservado para la Entrega 4).
+- `_revisiones`: lista de `{revision, huella, aplicada_en, origen, receta}` (la receta anterior completa como texto JSON), con tope de 20; al excederlo se descarta la más antigua y se avisa.
+- `_receta` conserva `ids`, `json`, `origen`, `id_proyecto` y suma `revision` y `huella` de la última receta aplicada.
+
+### 12.2 Variables
+
+Se fusionan por `nombre`. Un estado nuevo reemplaza al previo salvo que el previo sea `REAL_VERIFICADO` y el nuevo no lo sea: bajar de verificado nunca ocurre en silencio y se trata como conflicto (12.5). `SINTETICO_DEMO` solo existe en demostración (ya validado en 0.26.0).
+
+### 12.3 Tareas
+
+Se fusionan por `id`. Los pendientes que hoy se muestran como texto pasan a tareas `auto` con id estable (`auto:<tipo>:<objeto>`) y se cierran solas cuando se cumple su condición (llegaron los datos, el análisis se corrió). Una tarea cerrada a mano no se reabre automáticamente. Las tareas con `origen: receta` se conservan siempre.
+
+### 12.4 Estado de cada análisis
+
+`pendiente`: falta una columna `@x` o no tiene datos; se guardan `requiere` y un `motivo` legible. `disponible`: hay datos pero aún no se corrió. `analizado`: existe el resultado (`uid`). Un análisis nunca queda `analizado` sin resultado, y no se corre sin los datos mínimos del módulo.
+
+### 12.5 Revisiones y conflictos
+
+Sea `n` la última revisión aplicada al proyecto destino (nula si ninguna) y `r` la `revision` de la receta recibida:
+
+1. Receta sin `revision` (v1 o v2 sin campo): se aplica como hoy y `revision` queda nula.
+2. Misma `huella` que una ya aplicada: no se hace nada y se avisa «ya aplicada».
+3. `r` mayor que `n` y `revision_base` igual a `n` (ambas nulas cuenta como igual): se aplica.
+4. `r` menor o igual que `n`: se avisa «más antigua» y por defecto no se aplica; el usuario puede forzar.
+5. `r` mayor que `n` pero `revision_base` distinta de `n`: conflicto. El usuario elige entre cancelar o aplicar solo lo nuevo (la semántica actual de «Actualizar»). No hay fusión automática de campos distintos.
+6. Antes de reemplazar `_receta`, la anterior pasa a `_revisiones`. Ningún cambio borra datos ni resultados válidos sin confirmación.
+
+### 12.6 Proyecto real sin mediciones
+
+Una receta v2 real con hojas vacías y variables `PENDIENTE_RECOLECCION` o `DESCONOCIDO` crea el proyecto, deja los análisis en `pendiente` con su motivo, genera las tareas, no carga ningún dato sintético y no inventa cifras.
+
+## 13. Paquete de avance v1 (D-MIKE hacia el diagnóstico)
+
+Archivo `.json` que D-MIKE exporta y el diagnóstico importa. Contiene solo estado: nunca datos de hojas, valores medidos ni resultados numéricos (eso es Entrega 4 y solo opcional).
+
+```json
+{
+  "tipo": "dmike-avance",
+  "avance_version": 1,
+  "id_proyecto": "uuid-v4",
+  "modo_proyecto": "real",
+  "revision_aplicada": 3,
+  "generado_en": "ISO-8601",
+  "huella": "sha256:...",
+  "fase_actual": "M",
+  "estado_ruta": "no_determinado",
+  "variables": [{"nombre": "", "estado_evidencia": "REAL_VERIFICADO"}],
+  "analisis": [{"id": "", "modulo": "", "estado": "pendiente"}],
+  "disenos": [{"id": "", "estado": "creado", "corridas": 13, "respuestas_capturadas": 0}],
+  "tareas_abiertas": [{"id": "", "descripcion": ""}]
+}
+```
+
+Reglas: `huella` se calcula igual que la de la receta. Sin `id_proyecto` no se puede exportar y se explica por qué (el proyecto viene de una receta v1 o se creó sin receta). `estado_ruta` toma uno de los valores de ESPEC_flujo 4.5 solo cuando se deduce de la existencia de objetos: `Sin datos` (hoja vacía), `Historicos cargados` (hay columnas con datos), `DOE disenado` (hay un diseño creado), `DOE ejecutado` (un diseño con todas sus respuestas capturadas). El resto de valores (medición evaluada, línea base, causas, mejora validada, control) no se infieren: se devuelve `no_determinado`. `disenos[].id` es el id de la receta; el `design_id` formal llega con la Entrega 3. `tareas_abiertas[].descripcion` se limita a texto generado por D-MIKE o por la receta, nunca a contenido de celdas.
+
+## 14. Botones de reciprocidad
+
+D-MIKE: `Archivo › Importar receta del diagnóstico…` (mismo flujo de Abrir proyecto con una receta, hoy ya disponible por `abrir_proyecto`) y `Archivo › Exportar paquete de avance…`. El diagnóstico (artefacto, se hace fuera del repositorio): botón «Importar paquete de avance» con selector de archivo y, como respaldo, pegar el texto. La web compara `id_proyecto` y `revision_aplicada` y nunca envía ni recibe datos crudos. Las rutas exactas de menú las propone Claude Code según `app/nucleo/menus.py`.
+
+## 15. Versión y compatibilidad
+
+D-MIKE pasa a 0.27.0. Las recetas que usen campos de la Entrega 2 declaran `dmike_minimo` «0.27»; un 0.26.0 las rechaza con «requiere D-MIKE 0.27». Un `.dmike` de 0.26.0 abre en 0.27.0 sin cambios; uno guardado en 0.27.0 abre en 0.26.0 ignorando las claves nuevas. `limites_seguros`, `design_id` y `run_id` siguen en la Entrega 3.
+
