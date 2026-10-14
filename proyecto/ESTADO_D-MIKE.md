@@ -176,6 +176,14 @@ Programa de escritorio para Windows, sin conexión, con módulos independientes 
 - 265 pruebas automáticas aprobadas (v0.13.0); 220 en v0.12.0
 - (anterior) 220 pruebas automáticas aprobadas (v0.12.0); 152 en v0.11.0 (pytest + Playwright con el puente real), estables en corridas repetidas. Capturas en pruebas/capturas.
 
+## Entrega 1.2 (14/10/2026, sin cambio de versión: sigue 0.26.0)
+- Falla de compilación (ejecuciones #8 y #9): MANIFIESTO.txt seguía listando proyecto/catalogo/catalogo_dmike_0.25.0.json, borrado en la Entrega 1. El flujo no tenía el número escrito; la exigencia venía del manifiesto.
+- herramientas/generar_manifiesto.py regenera MANIFIESTO.txt desde git ls-files y deduce el catálogo vigente de VERSION. Usarlo en cada entrega (paso 5 de CLAUDE.md).
+- El paso «Revisar que estén todos los archivos» exige además el catálogo de la VERSION vigente, sin número escrito a mano.
+- pruebas/test_compilacion.py ejecuta el código real del paso del flujo, compara el manifiesto con el repositorio y exige el catálogo vigente.
+- Referencias a 0.25.0 que se conservan a propósito (históricas): fixture caso_integral_v0.25.0.*, pruebas de migración en test_modo_v026.py, y textos de especificaciones y de este archivo.
+- Sin probar en local: PyInstaller, ejecutable --prueba, Inno Setup, descarga de WebView2 y subida del artefacto (solo se confirman en GitHub Actions).
+
 ## Decisiones
 - Interfaz: menú tipo Minitab, panel izquierdo D-M-A-I-C, hoja central, pestañas para resultados y formatos, sesión; datos fijos inyectados solos. Ningún formato exige llenar otro.
 - Tecnología: Python + pywebview (WebView2) + PyInstaller en GitHub Actions (el usuario no tiene Python). SQLite para .dmike. Cálculos en Python (scipy), gráficas en matplotlib a SVG (PNG para exportar). Hoja en JavaScript propio.
