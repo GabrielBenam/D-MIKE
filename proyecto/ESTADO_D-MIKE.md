@@ -184,6 +184,13 @@ Programa de escritorio para Windows, sin conexión, con módulos independientes 
 - Referencias a 0.25.0 que se conservan a propósito (históricas): fixture caso_integral_v0.25.0.*, pruebas de migración en test_modo_v026.py, y textos de especificaciones y de este archivo.
 - Sin probar en local: PyInstaller, ejecutable --prueba, Inno Setup, descarga de WebView2 y subida del artefacto (solo se confirman en GitHub Actions).
 
+## Entrega 1.3 (14/10/2026, sin cambio de versión: sigue 0.26.0)
+- E1.3-R1: test_captura_incremento_3 espera `#franja:not([hidden])` con state="attached" (la franja puede estar fuera del área visible).
+- E1.3-R2: la pestaña de un proyecto de demostración muestra la insignia pequeña «SINTÉTICO» (8 px); el texto completo «SINTÉTICO / NO EMPRESARIAL» va en title y aria-label. Proyecto real: sin insignia. Franja de resultados, .xlsx, .png, Power BI, Minitab y reporte conservan el texto completo.
+- E1.3-R3: ejecutar_receta con modo="datos" no comprueba id_proyecto repetido ni asigna id_proyecto al proyecto nuevo. Ramas «nuevo» y «actualizar» sin cambio. La prueba a6 ya no espera id_conflicto en «datos».
+- E1.3-R4: id_proyecto_de devuelve None sin excepción con archivo borrado, vacío, no SQLite, JSON dañado, sin _receta, sin tabla; ya lo hacía, se agregó la prueba.
+- Sin probar en local: pruebas/test_ui_completa.py (requiere pywebview, que no se instala en el contenedor Linux); se confirma en GitHub Actions.
+
 ## Decisiones
 - Interfaz: menú tipo Minitab, panel izquierdo D-M-A-I-C, hoja central, pestañas para resultados y formatos, sesión; datos fijos inyectados solos. Ningún formato exige llenar otro.
 - Tecnología: Python + pywebview (WebView2) + PyInstaller en GitHub Actions (el usuario no tiene Python). SQLite para .dmike. Cálculos en Python (scipy), gráficas en matplotlib a SVG (PNG para exportar). Hoja en JavaScript propio.

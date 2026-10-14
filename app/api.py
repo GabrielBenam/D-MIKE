@@ -469,6 +469,7 @@ class Api:
         if bloqueo: return self._resp("La receta no se puede abrir: " + "; ".join(bloqueo[:6]) + ".", "aviso", error="receta")
         # id_proyecto (E1-R9): nunca se asigna uno que ya pertenezca a otro proyecto abierto o reciente
         idp = rc.get("id_proyecto")
+        if modo == "datos": idp = None                  # E1.3-R3: «solo abrir los datos» no compara ni asigna id_proyecto
         if idp:
             otro = self._doc_con_id(idp, excluir=objetivo["id"] if objetivo else None)
             previo = (objetivo["proyecto"].formatos.get("_receta") or {}).get("id_proyecto") if objetivo else None
