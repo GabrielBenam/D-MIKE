@@ -8,7 +8,7 @@ Ingeniero Aeronáutico en Manufactura y Black Belt LSS, nivel informático bási
 
 ## Fuentes y rigor
 - `proyecto/ESTADO_D-MIKE.md`: fuente de verdad de lo decidido y lo pendiente. Actualízalo en cada entrega.
-- `proyecto/especificaciones/`: requisitos vigentes (`ESPEC_flujo_real_dmaic.md`, `ESPEC_manual_v026.md`).
+- `proyecto/especificaciones/`: requisitos vigentes (`ESPEC_flujo_real_dmaic.md`, `ESPEC_manual_v026.md`, `ESPEC_receta_v2.md`).
 - Fórmulas y umbrales: solo de la base del curso (citas tipo `16_GB_... CAP-...`, `PL03`). Si no hay fuente, marca «no respaldado» en el código o el resultado; no inventes criterios.
 - Solo datos sintéticos marcados como tales. Nunca datos de clientes.
 - Formatos Lean (TAKT, TIEMPOS, BALANCE, MUDAS, TRABAJO-EST, VSM): no cambiar cálculos hasta verificarlos contra PL03 con los Excel 3_6_a/3_6_b. MTM, solver de balanceo, simulación y layout: fuera de alcance.

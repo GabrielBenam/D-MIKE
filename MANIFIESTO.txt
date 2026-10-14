@@ -3,7 +3,6 @@
 .gitignore
 08_GLOSARIO.md
 CLAUDE.md
-ESPEC_receta_v2.md
 README.md
 app/__init__.py
 app/api.py
@@ -109,6 +108,7 @@ proyecto/artefactos/visor.plantilla.html
 proyecto/catalogo/catalogo_dmike_0.26.0.json
 proyecto/especificaciones/ESPEC_flujo_real_dmaic.md
 proyecto/especificaciones/ESPEC_manual_v026.md
+proyecto/especificaciones/ESPEC_receta_v2.md
 pruebas/capturas.py
 pruebas/conftest.py
 pruebas/maquetas/maquetas.py
