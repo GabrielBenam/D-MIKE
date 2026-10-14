@@ -20,7 +20,7 @@ Van en `herramientas/manual/entradas/` (o en la carpeta de `--entradas`):
 |---|---|---|
 | `D-MIKE_caso_integral_paso_a_paso.md` | Sección 6, caso maestro | sin sección 6 |
 | `svgs.json` | Figuras del caso (formato `{MÓDULO: [{"svg": [...], "huella": "..."}]}`) | sin figuras |
-| `08_GLOSARIO.md` | Apéndice B, glosario de la base del curso | sin glosario |
+| `08_GLOSARIO.md` | Apéndice B, glosario de la base del curso. Si no está en `entradas/`, se usa el de la raíz del repositorio (ya está ahí) | sin glosario |
 
 Si falta alguno, el generador se detiene y lo dice. Con `--permitir-faltantes` genera un PDF **parcial**: las secciones afectadas salen marcadas «Sección no generada» y el generador lista lo que faltó. Un PDF parcial no es el manual completo.
 
