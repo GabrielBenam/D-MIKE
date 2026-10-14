@@ -18,7 +18,7 @@ def test_manual_sin_rutas_absolutas():
 
 
 def _generar(cwd, salida):
-    return subprocess.run([sys.executable, str(MANUAL / "gen.py"), "--permitir-faltantes", "--salida", str(salida)], cwd=cwd, capture_output=True, text=True, timeout=600)
+    return subprocess.run([sys.executable, str(MANUAL / "gen.py"), "--salida", str(salida)], cwd=cwd, capture_output=True, text=True, timeout=600)
 
 
 @pytest.mark.interfaz
@@ -38,10 +38,45 @@ def test_manual_mismo_pdf_desde_distintos_directorios(tmp_path):
         n = int(re.search(r"Pages:\s+(\d+)", subprocess.run(["pdfinfo", str(pdf)], capture_output=True, text=True).stdout).group(1))
         textos.append((n, subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True, text=True).stdout))
     assert textos[0] == textos[1] and textos[0][0] > 50
-    assert "Sección no generada" in textos[0][1]                     # el PDF parcial declara lo que le falta
+    assert "Sección no generada" not in textos[0][1] and textos[0][0] > 120      # manual completo, no parcial
 
 
 def test_manual_sin_entradas_se_detiene_con_mensaje(tmp_path):
     r = subprocess.run([sys.executable, str(MANUAL / "gen.py"), "--entradas", str(tmp_path), "--salida", str(tmp_path / "s")], capture_output=True, text=True, timeout=120)
     if "No module named" in r.stderr: pytest.skip("faltan dependencias del generador")
-    assert r.returncode != 0 and "Faltan entradas" in r.stderr and "svgs.json" in r.stderr and "paso_a_paso.md" in r.stderr and "--permitir-faltantes" in r.stderr
+    assert r.returncode != 0 and "Faltan entradas" in r.stderr and "paso_a_paso.md" in r.stderr and "--permitir-faltantes" in r.stderr
+
+
+def test_generar_svgs_produce_las_figuras_que_usa_el_manual(tmp_path):
+    """svgs.json trae las 10 figuras que gen.py inserta en la sección 6 (módulo, k-ésimo resultado, j-ésima gráfica) y es reproducible."""
+    import json
+    a, b = tmp_path / "a.json", tmp_path / "b.json"
+    for destino in (a, b):
+        r = subprocess.run([sys.executable, str(MANUAL / "generar_svgs.py"), "--salida", str(destino)], capture_output=True, text=True, timeout=300)
+        if "No module named" in r.stderr: pytest.skip("faltan dependencias del programa")
+        assert r.returncode == 0, r.stderr[-500:]
+    assert a.read_bytes() == b.read_bytes()
+    sv = json.loads(a.read_text(encoding="utf-8"))
+    usadas = [("MSA-VAR", 0, 0), ("SPC", 0, 0), ("CAPACIDAD", 0, 0), ("PARETO", 0, 0), ("ANOVA", 0, 0), ("FACTORIAL", 0, 0), ("RSM", 0, 1), ("RSM", 1, 1), ("OPTIMIZADOR", 0, 0), ("CAPACIDAD", 1, 0)]
+    for mod, k, j in usadas:
+        assert sv[mod][k]["svg"][j].lstrip().startswith("<svg") and len(sv[mod][k]["huella"]) == 64, (mod, k, j)
+    assert "dc:date" not in a.read_text(encoding="utf-8")
+
+
+@pytest.mark.interfaz
+def test_manual_completo_sin_permitir_faltantes(tmp_path):
+    pytest.importorskip("markdown", reason="falta el paquete markdown (requirements-dev.txt)")
+    if not (shutil.which("pdfinfo") and shutil.which("pdftotext")): pytest.skip("falta poppler-utils")
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p: p.chromium.launch().close()
+    except Exception as e: pytest.skip(f"sin navegador de Playwright ({str(e).splitlines()[0][:60]})")
+    ent = tmp_path / "entradas"; ent.mkdir()
+    shutil.copy(MANUAL / "entradas" / "D-MIKE_caso_integral_paso_a_paso.md", ent)           # el glosario sale de la raíz y svgs.json se genera solo
+    r = subprocess.run([sys.executable, str(MANUAL / "gen.py"), "--entradas", str(ent), "--salida", str(tmp_path / "s")], capture_output=True, text=True, timeout=900)
+    assert r.returncode == 0, r.stderr[-600:]
+    assert "ADVERTENCIA" not in r.stdout and (ent / "svgs.json").is_file()
+    pdf = next((tmp_path / "s").glob("*.pdf"))
+    texto = subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True, text=True).stdout
+    assert "Sección no generada" not in texto and "6.10 Notas de rigor" in texto and "A3: formato de una hoja" in texto
+    assert (tmp_path / "s" / "manual.html").read_text(encoding="utf-8").count("<figure>") == 10

@@ -12,15 +12,15 @@ El PDF queda en `herramientas/manual/salida/D-MIKE_Manual_de_uso_v<versión>.pdf
 
 Opciones: `--salida CARPETA` (otra carpeta de salida), `--entradas CARPETA` (otra carpeta de entradas), `--permitir-faltantes` (ver abajo). También se leen las variables de entorno `DMIKE_MANUAL_SALIDA` y `DMIKE_MANUAL_ENTRADAS`.
 
-## Entradas que NO están en el repositorio
+## Entradas
 
 Van en `herramientas/manual/entradas/` (o en la carpeta de `--entradas`):
 
-| Archivo | Para qué | Sin él |
+| Archivo | Para qué | Cómo se obtiene |
 |---|---|---|
-| `D-MIKE_caso_integral_paso_a_paso.md` | Sección 6, caso maestro | sin sección 6 |
-| `svgs.json` | Figuras del caso (formato `{MÓDULO: [{"svg": [...], "huella": "..."}]}`) | sin figuras |
-| `08_GLOSARIO.md` | Apéndice B, glosario de la base del curso. Si no está en `entradas/`, se usa el de la raíz del repositorio (ya está ahí) | sin glosario |
+| `D-MIKE_caso_integral_paso_a_paso.md` | Sección 6, caso maestro | Texto escrito a mano; está versionado en `entradas/` |
+| `svgs.json` | Figuras del caso (formato `{MÓDULO: [{"svg": [...], "huella": "..."}]}`) | Se genera solo si falta, con `python herramientas/manual/generar_svgs.py` (corre la receta sintética del caso; no se versiona) |
+| `08_GLOSARIO.md` | Apéndice B, glosario de la base del curso | Si no está en `entradas/`, se usa el de la raíz del repositorio |
 
 Si falta alguno, el generador se detiene y lo dice. Con `--permitir-faltantes` genera un PDF **parcial**: las secciones afectadas salen marcadas «Sección no generada» y el generador lista lo que faltó. Un PDF parcial no es el manual completo.
 

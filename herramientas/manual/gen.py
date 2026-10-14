@@ -17,6 +17,10 @@ SAL.mkdir(parents=True, exist_ok=True)
 ENTRADAS = {"caso": (ENT / "D-MIKE_caso_integral_paso_a_paso.md", "paso a paso del caso maestro (sección 6)"),
             "svgs": (ENT / "svgs.json", "gráficas SVG del caso (figuras de la sección 6)"),
             "glosario": (ENT / "08_GLOSARIO.md" if (ENT / "08_GLOSARIO.md").is_file() else RAIZ / "08_GLOSARIO.md", "glosario de la base del curso (apéndice B)")}   # si no está en entradas/, se usa el de la raíz del repositorio
+if not ENTRADAS["svgs"][0].is_file():          # svgs.json se deriva de la receta del caso: si no está, se genera (ver generar_svgs.py)
+    sys.path.insert(0, str(AQUI)); import generar_svgs
+    ENT.mkdir(parents=True, exist_ok=True)
+    ENTRADAS["svgs"][0].write_text(json.dumps(generar_svgs.generar(), ensure_ascii=False), encoding="utf-8")
 FALTAN = [f"{ruta}  [{que}]" for ruta, que in ENTRADAS.values() if not ruta.is_file()]
 FALTAN += [f"{h}  [herramienta del sistema; instala poppler-utils]" for h in ("pdfinfo", "pdftotext") if not shutil.which(h)]
 if FALTAN and not ARGS.permitir_faltantes:
