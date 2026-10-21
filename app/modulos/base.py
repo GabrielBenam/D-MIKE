@@ -124,6 +124,44 @@ def resultado(modulo, titulo, params, bloques, avisos=(), datos=None, png=None, 
             "avisos": list(avisos), "datos": datos or {}, "png": png}
 
 
+# ---------- G7: análisis por persona ----------
+NOTA_PERSONA = ("Atención: no compares el desempeño individual de personas sin normalizar por tipo y complejidad del trabajo. "
+                "Las diferencias entre personas pueden venir de la mezcla de trabajos que recibe cada una y no de su desempeño. "
+                "Esta nota no bloquea el cálculo.")
+_PERSONA = ("persona", "operador", "analista", "tecnico", "inspector", "revisor", "responsable", "empleado", "colaborador",
+            "capturista", "autor", "redactor", "evaluador", "ingeniero", "dibujante", "auditor", "usuario", "trabajador", "elaboro", "asignado")
+SIN_NOTA_PERSONA = ("MSA-ATR", "MSA-VAR")     # en un MSA los evaluadores son parte del sistema de medición que se estudia
+
+
+def _sin_acentos(t):
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", str(t).lower()) if unicodedata.category(c) != "Mn")
+
+
+def es_columna_persona(nombre):
+    n = _sin_acentos(nombre)
+    return any(k in n for k in _PERSONA)
+
+
+def nota_persona(cls, hoja, params):
+    """G7: bloque de texto (o None) para el Pareto y para cualquier análisis cuya columna de agrupación parezca identificar personas."""
+    if cls.ID in SIN_NOTA_PERSONA: return None
+    if cls.ID == "PARETO": return b_texto(NOTA_PERSONA, "advertencia")
+    for c in getattr(cls, "CAMPOS", []):
+        j = params.get(c["campo"])
+        if c.get("tipo") == "col" and c.get("filtro") == "texto" and isinstance(j, int) and 0 <= j < len(hoja.columnas) \
+                and es_columna_persona(hoja.columnas[j].nombre or ""):
+            return b_texto(NOTA_PERSONA, "advertencia")
+    return None
+
+
+def agregar_nota_persona(res, cls, hoja, params):
+    b = nota_persona(cls, hoja, params)
+    if b and not any(x.get("clase") == "advertencia" and x.get("texto") == NOTA_PERSONA for x in res["bloques"]):
+        res["bloques"].insert(1 if res["bloques"] and res["bloques"][0]["tipo"] == "grafica" else 0, b)
+    return res
+
+
 def frase_p(p, alfa, h0, ha):
     """Conclusión de una prueba con redacción correcta (no afirma igualdad cuando no se rechaza H0)."""
     if p < alfa:

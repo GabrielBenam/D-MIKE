@@ -145,6 +145,7 @@ button.pestana { padding: 6px 12px; }
 .texto-res { line-height: 1.5; margin: 6px 0 10px; max-width: 900px; }
 .texto-res.conclusion { font-weight: 600; background: var(--acento-suave); border-left: 3px solid var(--acento); padding: 8px 12px; border-radius: 4px; }
 .texto-res.nota { color: var(--tinta-suave); font-size: 11.5px; }
+.texto-res.advertencia { background: var(--panel); border-left: 3px solid var(--acento); padding: 8px 12px; border-radius: 4px; font-size: 12px; }
 .texto-res.aviso, .aviso-res { color: #9a3d0d; margin: 4px 0; }
 .tabla-marco { margin: 10px 0 14px; overflow-x: auto; }
 .tabla-titulo { font-weight: 700; font-size: 12.5px; margin: 12px 0 6px; }

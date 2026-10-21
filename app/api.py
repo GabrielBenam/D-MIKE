@@ -9,7 +9,7 @@ from .nucleo import archivo
 from .nucleo import modo as MD
 from .nucleo import seguimiento as SG
 from . import modulos
-from .modulos.base import ErrorEntrada
+from .modulos.base import ErrorEntrada, agregar_nota_persona
 import json, os
 from datetime import datetime
 
@@ -590,6 +590,7 @@ class Api:
             return self._resp(f"{cls.TITULO}: {e}", "aviso", error="entrada")
         if getattr(cls, "SIN_RESULTADO", False):
             return self._resp(res)
+        agregar_nota_persona(res, cls, self.hoja, params)
         res["definicion"] = self._definicion(cls, mid, params)
         res["definicion"]["congelado"] = self._congelar(cls, params)
         self.proyecto.resultados.append(res)
@@ -666,6 +667,7 @@ class Api:
         cls = self._modulo(res["definicion"]["analisis"])
         try: nuevo = cls.ejecutar(tmp, dict(cg["parametros"]), self.proyecto)
         except ErrorEntrada as e: return self._resp(f"No se pudo reproducir: {e}", "aviso", error="entrada")
+        agregar_nota_persona(nuevo, cls, tmp, cg["parametros"])
         nuevo["titulo"] = res["titulo"] + " (reproducción de la versión guardada)"
         nuevo["definicion"] = dict(res["definicion"]); nuevo["definicion"]["reproduccion_de"] = uid
         nuevo["avisos"] = [f"Reproducido con la copia congelada del {res['definicion'].get('fecha', '')[:10]} (motor v{cg['version']}, huella {cg['huella'][:12]}); no usa la hoja actual."] + nuevo["avisos"]
