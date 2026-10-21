@@ -130,7 +130,7 @@ class Api:
         ses += [self.sesion.registrar(t, k) for t, k in mensajes]
         r = {"error": error, "sesion": ses, "archivo": self._archivo()}
         if hoja:
-            DIS.sincronizar_runid(self.proyecto, self.hoja)            # E3-2: RunId es de solo lectura; se reescribe de OrdenEst
+            DIS.sincronizar(self.proyecto, self.hoja)                  # E3-2: RunId es de solo lectura (se reescribe de OrdenEst); E3-3: versión de las respuestas
             r["hoja"] = self.hoja.estado()
         if proyecto: r["proyecto"] = self.proyecto.estado(self.catalogo)
         return r
@@ -216,7 +216,7 @@ class Api:
         n0, nc0 = self.hoja.n, len(self.hoja.columnas)
         antes = self.hoja.columnas[col].tipo if col < nc0 else None
         self.hoja.editar(fila, col, texto)
-        runid_cambio = DIS.sincronizar_runid(self.proyecto, self.hoja)       # editar OrdenEst cambia el RunId de esa fila: se envía la hoja completa
+        runid_cambio = DIS.sincronizar(self.proyecto, self.hoja)       # editar OrdenEst cambia el RunId de esa fila: se envía la hoja completa
         c = self.hoja.columnas[col] if col < len(self.hoja.columnas) else None
         malo = bool(c and fila < self.hoja.n and not c.valor(fila)[1])
         if malo:
@@ -844,6 +844,34 @@ class Api:
         """E3-2: identidad de los diseños del proyecto (design_id, version_diseno, estado de su definición, RunId)."""
         return DIS.descriptores(self.proyecto, self.hoja)
 
+    def importar_respuestas(self, ruta=None, design_id=None, sobrescribir=False):
+        """E3-3: importa las respuestas de un diseño por RunId (columnas RunId, version_diseno, la respuesta y, opcional, los factores). Atómica:
+        con un solo desajuste no se escribe nada y se informa cada error."""
+        from .nucleo import importar as imp, respuestas as RS
+        ruta = ruta or self._elegir("abrir", ["Respuestas del diseño (*.csv;*.tsv;*.txt;*.xlsx)", "Todos los archivos (*.*)"])
+        if not ruta: return self._resp("Importación cancelada.", hoja=False)
+        nombre = os.path.basename(ruta)
+        try: filas, fmt = imp.leer(ruta); huella = RS.huella_archivo(ruta)
+        except (OSError, ValueError) as e:
+            return self._resp(f"No se pudieron leer las respuestas: {e}. No se cambió nada.", "aviso", error="respuestas", hoja=False)
+        plan = RS.analizar(self.proyecto, self.hoja, filas, design_id, bool(sobrescribir))
+        resumen = {k: plan[k] for k in ("ok", "errores", "avisos", "design_id", "version", "escritas", "iguales", "sobrescritas", "sin_dato")}
+        if not plan["ok"]:
+            r = self._resp(f"Respuestas no importadas de {nombre}: {len(plan['errores'])} {'problema' if len(plan['errores']) == 1 else 'problemas'}. No se escribió nada.",
+                           "aviso", error="respuestas", mensajes=[(e, "aviso") for e in plan["errores"]] + [(a, "info") for a in plan["avisos"]], hoja=False)
+            r["importacion"] = resumen; return r
+        n = RS.aplicar(self.proyecto, self.hoja, plan, nombre, huella)
+        r = self._resp(f"Importadas {n} respuestas de {nombre} ({fmt}) al diseño {plan['design_id']}, versión {plan['version']}"
+                       + (f"; {plan['iguales']} ya estaban iguales" if plan["iguales"] else "") + (f"; {plan['sobrescritas']} sobrescritas" if plan["sobrescritas"] else "") + ".",
+                       mensajes=[(a, "info") for a in plan["avisos"]])
+        r["importacion"] = resumen; return r
+
+    def confirmar_respuestas_diseno(self, design_id, motivo=""):
+        """E3-3: el usuario declara, con motivo registrado, que las respuestas de la hoja corresponden a la versión vigente del diseño."""
+        estado, msg = DIS.confirmar_respuestas(self.proyecto, self.hoja, design_id, motivo)
+        r = self._resp(msg, "aviso" if estado == "error" else "info", error="confirmar" if estado == "error" else None, hoja=False)
+        r["estado"] = estado; r["disenos"] = DIS.descriptores(self.proyecto, self.hoja); return r
+
     def registrar_version_diseno(self, design_id, motivo=""):
         """E3-2: el usuario pide registrar una versión nueva del diseño cuando su definición cambió; el número lo asigna D-MIKE."""
         estado, msg = DIS.registrar_version(self.proyecto, self.hoja, design_id, motivo)
@@ -1014,8 +1042,8 @@ class Api:
 
 _HOJA = ("editar", "pegar", "renombrar", "cambiar_tipo", "insertar_columna", "eliminar_columna", "insertar_fila", "eliminar_fila",
          "borrar_rango", "llenar_con", "rellenar", "insertar_filas", "eliminar_filas", "eliminar_columnas", "filtrar", "importar", "abrir_perfil",
-         "ejecutar_modulo")
-_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno"}
+         "ejecutar_modulo", "importar_respuestas")
+_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno"}
 
 
 def _con_deshacer(f, cambia_hoja):

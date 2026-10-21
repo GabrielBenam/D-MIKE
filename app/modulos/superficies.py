@@ -174,6 +174,7 @@ class Rsm(ModuloDialogo):
         X = [[valor(hoja, j, i) for j in xs] for i in filas]
         nombres = [hoja.columnas[j].nombre or f"C{j + 1}" for j in xs]
         ny = hoja.columnas[yj].nombre or f"C{yj + 1}"
+        if (motivo := DIS.verificar_para_analisis(proyecto, hoja, ny)): raise ErrorEntrada(motivo)          # E3-3: no se mezclan versiones del diseño
         disenos = (proyecto.formatos.get("_disenos", {}) if proyecto is not None else {})
         diseno = disenos.get(ny)
         if p.get("niveles"):

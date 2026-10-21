@@ -145,6 +145,69 @@ def estado_definicion(hoja, info):
     return "vigente" if actual == info.get("huella_diseno") else "cambiada"
 
 
+# ---------------- respuestas del diseño (E3-3) ----------------
+def estado_respuestas(hoja, info):
+    """(cuántas respuestas hay en la hoja, versión con la que se capturaron o None). Cuenta las celdas no vacías de la columna de respuestas
+    del diseño. La versión la deja D-MIKE: al importar, o al etiquetar las respuestas tecleadas con la versión vigente."""
+    j = _indice(hoja, info.get("respuesta"))
+    if j is None: return 0, info.get("respuestas_version")
+    n = sum(1 for t in hoja.columnas[j].celdas if t not in (None, "") and str(t).strip() != "")
+    return n, (info.get("respuestas_version") if n else None)
+
+
+def etiquetar_respuestas(proyecto, hoja):
+    """Las respuestas tecleadas o pegadas a mano se etiquetan con la versión vigente del diseño; sin respuestas, se borra la etiqueta. Solo toca
+    diseños con identidad guardada (los anteriores a 0.29 no se modifican al abrir ni al consultar)."""
+    for info in _disenos(proyecto).values():
+        if not info.get("design_id"): continue
+        n, v = estado_respuestas(hoja, info)
+        if n == 0 and info.get("respuestas_version") is not None: info["respuestas_version"] = None
+        elif n and v is None: info["respuestas_version"] = int(info.get("version_diseno") or 1)
+
+
+def sincronizar(proyecto, hoja):
+    """Mantiene lo derivado de la hoja: la columna RunId de solo lectura y la etiqueta de versión de las respuestas. Devuelve True si cambió RunId."""
+    etiquetar_respuestas(proyecto, hoja)
+    return sincronizar_runid(proyecto, hoja)
+
+
+def verificar_para_analisis(proyecto, hoja, nombre_respuesta):
+    """Motivo (texto) por el que un análisis no debe correr sobre la columna de respuestas de un diseño, o None si puede. No se mezclan
+    respuestas de versiones distintas: se rechaza si la definición cambió sin registrar o si las respuestas son de otra versión.
+    Diseños anteriores a 0.29 (sin identidad guardada) y columnas que no son la respuesta de un diseño no se verifican."""
+    if proyecto is None: return None
+    info = _disenos(proyecto).get(nombre_respuesta)
+    if not info or not info.get("design_id"): return None
+    n, v = estado_respuestas(hoja, info)
+    if n == 0: return None
+    ident = identidad(info, nombre_respuesta)
+    if estado_definicion(hoja, info) == "cambiada":
+        return (f"La definición de {ident['design_id']} cambió desde la versión {ident['version_diseno']} y no está registrada: las respuestas podrían no corresponder "
+                "a los niveles actuales. Registra la versión nueva del diseño (Diseños del proyecto) antes de analizar.")
+    if v is not None and v != ident["version_diseno"]:
+        return (f"Las respuestas de {ident['design_id']} son de la versión {v} y el diseño está en la versión {ident['version_diseno']}: no se mezclan versiones. "
+                "Bórralas, impórtalas de nuevo con la versión vigente o confirma que corresponden a ella (Diseños del proyecto).")
+    return None
+
+
+def confirmar_respuestas(proyecto, hoja, design_id, motivo, ahora=None):
+    """Resolución manual y auditable: el usuario declara que las respuestas que hay en la hoja corresponden a la versión vigente. Exige un motivo.
+    Devuelve (estado, mensaje): «confirmadas», «sin_cambios» o «error»."""
+    motivo = str(motivo or "").strip()
+    for clave, info in _disenos(proyecto).items():
+        if identidad(info, clave)["design_id"] != design_id: continue
+        if not info.get("design_id"): asegurar_identidad(proyecto, hoja)
+        n, v = estado_respuestas(hoja, info); vig = int(info.get("version_diseno") or 1)
+        if n == 0: return "sin_cambios", f"{design_id} no tiene respuestas en la hoja: no hay nada que confirmar."
+        if v == vig: return "sin_cambios", f"Las respuestas de {design_id} ya son de la versión vigente ({vig})."
+        if not motivo: return "error", "Escribe el motivo: la confirmación queda registrada en el diseño."
+        info.setdefault("confirmaciones_respuestas", []).append({"de_version": v, "a_version": vig, "motivo": motivo,
+                                                                 "fecha": (ahora or datetime.now()).isoformat(timespec="seconds")})
+        info["respuestas_version"] = vig
+        return "confirmadas", f"Las respuestas de {design_id} se confirman como de la versión {vig} (antes de la {v}); quedó registrado."
+    return "error", f"No existe el diseño {design_id}."
+
+
 def descriptores(proyecto, hoja):
     """Vista de los diseños del proyecto para la interfaz y el seguimiento. Solo lee: la identidad de un diseño anterior a 0.29 se deriva de su
     clave sin guardarla (determinista y reversible)."""
@@ -154,6 +217,7 @@ def descriptores(proyecto, hoja):
         out.append({"clave": clave, **ident, "respuesta": info.get("respuesta"), "factores": [f["nombre"] for f in info.get("factores", [])],
                     "tipo": info.get("tipo"), "corridas": info.get("corridas"), "estado_definicion": estado_definicion(hoja, info),
                     "col_runid": info.get("col_runid"), "run_ids": sum(1 for r in ids if r), "problemas": prob,
+                    "respuestas": dict(zip(("n", "version"), estado_respuestas(hoja, info))), "importaciones": len(info.get("importaciones") or []),
                     "historial_versiones": list(info.get("historial_versiones") or [])})
     return out
 

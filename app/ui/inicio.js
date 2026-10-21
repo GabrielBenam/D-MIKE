@@ -79,6 +79,7 @@ const ACCIONES_UI = {
   guardar: () => aplicarProyecto(api().guardar(false)), guardar_como: () => aplicarProyecto(api().guardar(true)),
   exportar: () => aplicarProyecto(api().exportar()), exportar_powerbi: () => aplicarProyecto(api().exportar_powerbi()),
   exportar_avance: () => aplicarProyecto(api().exportar_avance()), seguimiento: () => dialogoSeguimiento(),
+  disenos_dialogo: () => dialogoDisenos(), importar_respuestas: () => aplicar(api().importar_respuestas()),
   importar_receta: async () => { if (window.guardarTabs) guardarTabs(); const r = await aplicarProyecto(api().abrir_receta()); if (r.receta) preguntarReceta(r.receta); },
   deshacer: () => aplicar(api().deshacer()), rehacer: () => aplicar(api().rehacer()), importar: () => aplicar(api().importar()),
 };
@@ -242,6 +243,31 @@ async function dialogoSeguimiento() {
   dialogo("Seguimiento del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
 }
 window.dialogoSeguimiento = dialogoSeguimiento;
+
+// Diseños del proyecto (E3-2 y E3-3): identidad, versión, estado de la definición y de las respuestas
+const ESTADO_DEF = { vigente: "vigente", cambiada: "cambió: registra una versión nueva", sin_linea_base: "sin línea base (diseño anterior a 0.29)", no_verificable: "faltan columnas del diseño en la hoja" };
+function pedirMotivo(titulo, ayuda, accion) {
+  const motivo = el("input", { placeholder: "Motivo (queda registrado)", style: "width:100%", autocomplete: "off" });
+  dialogo(titulo, el("div", { class: "formulario" }, el("p", { class: "tb-sub" }, ayuda), el("label", {}, motivo)), async () => { await accion(motivo.value); return true; }, "Guardar");
+}
+async function dialogoDisenos() {
+  const ds = await api().disenos();
+  const recargar = async r => { if (r && r.sesion) registrarSesion(r.sesion); document.querySelector(".velo")?.remove(); await dialogoDisenos(); };
+  const cuerpo = el("div", { class: "ficha", id: "disenos" }, ds.length ? ds.map(d => {
+    const mezcla = d.respuestas.version != null && d.respuestas.version !== d.version_diseno;
+    return el("div", { class: "tb-def" },
+      el("h4", {}, `${d.design_id} · versión ${d.version_diseno} · ${d.corridas ?? "?"} corridas`),
+      el("p", {}, `Respuesta: ${d.respuesta}. Factores: ${d.factores.join(", ")}. RunId: ${d.col_runid ? "columna " + d.col_runid + " (solo lectura)" : "derivado de OrdenEst, sin columna"}.`),
+      el("p", {}, `Definición: ${ESTADO_DEF[d.estado_definicion] || d.estado_definicion}. Respuestas en la hoja: ${d.respuestas.n}${d.respuestas.n ? ` (versión ${d.respuestas.version ?? "sin etiqueta"})` : ""}${mezcla ? " · no coinciden con la versión vigente: no se analizan" : ""}.`),
+      d.historial_versiones.length ? el("p", { class: "tb-sub" }, "Versiones anteriores: " + d.historial_versiones.map(h => `v${h.version}${h.motivo ? " (" + h.motivo + ")" : ""}`).join("; ")) : "",
+      el("div", {}, 
+        (d.estado_definicion === "cambiada" || d.estado_definicion === "sin_linea_base") ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Registrar versión nueva", d.estado_definicion === "cambiada" ? "La definición cambió: se registrará la versión " + (d.version_diseno + 1) + ". Las respuestas actuales dejarán de coincidir con la versión vigente." : "Este diseño no tenía línea base: se tomará su estado actual como versión 1.", async m => recargar(await api().registrar_version_diseno(d.design_id, m))) }, d.estado_definicion === "cambiada" ? "Registrar versión nueva…" : "Tomar línea base…") : "",
+        mezcla ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Confirmar respuestas", `Declaras que las respuestas de la hoja corresponden a la versión ${d.version_diseno}. Escribe por qué.`, async m => recargar(await api().confirmar_respuestas_diseno(d.design_id, m))) }, "Confirmar que son de la versión vigente…") : "",
+        el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…")));
+  }) : el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos."));
+  dialogo("Diseños del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
+}
+window.dialogoDisenos = dialogoDisenos;
 
 async function iniciar() {
   const e = await api().estado_inicial();

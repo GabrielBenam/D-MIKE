@@ -1592,6 +1592,26 @@
 },
 {
 "cat": "Estadística",
+"n": "Diseños del proyecto",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Identidad, versión y estado de cada diseño; registrar versión y confirmar respuestas"
+},
+{
+"cat": "Estadística",
+"n": "Importar respuestas del diseño",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Respuestas por RunId con verificación de versión y de niveles; atómica"
+},
+{
+"cat": "Estadística",
 "n": "Analizar diseño factorial",
 "a": "—",
 "c": [
