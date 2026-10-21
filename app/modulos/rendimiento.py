@@ -212,7 +212,7 @@ class Rendimiento(ModuloDialogo):
         regla = ("Regla de primer evento: " + ("número de intento (1 = primera inspección)" if ji is not None else "fecha del evento (el más antiguo de cada unidad y paso)" if jf is not None
                  else "declarada por el usuario: cada fila es la primera inspección") + ". Rendimiento de un paso = aprobadas en su primera inspección / inspeccionadas por primera vez. "
                  "Rendimiento tradicional = unidades que salen / unidades que entran, sin retrabajo; FTY = promedio de los rendimientos de cada paso; RTY = producto. "
-                 f"Fuente: {FUENTE}. Sin ejemplo del curso; verificado con cálculo a mano (pruebas/test_g4_rendimiento.py). Orden de los pasos: el de la hoja; esa regla es una decisión de D-MIKE, no del curso (no respaldado). "
+                 f"Fuente: {FUENTE}. Sin ejemplo del curso; verificado con cálculo a mano (pruebas/test_g4_rendimiento.py). Orden de los pasos: el de la hoja; esa regla es una decisión de D-MIKE, no del curso (no respaldado). FTY: el rendimiento de cada paso es el de primera pasada, el mismo que alimenta al RTY; es una lectura deducida del nombre First-Time Yield y de que, según el curso, el RTY baja al incluir el retrabajo. DES-RENDIMIENTO no define explícitamente si las «buenas» incluyen retrabajo, y esta lectura no es un ejemplo del curso. "
                  "El supuesto de que el registro incluye todas las inspecciones no se puede comprobar con los datos.")
         bloques.append(b_texto(regla, "nota"))
         return resultado(cls.ID, f"Rendimientos de {nom}", p, bloques, avisos, datos={"columnas": [j for j in (ju, jp, jr, ji, jf) if j is not None],

@@ -161,3 +161,10 @@ def test_la_nota_dice_que_el_orden_de_los_pasos_es_decision_de_d_mike():
     r = corre(eventos_a_mano())["resultado"]
     nota = " ".join(b["texto"] for b in r["bloques"] if b["tipo"] == "texto" and b["clase"] == "nota")
     assert "Orden de los pasos: el de la hoja; esa regla es una decisión de D-MIKE, no del curso (no respaldado)" in nota
+
+
+def test_la_nota_declara_el_fty_como_lectura_deducida():
+    r = corre(eventos_a_mano())["resultado"]
+    nota = " ".join(b["texto"] for b in r["bloques"] if b["tipo"] == "texto" and b["clase"] == "nota")
+    assert "lectura deducida del nombre First-Time Yield" in nota and "no define explícitamente si las «buenas» incluyen retrabajo" in nota
+    assert "esta lectura no es un ejemplo del curso" in nota
