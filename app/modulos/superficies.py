@@ -11,6 +11,7 @@ from .base import _f
 from .base import (ErrorEntrada, columna, filas_validas, valor, figura, a_svg_png, num, p_igual, p_texto, frase_p,
                    resultado, b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO)
 from .dialogo import ModuloDialogo
+from ..nucleo import modo as MD, disenos as DIS
 
 MAPA = mcolors.LinearSegmentedColormap.from_list("dmike", ["#fbf6ef", "#f6c9a8", "#ec8a4f", "#dd5813", "#8a3307"])
 TIPOS_DISENO = [["ccd", "Central compuesto (DCC)"], ["bb", "Box-Behnken"], ["fact", "Factorial completo 2^k con puntos centrales"],
@@ -86,9 +87,17 @@ class DisenoRsm(ModuloDialogo):
         hoja.cambiar_tipo(col0 + len(cab) - 1, "num")
         reales = [hoja.columnas[col0 + j].nombre for j in range(len(cab))]
         info = {"tipo": tipo, "factores": [{"nombre": reales[4 + j], "bajo": bajos[j], "alto": altos[j]} for j in range(k)],
-                "alfa": alfa, "respuesta": reales[-1], "bloque": reales[3], "tipo_punto": reales[2], "corridas": n}
+                "alfa": alfa, "respuesta": reales[-1], "bloque": reales[3], "tipo_punto": reales[2], "corridas": n,
+                "orden_est": reales[0], "orden_corrida": reales[1]}
+        columnas_nuevas = list(range(col0, col0 + len(cab)))
+        runid = False
         if proyecto is not None:
+            # E3-2: identidad del diseño (design_id, version_diseno, huella). En un proyecto real se agrega la columna RunId de solo lectura;
+            # en demostración no se toca la hoja (el run_id se deriva igual de OrdenEst).
+            DIS.asignar_nuevo(proyecto, hoja, info, info["respuesta"])
             proyecto.formatos.setdefault("_disenos", {})[info["respuesta"]] = info
+            if not MD.es_demo(proyecto):
+                columnas_nuevas.append(DIS.agregar_runid(hoja, info)); DIS.sincronizar_runid(proyecto, hoja); runid = True
         conteo = {"cubo o esquina": sum(f["tipo"] == 1 for f in filas), "axiales": sum(f["tipo"] == -1 for f in filas),
                   "aristas (Box-Behnken)": sum(f["tipo"] == 2 for f in filas), "centrales": sum(f["tipo"] == 0 for f in filas)}
         frac_info = []
@@ -100,6 +109,8 @@ class DisenoRsm(ModuloDialogo):
                          ["Relación definidora", "I = " + " = ".join(pal)], ["Resolución", ["", "", "", "III", "IV", "V", "VI", "VII"][R]],
                          ["Letras", ", ".join(f"{a} = {b}" for a, b in letras.items())]]
             info["fraccion"] = {"p": pf, "signo": sg, "palabras": pal, "resolucion": R}
+        identidad = [["Identificador del diseño (design_id)", info.get("design_id", "—")], ["Versión del diseño", info.get("version_diseno", "—")],
+                     ["Identificador de cada corrida", "RunId = design_id + OrdenEst" + (" (columna de solo lectura al final de la hoja)" if runid else " (derivado de OrdenEst; la hoja no se modifica en demostración)")]]
         resumen = [["Tipo", dict(TIPOS_DISENO)[tipo] + (f" 2^({k}-{int(p.get('fraccion') or 1)})" if tipo == "frac" else "")], ["Factores", k], ["Corridas", n],
                    ["α (distancia axial, codificada)", num(alfa, 4) if tipo == "ccd" else "—"],
                    ["Bloques", p.get("bloques") if tipo == "ccd" else "1"], ["Réplicas", rep]] + \
@@ -111,14 +122,14 @@ class DisenoRsm(ModuloDialogo):
             avisos.append("Los puntos axiales quedan fuera de los niveles bajo y alto: verifica que el proceso pueda operar en ellos; si no, "
                           "usa el diseño centrado en las caras.")
         return resultado(cls.ID, f"Diseño {dict(TIPOS_DISENO)[tipo].split(' (')[0].lower()} de {k} factores para {resp}", p, [
-            b_texto(f"Se agregaron {len(cab)} columnas a la hoja, a partir de C{col0 + 1}. Corre los experimentos en el orden de "
+            b_texto(f"Se agregaron {len(columnas_nuevas)} columnas a la hoja, a partir de C{col0 + 1}. Corre los experimentos en el orden de "
                     f"«OrdenCorrida», captura la respuesta en «{info['respuesta']}» y luego usa Estadística > Superficie de respuesta > Analizar.",
                     "conclusion"),
-            b_tabla("Resumen del diseño", ["Concepto", "Valor"], resumen + frac_info),
+            b_tabla("Resumen del diseño", ["Concepto", "Valor"], resumen + frac_info + identidad),
             b_tabla("Factores (unidades reales)", ["Factor", "Bajo (-1)", "Alto (+1)", "Axial -α", "Axial +α"], fact),
             b_texto("Procedimiento: 28_BB RSM-PROCEDIMIENTO (factorial con puntos centrales, ascenso, DCC). No respaldados por la base: "
                     "α rotable, Box-Behnken, cantidad de puntos centrales por omisión y reparto en bloques.")],
-            avisos, datos={"columnas": list(range(col0, col0 + len(cab))), "diseno": info})
+            avisos, datos={"columnas": columnas_nuevas, "diseno": info})
 
 
 # ---------------- analizar ----------------

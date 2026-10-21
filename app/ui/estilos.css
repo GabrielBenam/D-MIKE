@@ -83,6 +83,7 @@ body { font-family: "Montserrat", "Segoe UI", sans-serif; font-size: 13px; color
 .hoja td.t { text-align: left; }
 .hoja td.mal { color: #b3261e; background: #fdecea; }
 .hoja td.na { color: var(--tinta-suave); font-style: italic; }
+.hoja td.ro { color: var(--tinta-suave); background: var(--panel); cursor: not-allowed; }
 .hoja td.sd { color: #9a3d0d; font-style: italic; }
 .hoja thead tr.nom th.nombre { color: var(--tinta); font-weight: 600; cursor: cell; }
 .hoja td { cursor: cell; }
