@@ -86,6 +86,30 @@ def errores_modo(receta, modo):
     return err
 
 
+EXIGE_LIMITES_DESDE = "0.29"
+
+
+def errores_limites(receta, modo):
+    """Entrega 3, Decisión 5: disenos[].limites_seguros por factor ({"A": {"min": 0, "max": 1}}). Si vienen, deben ser números con mínimo menor que máximo para cada
+    factor del diseño. Se exigen a los diseños de recetas con dmike_minimo 0.29 o mayor en modo real; en demostración son opcionales y las recetas anteriores
+    se aceptan sin ellos (el diseño queda con región «no declarada»)."""
+    err = []; exige = modo == "real" and _version(receta.get("dmike_minimo") or "0") >= _version(EXIGE_LIMITES_DESDE)
+    for i, d in enumerate(receta.get("disenos") or [], 1):
+        if not isinstance(d, dict) or d.get("modulo") != "DISENO-RSM": continue
+        nom = d.get("id") or i; ls = d.get("limites_seguros")
+        nombres = [x.strip() for x in str((d.get("parametros") or {}).get("nombres") or "").replace(";", ",").split(",") if x.strip()]
+        if ls is None:
+            if exige: err.append(f"el diseño «{nom}» no trae limites_seguros: en modo real son obligatorios desde D-MIKE {EXIGE_LIMITES_DESDE} (un mínimo y un máximo por factor)")
+            continue
+        if not isinstance(ls, dict): err.append(f"limites_seguros del diseño «{nom}» debe ser un objeto con un {{min, max}} por factor"); continue
+        for n in nombres:
+            v = ls.get(n)
+            if not isinstance(v, dict) or any(isinstance(v.get(c), bool) or not isinstance(v.get(c), (int, float)) for c in ("min", "max")):
+                err.append(f"limites_seguros del diseño «{nom}»: falta un {{min, max}} numérico para el factor «{n}»")
+            elif v["min"] >= v["max"]: err.append(f"limites_seguros del diseño «{nom}»: el mínimo de «{n}» debe ser menor que su máximo")
+    return err
+
+
 def errores_v2(receta):
     """12 / E2-R1: estructura de variables, tareas, revision, revision_base y analisis[].estado / requiere. Las claves desconocidas se toleran."""
     err = []
@@ -148,7 +172,9 @@ def validar(receta, registro, version_programa, modo=None):
         if isinstance(v, dict) and v.get("estado_evidencia") is not None and v["estado_evidencia"] not in EVIDENCIA:
             err.append(f"estado_evidencia «{v['estado_evidencia']}» no válido en la variable «{v.get('nombre')}»")
     err += errores_v2(receta)
-    err += errores_modo(receta, modo or MD.detectar(receta, huella_sintetica(receta))[0])
+    modo_efectivo = modo or MD.detectar(receta, huella_sintetica(receta))[0]
+    err += errores_modo(receta, modo_efectivo)
+    err += errores_limites(receta, modo_efectivo)
     for paso in receta.get("disenos", []) + receta.get("analisis", []):
         if isinstance(paso, dict) and paso.get("modulo") not in registro: err.append(f"módulo desconocido: {paso.get('modulo')}")
     from ..modulos.formatos import FORMATOS

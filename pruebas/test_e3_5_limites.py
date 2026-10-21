@@ -135,8 +135,10 @@ def test_receta_anterior_sin_limites_crea_el_diseno_marcado_region_no_declarada(
     d = a.disenos()[0]; assert d["region"] == "no_declarada" and d["limites_seguros"] is None and a.hoja.n == 6
 
 
-def test_receta_con_limites_incompletos_no_los_aplica(tmp_path):
-    a = Api(); a.ejecutar_receta(receta(tmp_path, limites={"Temp": {"min": 90, "max": 130}})); assert a.disenos()[0]["region"] == "no_declarada"
+def test_receta_con_limites_incompletos_se_rechaza_con_un_mensaje_claro(tmp_path):
+    # parte A los ignoraba (el diseño quedaba sin región); desde la parte B `validar` revisa la estructura de limites_seguros y un factor sin su par se rechaza
+    a = Api(); r = a.ejecutar_receta(receta(tmp_path, limites={"Temp": {"min": 90, "max": 130}}))
+    assert r["error"] == "receta" and "falta un {min, max} numérico para el factor «Tiempo»" in r["sesion"][-1]["texto"] and not a.proyecto.formatos.get("_disenos")
 
 
 # ---------- interfaz ----------

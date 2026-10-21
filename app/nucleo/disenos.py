@@ -145,6 +145,64 @@ def estado_definicion(hoja, info):
     return "vigente" if actual == info.get("huella_diseno") else "cambiada"
 
 
+# ---------------- región autorizada (E3-5 parte B) ----------------
+def parse_limites(texto, k):
+    """«90, 125; 5, 40» -> [(90.0, 125.0), (5.0, 40.0)]. Lanza ValueError con el motivo."""
+    partes = [x.strip() for x in str(texto or "").replace(";", ",").split(",") if x.strip()]
+    if len(partes) != 2 * k: raise ValueError(f"Límites seguros: se esperaban {2 * k} valores (un mínimo y un máximo por factor) y hay {len(partes)}.")
+    try: v = [float(x) for x in partes]
+    except ValueError: raise ValueError("Límites seguros: escribe números separados por comas, un par por factor (por ejemplo 90, 125; 5, 40).")
+    lim = [(v[2 * q], v[2 * q + 1]) for q in range(k)]
+    if any(a >= b for a, b in lim): raise ValueError("Cada límite seguro mínimo debe ser menor que su máximo.")
+    return lim
+
+
+def declarar_limites(proyecto, hoja, design_id, texto, ahora=None):
+    """Declara (o cambia) la región autorizada de un diseño que ya existe. Todos sus puntos actuales deben caber en ella: si no, se rechaza y no se
+    guarda nada (un diseño no se mueve; para salirse de esos niveles hay que crear otro dentro de la región). Un cambio de una región ya declarada queda
+    en historial_limites. Devuelve (estado, mensaje): «declarada», «sin_cambios» o «error»."""
+    for clave, info in _disenos(proyecto).items():
+        if identidad(info, clave)["design_id"] != design_id: continue
+        k = len(info.get("factores", []))
+        try: lim = parse_limites(texto, k)
+        except ValueError as e: return "error", str(e)
+        cols = columnas(hoja, info)
+        if cols["orden_est"] is None or any(j is None for j in cols["factores"]):
+            return "error", f"Faltan en la hoja columnas de {design_id} (OrdenEst o factores): no se puede comprobar que sus puntos caben en la región."
+        ids, _ = run_ids(hoja, info, clave); fuera = []
+        for i, r in enumerate(ids):
+            if not r: continue
+            for q, jf in enumerate(cols["factores"]):
+                v = _num(hoja, jf, i)
+                if v is None or v < lim[q][0] - 1e-9 * max(1.0, abs(lim[q][0])) or v > lim[q][1] + 1e-9 * max(1.0, abs(lim[q][1])):
+                    fuera.append(f"{r}: {info['factores'][q]['nombre']} = {'vacío' if v is None else f'{v:.6g}'} fuera de [{lim[q][0]:g}, {lim[q][1]:g}]")
+        if fuera:
+            extra = f" (y {len(fuera) - 6} más)" if len(fuera) > 6 else ""
+            return "error", (f"El diseño {design_id} ya tiene {len(fuera)} puntos fuera de esa región: " + "; ".join(fuera[:6]) + extra +
+                             ". No se guardó nada: un diseño existente no se mueve; crea otro dentro de la región o amplía los límites si de verdad son seguros.")
+        nuevo = {info["factores"][q]["nombre"]: {"min": lim[q][0], "max": lim[q][1]} for q in range(k)}
+        previo = info.get("limites_seguros")
+        if previo == nuevo and info.get("region") == "declarada": return "sin_cambios", f"Los límites seguros de {design_id} ya eran esos."
+        if previo: info.setdefault("historial_limites", []).append({"anterior": previo, "nuevo": nuevo, "fecha": (ahora or datetime.now()).isoformat(timespec="seconds")})
+        info["limites_seguros"] = nuevo; info["region"] = "declarada"
+        return "declarada", f"Región segura de {design_id} declarada: " + "; ".join(f"{n} {v['min']:g} a {v['max']:g}" for n, v in nuevo.items()) + "."
+    return "error", f"No existe el diseño {design_id}."
+
+
+def tareas_derivadas(proyecto):
+    """Tareas «declarar límites seguros»: una por cada diseño sin región declarada en un proyecto real (en demostración la región es opcional). Se derivan al
+    consultar y no se guardan: desaparecen solas cuando se declara la región y abrir un proyecto anterior no escribe nada."""
+    from . import modo as MD
+    if MD.es_demo(proyecto): return []
+    out = []
+    for clave, info in _disenos(proyecto).items():
+        if info.get("region") == "declarada": continue
+        did = identidad(info, clave)["design_id"]
+        out.append({"id": f"auto:limites:{did}", "descripcion": f"Declarar los límites seguros del diseño {did}: hasta entonces su región no está declarada y no se recomiendan parámetros.",
+                    "responsable": "", "accion": "Declarar límites seguros", "liga": f"diseno:{did}", "estado": "abierta", "origen": "auto"})
+    return out
+
+
 # ---------------- respuestas del diseño (E3-3) ----------------
 def estado_respuestas(hoja, info):
     """(cuántas respuestas hay en la hoja, versión con la que se capturaron o None). Cuenta las celdas no vacías de la columna de respuestas
