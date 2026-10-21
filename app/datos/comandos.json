@@ -1602,6 +1602,16 @@
 },
 {
 "cat": "Estadística",
+"n": "Exportar corridas del diseño",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Corridas en el orden en que se corren, con RunId y la respuesta en blanco (CSV o Excel)"
+},
+{
+"cat": "Estadística",
 "n": "Importar respuestas del diseño",
 "a": "—",
 "c": [

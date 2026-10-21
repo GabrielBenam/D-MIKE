@@ -9,7 +9,7 @@ from .nucleo import archivo
 from .nucleo import modo as MD
 from .nucleo import seguimiento as SG
 from . import modulos
-from .nucleo import indicadores as IND, disenos as DIS
+from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR
 from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_entrada
 import json, os
 from datetime import datetime
@@ -865,6 +865,24 @@ class Api:
                        + (f"; {plan['iguales']} ya estaban iguales" if plan["iguales"] else "") + (f"; {plan['sobrescritas']} sobrescritas" if plan["sobrescritas"] else "") + ".",
                        mensajes=[(a, "info") for a in plan["avisos"]])
         r["importacion"] = resumen; return r
+
+    def exportar_corridas(self, design_id=None, ruta=None, con_respuestas=False):
+        """E3-4: exporta las corridas del diseño sin respuestas (RunId, versión, orden de corrida, tipo de punto, bloque, factores y la respuesta en blanco),
+        en el orden en que se corre, a CSV UTF-8 o Excel. Se vuelve a importar con importar_respuestas."""
+        try: cab, filas, meta = CORR.preparar(self.proyecto, self.hoja, design_id, bool(con_respuestas))
+        except ValueError as e: return self._resp(str(e), "aviso", error="corridas", hoja=False)
+        ruta = ruta or self._elegir("guardar", ["Libro de Excel (*.xlsx)", "CSV UTF-8 (*.csv)"], f"{meta['design_id']}_corridas.xlsx")
+        if not ruta: return self._resp("Exportación cancelada.", hoja=False)
+        ext = os.path.splitext(ruta)[1].lower()
+        if ext not in (".xlsx", ".csv"): ruta, ext = ruta + ".xlsx", ".xlsx"
+        try:
+            if ext == ".xlsx": CORR.escribir_xlsx(ruta, cab, filas, meta)
+            else: CORR.escribir_csv(ruta, cab, filas)
+        except OSError as e: return self._resp(f"No se pudo exportar las corridas: {e}", "aviso", error="corridas", hoja=False)
+        r = self._resp(f"Exportadas {len(filas)} corridas de {meta['design_id']} (versión {meta['version_diseno']}) a {ruta}, en el orden en que se corren. "
+                       + ("Incluye las respuestas que ya hay en la hoja." if con_respuestas else "La respuesta va en blanco: captúrala al correr cada experimento y vuelve con «Importar respuestas del diseño»."), hoja=False)
+        r["corridas"] = {"design_id": meta["design_id"], "version_diseno": meta["version_diseno"], "n": len(filas), "ruta": ruta}
+        return r
 
     def confirmar_respuestas_diseno(self, design_id, motivo=""):
         """E3-3: el usuario declara, con motivo registrado, que las respuestas de la hoja corresponden a la versión vigente del diseño."""
