@@ -8820,8 +8820,8 @@
   },
   {
    "id": "RENDIMIENTO",
-   "titulo": "FPY y RTY (rendimiento a la primera)",
-   "ruta": "Estadística › Calidad del proceso › FPY y RTY",
+   "titulo": "Rendimientos: tradicional, FTY y RTY",
+   "ruta": "Estadística › Calidad del proceso › Rendimientos: tradicional, FTY y RTY",
    "fases": [
     "M"
    ],

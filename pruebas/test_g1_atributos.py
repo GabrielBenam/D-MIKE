@@ -1,6 +1,6 @@
 """G1: declaración «defectos» contra «unidades defectuosas» en las cartas de atributo y verificación con los valores
-de 19_GB_CONTROLAR (SPC-CARTAS-ATRIBUTO, secciones D a G). El curso da los resúmenes (p̄, np̄, c̄, ū), no los datos
-crudos: los datos aquí son SINTÉTICOS y construidos para reproducir exactamente esos resúmenes."""
+de 19_GB_CONTROLAR (SPC-CARTAS-ATRIBUTO, secciones D a G). Fórmulas de límites verificadas con datos sintéticos construidos a partir
+de los resúmenes de 19_GB (p̄, np̄, c̄, ū); sin datos crudos del curso."""
 import pytest
 from app.api import Api
 
@@ -79,3 +79,10 @@ def test_resultado_anterior_a_g1_sigue_abriendo():
     a = hoja("x", [[3], [4], [2], [5]])
     r = corre(a, {"tipo": "c", "y": 0})
     assert r["error"] is None and any("anterior a la declaración" in x for x in r["resultado"]["avisos"])
+
+
+def test_la_nota_declara_el_alcance_de_la_verificacion():
+    a = hoja("x", [[3], [4], [2], [5]])
+    r = corre(a, {"tipo": "c", "cuenta": "defectos", "y": 0})["resultado"]
+    nota = " ".join(b["texto"] for b in r["bloques"] if b["tipo"] == "texto")
+    assert "fórmulas de límites verificadas con datos sintéticos construidos a partir de los resúmenes de 19_GB; sin datos crudos del curso" in nota

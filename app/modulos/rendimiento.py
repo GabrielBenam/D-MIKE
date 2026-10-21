@@ -1,9 +1,12 @@
-"""FPY y RTY con regla explícita de primer evento (G4).
+"""Rendimientos del proceso con regla explícita de primer evento (G4; corrección del 21/10/2026).
 
-FPY de un paso = unidades aprobadas en su PRIMERA inspección / unidades inspeccionadas por primera vez.
-RTY = producto de los rendimientos (FPY) de cada paso. El retrabajo cuenta como no correcto a la primera: una unidad que se
-rechazó y se corrigió hasta pasar NO cuenta como aprobada a la primera (esa es la diferencia entre el rendimiento final y el FPY,
-el «trabajo oculto»). Fuente: 16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO (RTY y trabajo oculto), regla definida para D-MIKE.
+Tres rendimientos, con el nombre del curso (16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO, DES-RENDIMIENTO):
+  Rendimiento tradicional = unidades que salen / unidades que entran, sin retrabajo (cada unidad cuenta una vez).
+  FTY = promedio de los rendimientos de cada paso.
+  RTY = producto de los rendimientos de cada paso.
+El rendimiento de un paso = unidades aprobadas en su PRIMERA inspección / unidades inspeccionadas por primera vez. El retrabajo cuenta
+como no correcto a la primera: una unidad rechazada y corregida hasta pasar NO cuenta como aprobada a la primera (esa diferencia contra
+las unidades que salen es el «trabajo oculto»). La regla de primer evento es de D-MIKE.
 Si los datos no permiten identificar el primer evento de cada unidad en cada paso, el resultado es «no calculable» con su
 motivo, nunca un valor aproximado.
 """
@@ -13,7 +16,7 @@ from .base import (ErrorEntrada, columna, nombre_col, figura, a_svg_png, num, re
                    NARANJA, TINTA, SUAVE, _sin_acentos)
 from .dialogo import ModuloDialogo
 
-FUENTE = "16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO, RTY y trabajo oculto"
+FUENTE = "16_GB_HISTOGRAMAS_CAPACIDAD_DESEMPENO, DES-RENDIMIENTO"
 APROBADO, RECHAZO = "Aprobado, OK, Pasa, Sí", "Rechazado, No, Falla, Defecto, Retrabajo"
 
 
@@ -22,7 +25,8 @@ def _lista(texto): return {_sin_acentos(x).strip() for x in str(texto or "").spl
 
 def calcular(eventos, aprobados, rechazos, declaro_primera=False):
     """eventos: lista de dicts {unidad, paso, resultado (texto), intento (float|None), fecha (date|None), orden (int)}.
-    Devuelve {pasos: [...], rty, motivo_rty, excluidos}. Cada paso: {paso, n, aprobadas, fpy, estado, motivo, base, retrabajo, finales}.
+    Devuelve {pasos, tradicional, fty, rty, motivos}. Cada paso: {paso, n, aprobadas, rendimiento, estado, motivo, retrabajo, finales}.
+    Los pasos van en el orden en que aparecen en la hoja; el tradicional usa las unidades del primer paso (entran) y las que salen aprobadas del último.
     estado: «ok», «no_definido» (denominador 0) o «no_calculable» (con motivo)."""
     ap, rc = _lista(aprobados), _lista(rechazos)
     if ap & rc: raise ErrorEntrada("Un mismo valor no puede ser aprobado y no aprobado a la vez: " + ", ".join(sorted(ap & rc)) + ".")
@@ -30,7 +34,7 @@ def calcular(eventos, aprobados, rechazos, declaro_primera=False):
     sin_clasificar = OrderedDict(); na = sin_datos = 0
     for e in eventos:
         pasos.setdefault(e["paso"], OrderedDict()).setdefault(e["unidad"], []).append(e)
-    salida, fpys = [], []
+    salida, rends = [], []
     for paso, unidades in pasos.items():
         problemas, n, aprob, retrab = [], 0, 0, 0
         primeras, contadas = {}, []
@@ -41,8 +45,8 @@ def calcular(eventos, aprobados, rechazos, declaro_primera=False):
         if problemas:
             ej = "; ".join(f"{u}: {m}" for u, m in problemas[:5]) + (f" (y {len(problemas) - 5} unidades más)" if len(problemas) > 5 else "")
             salida.append({"paso": paso, "estado": "no_calculable", "motivo": f"no se puede identificar el primer evento de {len(problemas)} "
-                           f"de {len(unidades)} unidades. {ej}", "n": None, "aprobadas": None, "fpy": None, "retrabajo": None, "finales": None})
-            fpys.append(None); continue
+                           f"de {len(unidades)} unidades. {ej}", "n": None, "aprobadas": None, "rendimiento": None, "retrabajo": None, "finales": None})
+            rends.append(None); continue
         for u, (primero, evs) in primeras.items():
             r = _sin_acentos(primero["resultado"]).strip()
             if r in ("n/a",): na += 1; continue
@@ -55,19 +59,27 @@ def calcular(eventos, aprobados, rechazos, declaro_primera=False):
         n_fin = _finales_aprobadas(contadas, ap)
         if n == 0:
             salida.append({"paso": paso, "estado": "no_definido", "motivo": "ninguna unidad con resultado clasificado en su primera inspección (denominador 0)",
-                           "n": 0, "aprobadas": 0, "fpy": None, "retrabajo": 0, "finales": None}); fpys.append(None); continue
-        salida.append({"paso": paso, "estado": "ok", "motivo": "", "n": n, "aprobadas": aprob, "fpy": aprob / n, "retrabajo": retrab, "finales": n_fin})
-        fpys.append(aprob / n)
-    rty, motivo = None, ""
-    if not salida: motivo = "no hay eventos."
-    elif any(p["estado"] == "no_calculable" for p in salida):
-        motivo = "los pasos " + ", ".join(f"«{p['paso']}»" for p in salida if p["estado"] == "no_calculable") + " no son calculables, y el RTY necesita el FPY de todos los pasos."
-    elif any(p["estado"] == "no_definido" for p in salida):
-        motivo = "los pasos " + ", ".join(f"«{p['paso']}»" for p in salida if p["estado"] == "no_definido") + " tienen denominador 0, y el RTY necesita el FPY de todos los pasos."
+                           "n": 0, "aprobadas": 0, "rendimiento": None, "retrabajo": 0, "finales": None}); rends.append(None); continue
+        salida.append({"paso": paso, "estado": "ok", "motivo": "", "n": n, "aprobadas": aprob, "rendimiento": aprob / n, "retrabajo": retrab, "finales": n_fin})
+        rends.append(aprob / n)
+    rty = fty = trad = None; motivos = {}
+    malos = [p for p in salida if p["estado"] != "ok"]
+    if not salida: motivos["rty"] = motivos["fty"] = "no hay eventos."
+    elif malos:
+        nc = [p for p in malos if p["estado"] == "no_calculable"]; nd = [p for p in malos if p["estado"] == "no_definido"]
+        m = []
+        if nc: m.append("los pasos " + ", ".join(f"«{p['paso']}»" for p in nc) + " no son calculables")
+        if nd: m.append("los pasos " + ", ".join(f"«{p['paso']}»" for p in nd) + " tienen denominador 0")
+        motivos["rty"] = motivos["fty"] = "; ".join(m) + ", y el FTY y el RTY necesitan el rendimiento de todos los pasos."
     else:
         rty = 1.0
-        for f in fpys: rty *= f
-    return {"pasos": salida, "rty": rty, "motivo_rty": motivo, "sin_clasificar": sin_clasificar, "na": na, "sin_datos": sin_datos}
+        for f in rends: rty *= f
+        fty = sum(rends) / len(rends)
+    if salida and salida[0]["estado"] == "ok" and salida[-1]["estado"] == "ok":
+        entran, salen = salida[0]["n"], salida[-1]["finales"]
+        trad = {"entran": entran, "salen": salen, "valor": salen / entran, "primer_paso": salida[0]["paso"], "ultimo_paso": salida[-1]["paso"]}
+    elif salida: motivos["tradicional"] = "el primer o el último paso no es calculable o tiene denominador 0, y el tradicional necesita las unidades que entran al primero y salen del último."
+    return {"pasos": salida, "tradicional": trad, "fty": fty, "rty": rty, "motivos": motivos, "sin_clasificar": sin_clasificar, "na": na, "sin_datos": sin_datos}
 
 
 def _primer_evento(evs, declaro_primera):
@@ -106,7 +118,7 @@ def _finales_aprobadas(primeras, ap):
 
 @registrar
 class Rendimiento(ModuloDialogo):
-    ID, TITULO = "RENDIMIENTO", "FPY y RTY (rendimiento a la primera)"
+    ID, TITULO = "RENDIMIENTO", "Rendimientos: tradicional, FTY y RTY"
     CAMPOS = [{"campo": "unidad", "etiqueta": "Unidad (pieza, documento o folio)", "tipo": "col"},
               {"campo": "paso", "etiqueta": "Paso o etapa (vacío = un solo paso)", "tipo": "col", "opcional": True},
               {"campo": "resultado", "etiqueta": "Resultado de la inspección (texto o 1/0)", "tipo": "col"},
@@ -151,7 +163,7 @@ class Rendimiento(ModuloDialogo):
         filas = []
         for q in pasos:
             if q["estado"] == "ok":
-                filas.append([q["paso"], q["n"], q["aprobadas"], q["fpy"] * 100, q["retrabajo"], q["finales"]])
+                filas.append([q["paso"], q["n"], q["aprobadas"], q["rendimiento"] * 100, q["retrabajo"], q["finales"]])
             else:
                 filas.append([q["paso"], "no calculable" if q["estado"] == "no_calculable" else (q["n"] or 0), "—", "no calculable" if q["estado"] == "no_calculable" else "no definido", "—", "—"])
         bloques = []
@@ -159,34 +171,44 @@ class Rendimiento(ModuloDialogo):
         if calculables:
             fig, ax = figura(max(5.6, 0.9 * (len(pasos) + 1) + 2), 3.4)
             etiquetas = [q["paso"] for q in pasos] + (["RTY"] if r["rty"] is not None else [])
-            vals = [(q["fpy"] * 100 if q["estado"] == "ok" else 0) for q in pasos] + ([r["rty"] * 100] if r["rty"] is not None else [])
+            vals = [(q["rendimiento"] * 100 if q["estado"] == "ok" else 0) for q in pasos] + ([r["rty"] * 100] if r["rty"] is not None else [])
             colores = [NARANJA if q["estado"] == "ok" else "#cfc8bb" for q in pasos] + ([TINTA] if r["rty"] is not None else [])
             ax.bar(range(len(vals)), vals, color=colores, width=0.7); ax.set_ylim(0, 105)
             ax.set_xticks(range(len(vals))); ax.set_xticklabels(etiquetas, rotation=20 if len(vals) > 5 else 0)
             for x, v in enumerate(vals): ax.text(x, v + 1.5, f"{v:.1f}%" if v else "", ha="center", fontsize=8, color=TINTA)
-            ax.set_ylabel("% aprobado a la primera"); ax.set_title(f"FPY por paso y RTY de {nom}")
+            ax.set_ylabel("% aprobado a la primera"); ax.set_title(f"Rendimiento por paso y RTY de {nom}")
             svg, png = a_svg_png(fig); bloques.append(b_grafica(svg))
         else: png = None
-        if r["rty"] is not None:
-            concl = (f"RTY = {r['rty'] * 100:.2f}% (producto de los FPY de {len(pasos)} {'paso' if len(pasos) == 1 else 'pasos'}: "
-                     + " × ".join(f"{q['fpy'] * 100:.1f}%" for q in pasos) + "). Cada porcentaje de FPY lleva su base en la tabla.")
-        else:
-            concl = f"RTY no calculable: {r['motivo_rty']}"
+        k = len(pasos); pl = "paso" if k == 1 else "pasos"
+        t, fty, rty = r["tradicional"], r["fty"], r["rty"]; mot = r["motivos"]
+        rend = [["Rendimiento tradicional (salen / entran, sin retrabajo)",
+                 f"{t['valor'] * 100:.2f}%" if t else "no calculable",
+                 f"{num(t['salen'])} salen de «{t['ultimo_paso']}» entre {num(t['entran'])} que entran a «{t['primer_paso']}»" if t else mot.get("tradicional", "")],
+                ["FTY (promedio de los rendimientos de cada paso)", f"{fty * 100:.2f}%" if fty is not None else "no calculable",
+                 f"promedio de {k} {pl}" if fty is not None else mot.get("fty", "")],
+                ["RTY (producto de los rendimientos de cada paso)", f"{rty * 100:.2f}%" if rty is not None else "no calculable",
+                 f"producto de {k} {pl}: " + " × ".join(f"{q['rendimiento'] * 100:.1f}%" for q in pasos) if rty is not None else mot.get("rty", "")]]
+        concl = " · ".join(f"{a.split(' (')[0]} {b}" for a, b, _ in rend) + ". Cada porcentaje lleva su base en la tabla."
+        faltan_m = [m for m in dict.fromkeys(mot.values()) if m]
+        if faltan_m and (t is None or fty is None or rty is None): concl += " No calculable porque " + " ".join(faltan_m)
         bloques.append(b_texto(concl, "conclusion"))
-        bloques.append(b_tabla("Primer evento por paso (cada % con su base)", ["Paso", "Inspeccionadas por primera vez", "Aprobadas a la primera",
-                                                                               "FPY (%)", "Unidades con retrabajo", "Aprobadas al final"], filas,
+        bloques.append(b_tabla("Rendimientos del proceso", ["Rendimiento", "Valor", "Base"], rend, ["i", "d", "i"]))
+        bloques.append(b_tabla("Rendimiento de cada paso, por primer evento (cada % con su base)", ["Paso", "Inspeccionadas por primera vez", "Aprobadas a la primera",
+                                                                               "Rendimiento del paso (%)", "Unidades con retrabajo", "Aprobadas al final"], filas,
                                ["i", "d", "d", "d", "d", "d"]))
         for q in pasos:
             if q["estado"] != "ok":
                 bloques.append(b_texto(f"Paso «{q['paso']}»: {'NO CALCULABLE' if q['estado'] == 'no_calculable' else 'NO DEFINIDO'}. Motivo: {q['motivo']}.", "advertencia"))
         if calculables:
-            bloques.append(b_texto("Trabajo oculto: las unidades «aprobadas al final» incluyen las que pasaron tras retrabajo; el FPY no las cuenta como correctas a la "
+            bloques.append(b_texto("Trabajo oculto: las unidades «aprobadas al final» incluyen las que pasaron tras retrabajo; el rendimiento del paso no las cuenta como correctas a la "
                                    "primera. Una diferencia grande entre «aprobadas al final» y «aprobadas a la primera» es retrabajo que el rendimiento final no muestra.", "interpretacion"))
         regla = ("Regla de primer evento: " + ("número de intento (1 = primera inspección)" if ji is not None else "fecha del evento (el más antiguo de cada unidad y paso)" if jf is not None
-                 else "declarada por el usuario: cada fila es la primera inspección") + ". FPY = aprobadas en su primera inspección / inspeccionadas por primera vez; RTY = producto de los FPY. "
-                 f"Fuente: {FUENTE}. Verificación contra el ejemplo resuelto del curso: pendiente, el archivo 16_GB no está en el repositorio; "
-                 "verificado con cálculo a mano en pruebas/test_g4_rendimiento.py. El supuesto de que el registro incluye todas las inspecciones no se puede comprobar con los datos.")
+                 else "declarada por el usuario: cada fila es la primera inspección") + ". Rendimiento de un paso = aprobadas en su primera inspección / inspeccionadas por primera vez. "
+                 "Rendimiento tradicional = unidades que salen / unidades que entran, sin retrabajo; FTY = promedio de los rendimientos de cada paso; RTY = producto. "
+                 f"Fuente: {FUENTE}. Sin ejemplo del curso; verificado con cálculo a mano (pruebas/test_g4_rendimiento.py). Los pasos van en el orden en que aparecen en la hoja. "
+                 "El supuesto de que el registro incluye todas las inspecciones no se puede comprobar con los datos.")
         bloques.append(b_texto(regla, "nota"))
-        return resultado(cls.ID, f"FPY y RTY de {nom}", p, bloques, avisos, datos={"columnas": [j for j in (ju, jp, jr, ji, jf) if j is not None],
-                         "rty": _f(r["rty"]), "pasos": [{"paso": q["paso"], "estado": q["estado"], "n": q["n"], "aprobadas": q["aprobadas"], "fpy": _f(q["fpy"]), "motivo": q["motivo"]} for q in pasos]},
+        return resultado(cls.ID, f"Rendimientos de {nom}", p, bloques, avisos, datos={"columnas": [j for j in (ju, jp, jr, ji, jf) if j is not None],
+                         "rty": _f(r["rty"]), "fty": _f(r["fty"]), "tradicional": ({**r["tradicional"], "valor": _f(r["tradicional"]["valor"])} if r["tradicional"] else None),
+                         "pasos": [{"paso": q["paso"], "estado": q["estado"], "n": q["n"], "aprobadas": q["aprobadas"], "rendimiento": _f(q["rendimiento"]), "finales": q["finales"], "motivo": q["motivo"]} for q in pasos]},
                          png=png)
