@@ -300,15 +300,30 @@ def vista(proyecto, hoja):
             "analisis": [{"id": k, "modulo": e.get("modulo"), "estado": e["estado"], "motivo": e.get("motivo") or ""} for k, e in an.items()]}
 
 
+def _identidad_de_receta(proyecto, receta_id):
+    """design_id y version_diseno (E3-2) del diseño que D-MIKE creó para el diseño «receta_id» de la receta; None si no se puede ubicar.
+    Un diseño anterior a 0.29 recibe su identidad derivada (sin escribirla)."""
+    from . import disenos as DIS
+    uid = ((proyecto.formatos.get("_receta") or {}).get("ids") or {}).get(receta_id)
+    res = next((r for r in proyecto.resultados if r.get("uid") == uid), None) if uid else None
+    clave = (((res or {}).get("datos") or {}).get("diseno") or {}).get("respuesta")
+    info = (proyecto.formatos.get("_disenos") or {}).get(clave) if clave else None
+    return DIS.identidad(info, clave) if info else None
+
+
 def disenos_estado(proyecto, hoja):
-    """Diseños de la receta que D-MIKE ya creó: id, estado (creado o ejecutado), corridas y respuestas capturadas completas."""
+    """Diseños de la receta que D-MIKE ya creó: id, estado (creado o ejecutado), corridas y respuestas capturadas completas, y desde 0.29 su
+    design_id y version_diseno (claves nuevas y opcionales; avance_version sigue en 1)."""
     ids = (proyecto.formatos.get("_receta") or {}).get("ids") or {}; out = []
     for d in _lista(_receta_guardada(proyecto).get("disenos")):
         if d.get("id") not in ids: continue
         filas = filas_diseno(hoja, d); resps = [r for r in d.get("respuestas") or [] if isinstance(r, str)]
         capt = sum(1 for r in resps if respuesta_completa(hoja, filas, r))
-        out.append({"id": d["id"], "estado": "ejecutado" if resps and capt == len(resps) else "creado",
-                    "corridas": len(filas) if filas is not None else None, "respuestas_capturadas": capt})
+        e = {"id": d["id"], "estado": "ejecutado" if resps and capt == len(resps) else "creado",
+             "corridas": len(filas) if filas is not None else None, "respuestas_capturadas": capt}
+        ident = _identidad_de_receta(proyecto, d["id"])
+        if ident: e.update(design_id=ident["design_id"], version_diseno=ident["version_diseno"])
+        out.append(e)
     return out
 
 

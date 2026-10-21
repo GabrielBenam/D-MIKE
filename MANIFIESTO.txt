@@ -147,6 +147,7 @@ pruebas/test_doe.py
 pruebas/test_e3_1_destructivo.py
 pruebas/test_e3_2_identidad.py
 pruebas/test_e3_3_respuestas.py
+pruebas/test_e3_4_avance.py
 pruebas/test_e3_4_corridas.py
 pruebas/test_estadistica.py
 pruebas/test_exportar_catalogo.py
