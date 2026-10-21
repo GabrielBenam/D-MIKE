@@ -6,7 +6,7 @@ from app.api import Api
 from app.nucleo import receta as RC
 
 DISENO = {"tipo": "fact", "nombres": "Temp, Tiempo", "bajos": "100, 10", "altos": "120, 30", "centros": "2", "replicas": "1",
-          "respuesta": "Resistencia", "aleatorio": True, "semilla": "7"}
+          "respuesta": "Resistencia", "aleatorio": True, "semilla": "7", "limites": "90, 130; 5, 40"}
 
 
 def receta(tmp, modo="real", disenos=1):

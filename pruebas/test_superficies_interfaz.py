@@ -7,7 +7,7 @@ from test_superficies import VERDAD
 def test_flujo_completo_diseno_analisis_optimizador(pagina):
     menu(pagina, "Estadística", "Crear diseño de experimentos…")
     pagina.fill(".dialogo input[name='nombres']", "Temperatura, Presion")
-    pagina.fill(".dialogo input[name='bajos']", "140, 3"); pagina.fill(".dialogo input[name='altos']", "160, 5")
+    pagina.fill(".dialogo input[name='bajos']", "140, 3"); pagina.fill(".dialogo input[name='altos']", "160, 5"); pagina.fill(".dialogo input[name='limites']", "130, 170; 2, 6")
     pagina.fill(".dialogo input[name='respuesta']", "Rendimiento"); pagina.fill(".dialogo input[name='semilla']", "3")
     pagina.click(".dialogo .primario")
     expect(pagina.locator(".pestana.activa")).to_contain_text("Diseño central compuesto")

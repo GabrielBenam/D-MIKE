@@ -63,7 +63,7 @@ def test_reemplazar_y_deshacer_rehacer():
 def test_deshacer_edicion_y_diseno():
     a = Api(); a.editar(0, 0, "5"); a.editar(1, 0, "6")
     a.deshacer(); assert a.hoja.n == 1 and a.hoja.columnas[0].valor(0)[0] == "5"
-    a.ejecutar_modulo("DISENO-RSM", {"nombres": "A, B", "bajos": "0, 0", "altos": "1, 1"})
+    a.ejecutar_modulo("DISENO-RSM", {"nombres": "A, B", "bajos": "0, 0", "altos": "1, 1", "limites": "-1, 2; -1, 2"})
     assert len(a.hoja.columnas) > 5
     a.deshacer(); assert len(a.hoja.columnas) == 1
     a.ejecutar_modulo("CORRIDA", {"y": 0})                    # un análisis no cambia la hoja: no ocupa un paso

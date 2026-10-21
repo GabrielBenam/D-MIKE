@@ -8,7 +8,7 @@ from app.nucleo import modo as MD, disenos as DIS, archivo
 
 S = Path(__file__).parent / "sinteticos"
 DISENO = {"tipo": "fact", "nombres": "Temp, Tiempo", "bajos": "100, 10", "altos": "120, 30", "centros": "2", "replicas": "1",
-          "respuesta": "Resistencia", "aleatorio": True, "semilla": "7"}          # 2^2 + 2 centros = 6 corridas
+          "respuesta": "Resistencia", "aleatorio": True, "semilla": "7", "limites": "90, 130; 5, 40"}          # 2^2 + 2 centros = 6 corridas
 
 
 def api(demo=False, **extra):

@@ -7,7 +7,7 @@ from app.api import Api
 from app.nucleo import modo as MD
 
 DISENO = {"tipo": "fact", "nombres": "Temp, Tiempo", "bajos": "100, 10", "altos": "120, 30", "centros": "2", "replicas": "1",
-          "respuesta": "Resistencia", "aleatorio": True, "semilla": "7"}
+          "respuesta": "Resistencia", "aleatorio": True, "semilla": "7", "limites": "90, 130; 5, 40"}
 CAB = ["RunId", "version_diseno", "OrdenCorrida", "TipoPunto", "Bloque", "Temp", "Tiempo", "Resistencia"]
 
 
