@@ -290,12 +290,20 @@ def _receta_guardada(proyecto):
     return rc if isinstance(rc, dict) else {}
 
 
+def _tareas_de_limites(proyecto):
+    """Tareas derivadas «declarar límites seguros» (E3-5 parte B); no se guardan."""
+    from . import disenos as DIS
+    ya = {t.get("id") for t in _lista(proyecto.formatos.get("_tareas"))}
+    return [t for t in DIS.tareas_derivadas(proyecto) if t["id"] not in ya]
+
+
 def vista(proyecto, hoja):
     """Solo lectura (E2-R9): variables con su estado, tareas abiertas y estado de cada análisis."""
     an = evaluar_analisis(proyecto, hoja); tareas = _lista(proyecto.formatos.get("_tareas")); ap = aplicada(proyecto)
     return {"revision": ap["revision"], "huella": ap["huella"], "revisiones_guardadas": len(_lista(proyecto.formatos.get("_revisiones"))),
             "variables": [{k: v.get(k) for k in ("nombre", "hoja", "unidad", "estado_evidencia", "ensayo_destructivo")} for v in _lista(proyecto.formatos.get("_variables"))],
-            "tareas_abiertas": [{k: t.get(k) for k in ("id", "descripcion", "responsable", "accion", "origen")} for t in tareas if t.get("estado") == "abierta"],
+            "tareas_abiertas": [{k: t.get(k) for k in ("id", "descripcion", "responsable", "accion", "origen")}
+                                for t in tareas + _tareas_de_limites(proyecto) if t.get("estado") == "abierta"],
             "tareas_cerradas": sum(1 for t in tareas if t.get("estado") == "cerrada"),
             "analisis": [{"id": k, "modulo": e.get("modulo"), "estado": e["estado"], "motivo": e.get("motivo") or ""} for k, e in an.items()]}
 
@@ -360,7 +368,7 @@ def paquete_avance(proyecto, hoja):
            "variables": [{"nombre": v.get("nombre"), "estado_evidencia": v.get("estado_evidencia")} for v in _lista(proyecto.formatos.get("_variables"))],
            "analisis": [{"id": k, "modulo": e.get("modulo"), "estado": e["estado"]} for k, e in an.items()],
            "disenos": dis,
-           "tareas_abiertas": [{"id": t["id"], "descripcion": _descripcion_exportable(t)} for t in _lista(proyecto.formatos.get("_tareas")) if t.get("estado") == "abierta"]}
+           "tareas_abiertas": [{"id": t["id"], "descripcion": _descripcion_exportable(t)} for t in _lista(proyecto.formatos.get("_tareas")) + _tareas_de_limites(proyecto) if t.get("estado") == "abierta"]}
     pkg["huella"] = RC.huella_receta(pkg)
     return pkg, None
 

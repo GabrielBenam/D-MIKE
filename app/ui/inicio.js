@@ -251,6 +251,13 @@ function pedirMotivo(titulo, ayuda, accion) {
   const motivo = el("input", { placeholder: "Motivo (queda registrado)", style: "width:100%", autocomplete: "off" });
   dialogo(titulo, el("div", { class: "formulario" }, el("p", { class: "tb-sub" }, ayuda), el("label", {}, motivo)), async () => { await accion(motivo.value); return true; }, "Guardar");
 }
+function pedirLimites(d, recargar) {
+  const actual = d.region === "declarada" ? d.factores.map(f => `${d.limites_seguros[f].min}, ${d.limites_seguros[f].max}`).join("; ") : "";
+  const campo = el("input", { value: actual, placeholder: "ej. 90, 125; 5, 40", style: "width:100%", autocomplete: "off" });
+  dialogo("Límites seguros de " + d.design_id, el("div", { class: "formulario" },
+    el("p", { class: "tb-sub" }, `Un par mínimo, máximo por factor, en este orden: ${d.factores.join(", ")}. Son la región autorizada para experimentar; todos los puntos del diseño deben caber en ella. Un diseño que ya existe no se mueve.`),
+    el("label", {}, campo)), async () => { await recargar(await api().declarar_limites_diseno(d.design_id, campo.value)); return true; }, "Guardar");
+}
 async function dialogoDisenos() {
   const ds = await api().disenos();
   const recargar = async r => { if (r && r.sesion) registrarSesion(r.sesion); document.querySelector(".velo")?.remove(); await dialogoDisenos(); };
@@ -264,6 +271,7 @@ async function dialogoDisenos() {
       d.historial_versiones.length ? el("p", { class: "tb-sub" }, "Versiones anteriores: " + d.historial_versiones.map(h => `v${h.version}${h.motivo ? " (" + h.motivo + ")" : ""}`).join("; ")) : "",
       el("div", {}, 
         (d.estado_definicion === "cambiada" || d.estado_definicion === "sin_linea_base") ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Registrar versión nueva", d.estado_definicion === "cambiada" ? "La definición cambió: se registrará la versión " + (d.version_diseno + 1) + ". Las respuestas actuales dejarán de coincidir con la versión vigente." : "Este diseño no tenía línea base: se tomará su estado actual como versión 1.", async m => recargar(await api().registrar_version_diseno(d.design_id, m))) }, d.estado_definicion === "cambiada" ? "Registrar versión nueva…" : "Tomar línea base…") : "",
+        el("button", { class: "boton chico", onclick: () => pedirLimites(d, recargar) }, d.region === "declarada" ? "Cambiar límites seguros…" : "Declarar límites seguros…"),
         mezcla ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Confirmar respuestas", `Declaras que las respuestas de la hoja corresponden a la versión ${d.version_diseno}. Escribe por qué.`, async m => recargar(await api().confirmar_respuestas_diseno(d.design_id, m))) }, "Confirmar que son de la versión vigente…") : "",
         el("button", { class: "boton chico", title: "Corridas en el orden en que se corren, con RunId y la respuesta en blanco", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().exportar_corridas(d.design_id)); } }, "Exportar corridas…"),
         el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…")));
