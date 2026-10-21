@@ -112,6 +112,7 @@ async function dialogoModulo(id, previo) {
 }
 
 // ---------- resultado ----------
+const CON_GRAFICA_EDITABLE = ["PARETO", "DISTRIB", "BOXPLOT", "CORRIDA", "SPC", "CAPACIDAD", "REGRESION", "RSM", "FACTORIAL"];
 function pintarResultado(res) {
   const v = $("#vista"); v.innerHTML = "";
   const barra = el("div", { class: "vista-barra" }, el("span", { class: "vista-titulo" }, res.titulo),
@@ -134,7 +135,11 @@ function pintarResultado(res) {
   for (const b of res.bloques) {
     if (b.tipo === "grafica") kg++;
     if (b.tipo === "grafica" && b.inter && window.Plotly && window.graficaInteractiva && leerPref("graficas_int") !== "0") { cuerpo.append(graficaInteractiva(res, kg, b)); continue; }
-    if (b.tipo === "grafica") { const g = el("div", { class: "grafica" }); g.innerHTML = b.svg; cuerpo.append(g); }
+    if (b.tipo === "grafica") {
+      const g = el("div", { class: "grafica" }); g.innerHTML = b.svg; cuerpo.append(g);
+      if (!b.inter && CON_GRAFICA_EDITABLE.includes(res.modulo))          // resultado anterior a la gráfica editable (v0.25)
+        cuerpo.append(el("p", { class: "texto-res nota" }, "Esta gráfica es una imagen fija de una versión anterior. Usa «Repetir con datos actuales» para obtener la versión editable (estilo, color y pestaña Gráfico)."));
+    }
     else if (b.tipo === "texto") cuerpo.append(el("p", { class: "texto-res " + b.clase }, b.texto));
     else if (b.tipo === "tabla") {
       cuerpo.append(el("div", { class: "tabla-marco" }, el("div", { class: "tabla-titulo" }, b.titulo),

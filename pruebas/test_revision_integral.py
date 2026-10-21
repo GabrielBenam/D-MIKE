@@ -24,6 +24,7 @@ VALIDOS = {
     "DISTRIB": {"y": 4, "lie": "8", "lse": "18"}, "SPC": {"tipo": "xr", "y": 4, "tam": "4", "pruebas": [str(k) for k in range(1, 8)]},
     "CAPACIDAD": {"y": 4, "tam": "4", "lie": "8", "lse": "18", "objetivo": "12", "resumen": True},
     "CORREL": {"vars": [4, 6, 7], "spearman": True}, "REGRESION": {"y": 7, "xs": [6], "grado": "2", "x0": "120"},
+    "RENDIMIENTO": {"unidad": 1, "paso": 3, "resultado": 2, "fecha": 0, "aprobado": "Con", "rechazo": "Sin"},
 }
 INF = ("HIPOTESIS", "ANOVA2", "TUKEY", "DIST-ID", "BOXCOX", "POTENCIA", "NOPARAM", "CHI2")   # test_inferencia.py
 CALC = ("CALCULADORA", "PATRON", "ALEATORIOS", "RECODIFICAR", "APILAR", "DUPLICADOS")

@@ -501,8 +501,8 @@ def test_r10_dmike_027_abre_en_026_sin_error_a8(tmp_path):
 
 
 def test_r10_receta_027_del_diagnostico_se_declara_con_dmike_minimo(tmp_path):
-    rc = rec(); rc["dmike_minimo"] = "0.28"; rc["huella"] = RC.huella_receta({k: v for k, v in rc.items() if k != "huella"})
-    assert any("requiere D-MIKE 0.28" in e for e in RC.validar(rc, REG, VERSION)) and VERSION == "0.27.0"
+    rc = rec(); rc["dmike_minimo"] = "0.99"; rc["huella"] = RC.huella_receta({k: v for k, v in rc.items() if k != "huella"})
+    assert any("requiere D-MIKE 0.99" in e for e in RC.validar(rc, REG, VERSION))     # una receta que pide una versión posterior a la vigente se rechaza
 
 
 # ---------- A1: el caso maestro v1 no cambia ----------

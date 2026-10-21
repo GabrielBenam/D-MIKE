@@ -147,3 +147,4 @@ def test_interfaz_define_indicador_y_muestra_revision_base_y_nota(pagina):
     pagina.click(".dialogo .primario")
     expect(pagina.locator(".tb-kpi >> nth=0")).to_contain_text("rev. 2"); expect(pagina.locator(".tb-cruce")).to_be_visible()
     expect(pagina.locator(".tb-avisos")).to_contain_text("cruza las revisiones 1 y 2")
+

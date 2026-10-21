@@ -56,3 +56,10 @@ def test_copia_formato_1_sigue_reproduciendo():
     del cg["filtro"]; cg["huella"] = a._huella(cg["columnas"])
     assert a.estado_resultado(r["uid"])["estado"] == "vigente"
     assert a.reproducir_resultado(r["uid"])["error"] is None
+
+
+def test_sin_filtro_la_huella_es_la_de_siempre():
+    # compatibilidad: sin filtro de filas la huella cubre solo las columnas, igual que en v0.25 a v0.27 (las huellas guardadas siguen valiendo)
+    a, r = con_resultado()
+    cg = r["definicion"]["congelado"]
+    assert cg["huella"] == a._huella(cg["columnas"]) and a._huella(cg["columnas"]) == a._huella(cg["columnas"], [])

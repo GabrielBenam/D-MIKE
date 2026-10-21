@@ -1,6 +1,6 @@
 {
- "version": "0.27.0",
- "total_modulos": 91,
+ "version": "0.28.0",
+ "total_modulos": 92,
  "modulos": [
   {
    "id": "A3",
@@ -8819,6 +8819,64 @@
    ]
   },
   {
+   "id": "RENDIMIENTO",
+   "titulo": "FPY y RTY (rendimiento a la primera)",
+   "ruta": "Estadística › Calidad del proceso › FPY y RTY",
+   "fases": [
+    "M"
+   ],
+   "tipo": "analisis",
+   "parametros": [
+    {
+     "campo": "unidad",
+     "etiqueta": "Unidad (pieza, documento o folio)",
+     "tipo": "col"
+    },
+    {
+     "campo": "paso",
+     "etiqueta": "Paso o etapa (vacío = un solo paso)",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "resultado",
+     "etiqueta": "Resultado de la inspección (texto o 1/0)",
+     "tipo": "col"
+    },
+    {
+     "campo": "aprobado",
+     "etiqueta": "Valores que cuentan como aprobado (separados por coma)",
+     "tipo": "texto",
+     "defecto": "Aprobado, OK, Pasa, Sí"
+    },
+    {
+     "campo": "rechazo",
+     "etiqueta": "Valores que cuentan como no aprobado (separados por coma)",
+     "tipo": "texto",
+     "defecto": "Rechazado, No, Falla, Defecto, Retrabajo"
+    },
+    {
+     "campo": "intento",
+     "etiqueta": "Número de intento (1 = primera inspección)",
+     "tipo": "col",
+     "filtro": "num",
+     "opcional": true
+    },
+    {
+     "campo": "fecha",
+     "etiqueta": "Fecha del evento (si no hay número de intento)",
+     "tipo": "col",
+     "filtro": "fecha",
+     "opcional": true
+    },
+    {
+     "campo": "declaro",
+     "etiqueta": "Declaro que cada fila es la primera inspección de su unidad en ese paso (solo si no hay intento ni fecha)",
+     "tipo": "bool"
+    }
+   ]
+  },
+  {
    "id": "RIESGOS",
    "titulo": "Registro de riesgos",
    "ruta": "Gestión › Riesgo y decisión › Registro de riesgos",
@@ -9829,19 +9887,38 @@
       },
       {
        "valor": "p",
-       "etiqueta": "p (proporción de defectuosos, n variable)"
+       "etiqueta": "p (unidades defectuosas, n variable)"
       },
       {
        "valor": "np",
-       "etiqueta": "np (número de defectuosos, n constante)"
+       "etiqueta": "np (unidades defectuosas, n constante)"
       },
       {
        "valor": "c",
-       "etiqueta": "c (número de defectos, n constante)"
+       "etiqueta": "c (defectos, n constante)"
       },
       {
        "valor": "u",
-       "etiqueta": "u (defectos por unidad, n variable)"
+       "etiqueta": "u (defectos, n variable)"
+      }
+     ]
+    },
+    {
+     "campo": "cuenta",
+     "etiqueta": "Qué cuentas (solo cartas de atributo)",
+     "tipo": "opcion",
+     "opciones": [
+      {
+       "valor": "",
+       "etiqueta": "Declarar qué se cuenta (obligatorio en p, np, c y u)"
+      },
+      {
+       "valor": "defectuosas",
+       "etiqueta": "Unidades defectuosas: cada unidad es buena o mala (binomial)"
+      },
+      {
+       "valor": "defectos",
+       "etiqueta": "Defectos o errores: una unidad puede tener varios (Poisson)"
       }
      ]
     },
@@ -10122,9 +10199,16 @@
       },
       {
        "campo": "col",
-       "etiqueta": "Desde la hoja: columna",
+       "etiqueta": "Desde la hoja: columna (numerador)",
        "tipo": "col",
        "filtro": "num"
+      },
+      {
+       "campo": "col_den",
+       "etiqueta": "Desde la hoja: denominador",
+       "tipo": "col",
+       "filtro": "num",
+       "ayuda": "Solo para el cálculo «Proporción»: suma del numerador / suma de este denominador por semana. Sin columna, el numerador se toma como marcas 0/1 y la base es el número de registros."
       },
       {
        "campo": "calculo",
@@ -10146,6 +10230,10 @@
         {
          "valor": "mediana",
          "etiqueta": "Mediana"
+        },
+        {
+         "valor": "proporcion",
+         "etiqueta": "Proporción (con base)"
         }
        ]
       }

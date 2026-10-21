@@ -1572,6 +1572,16 @@
 },
 {
 "cat": "Estadística",
+"n": "FPY y RTY",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Rendimiento a la primera por paso y producto de los pasos (regla de primer evento)"
+},
+{
+"cat": "Estadística",
 "n": "Crear diseño de experimentos",
 "a": "—",
 "c": [

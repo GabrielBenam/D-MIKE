@@ -14,7 +14,7 @@ from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_en
 import json, os
 from datetime import datetime
 
-VERSION = "0.27.0"
+VERSION = "0.28.0"
 NOMBRE_TIPO = {"num": "numérico", "texto": "texto", "fecha": "fecha"}
 
 
@@ -625,9 +625,10 @@ class Api:
 
     @staticmethod
     def _huella(columnas, filtro=None):
-        """SHA-256 de la copia congelada. Con filtro (formato 2, v0.28) la huella cubre columnas y condiciones del filtro; sin él, solo columnas (formato 1)."""
+        """SHA-256 de la copia congelada. Sin filtro de filas activo la huella cubre solo las columnas (igual que desde v0.25, así las huellas
+        ya guardadas siguen valiendo); con filtro cubre columnas y condiciones (v0.28)."""
         import hashlib
-        obj = columnas if filtro is None else {"columnas": columnas, "filtro": filtro}
+        obj = {"columnas": columnas, "filtro": filtro} if filtro else columnas
         return hashlib.sha256(json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
     def _cols_congeladas(self, cls, params):
@@ -648,7 +649,7 @@ class Api:
         return {"version": VERSION, "columnas": cols, "filtro": filtro, "huella": self._huella(cols, filtro), "parametros": params}
 
     def _huella_de_copia(self, cg):
-        return self._huella(cg["columnas"], cg["filtro"]) if "filtro" in cg else self._huella(cg["columnas"])
+        return self._huella(cg["columnas"], cg.get("filtro"))
 
     def estado_resultado(self, uid):
         """«vigente» si los datos de la hoja coinciden con la copia congelada; «desactualizado» si cambiaron; «sin_copia» si es anterior a v0.25."""
@@ -662,7 +663,7 @@ class Api:
             cel = list(self.hoja.columnas[k].celdas)
             while cel and cel[-1] in (None, ""): cel.pop()
             actual[j] = {"nombre": info["nombre"], "tipo": info["tipo"], "celdas": cel}
-        actual_h = self._huella(actual, [dict(f) for f in self.hoja.filtro]) if "filtro" in cg else self._huella(actual)
+        actual_h = self._huella(actual, [dict(f) for f in self.hoja.filtro] if cg.get("filtro") else None)
         if actual_h == cg["huella"]: return {"estado": "vigente", "huella": cg["huella"][:12], "version": cg["version"]}
         return {"estado": "desactualizado", "motivo": "los datos de la hoja cambiaron desde que se corrió", "huella": cg["huella"][:12], "version": cg["version"]}
 
