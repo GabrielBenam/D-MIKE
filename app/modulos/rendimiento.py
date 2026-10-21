@@ -34,7 +34,7 @@ def calcular(eventos, aprobados, rechazos, declaro_primera=False):
     sin_clasificar = OrderedDict(); na = sin_datos = 0
     for e in eventos:
         pasos.setdefault(e["paso"], OrderedDict()).setdefault(e["unidad"], []).append(e)
-    salida, rends = [], []
+    salida, rends, por_paso = [], [], {}
     for paso, unidades in pasos.items():
         problemas, n, aprob, retrab = [], 0, 0, 0
         primeras, contadas = {}, []
@@ -57,6 +57,7 @@ def calcular(eventos, aprobados, rechazos, declaro_primera=False):
             contadas.append((primero, evs))
             if len(evs) > 1: retrab += 1
         n_fin = _finales_aprobadas(contadas, ap)
+        por_paso[paso] = {primero_["unidad"]: (primero_, evs_) for primero_, evs_ in contadas}
         if n == 0:
             salida.append({"paso": paso, "estado": "no_definido", "motivo": "ninguna unidad con resultado clasificado en su primera inspección (denominador 0)",
                            "n": 0, "aprobadas": 0, "rendimiento": None, "retrabajo": 0, "finales": None}); rends.append(None); continue
@@ -76,8 +77,12 @@ def calcular(eventos, aprobados, rechazos, declaro_primera=False):
         for f in rends: rty *= f
         fty = sum(rends) / len(rends)
     if salida and salida[0]["estado"] == "ok" and salida[-1]["estado"] == "ok":
-        entran, salen = salida[0]["n"], salida[-1]["finales"]
-        trad = {"entran": entran, "salen": salen, "valor": salen / entran, "primer_paso": salida[0]["paso"], "ultimo_paso": salida[-1]["paso"]}
+        # salen = unidades del último paso que terminan aprobadas Y entraron al primero (una unidad que no entró no puede salir)
+        p1, pn = por_paso[salida[0]["paso"]], por_paso[salida[-1]["paso"]]
+        entran = salida[0]["n"]
+        salen = _finales_aprobadas([v for u, v in pn.items() if u in p1], ap)
+        ajenas = sum(1 for u in pn if u not in p1)
+        trad = {"entran": entran, "salen": salen, "valor": salen / entran, "primer_paso": salida[0]["paso"], "ultimo_paso": salida[-1]["paso"], "sin_entrada": ajenas}
     elif salida: motivos["tradicional"] = "el primer o el último paso no es calculable o tiene denominador 0, y el tradicional necesita las unidades que entran al primero y salen del último."
     return {"pasos": salida, "tradicional": trad, "fty": fty, "rty": rty, "motivos": motivos, "sin_clasificar": sin_clasificar, "na": na, "sin_datos": sin_datos}
 
@@ -156,6 +161,8 @@ class Rendimiento(ModuloDialogo):
         if vacias: avisos.append(f"{vacias} filas sin unidad quedaron fuera del cálculo.")
         if r["sin_datos"]: avisos.append(f"Sin datos: {r['sin_datos']} unidades tienen la primera inspección sin resultado; quedan fuera de la base (no cuentan como aprobadas ni como rechazadas).")
         if r["na"]: avisos.append(f"N/A: {r['na']} primeras inspecciones no aplican y quedan fuera de la base.")
+        if r["tradicional"] and r["tradicional"]["sin_entrada"]:
+            avisos.append(f"{r['tradicional']['sin_entrada']} unidades aparecen en el último paso pero no en el primero: no cuentan como salidas del proceso (no entraron).")
         for val, us in r["sin_clasificar"].items():
             avisos.append(f"El resultado «{val}» ({len(us)} unidades) no está en la lista de aprobados ni de no aprobados: esas unidades quedaron fuera de la base. Agrégalo a una de las listas.")
         nom = nombre_col(hoja, jr)
@@ -205,7 +212,7 @@ class Rendimiento(ModuloDialogo):
         regla = ("Regla de primer evento: " + ("número de intento (1 = primera inspección)" if ji is not None else "fecha del evento (el más antiguo de cada unidad y paso)" if jf is not None
                  else "declarada por el usuario: cada fila es la primera inspección") + ". Rendimiento de un paso = aprobadas en su primera inspección / inspeccionadas por primera vez. "
                  "Rendimiento tradicional = unidades que salen / unidades que entran, sin retrabajo; FTY = promedio de los rendimientos de cada paso; RTY = producto. "
-                 f"Fuente: {FUENTE}. Sin ejemplo del curso; verificado con cálculo a mano (pruebas/test_g4_rendimiento.py). Los pasos van en el orden en que aparecen en la hoja. "
+                 f"Fuente: {FUENTE}. Sin ejemplo del curso; verificado con cálculo a mano (pruebas/test_g4_rendimiento.py). Orden de los pasos: el de la hoja; esa regla es una decisión de D-MIKE, no del curso (no respaldado). "
                  "El supuesto de que el registro incluye todas las inspecciones no se puede comprobar con los datos.")
         bloques.append(b_texto(regla, "nota"))
         return resultado(cls.ID, f"Rendimientos de {nom}", p, bloques, avisos, datos={"columnas": [j for j in (ju, jp, jr, ji, jf) if j is not None],
