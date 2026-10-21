@@ -38,5 +38,5 @@ def autoprueba():
 
 def cargar():
     """Importa los módulos para que se registren."""
-    from . import graficas_basicas, analisis, formatos, formatos2, formatos3, formatos4, formatos5, formatos6, formatos7, calidad, relaciones, superficies, datos_hoja, calc_hoja, msa_variable, inferencia, probabilidad, factorial, formatos8  # noqa: F401
+    from . import graficas_basicas, analisis, formatos, formatos2, formatos3, formatos4, formatos5, formatos6, formatos7, calidad, relaciones, superficies, datos_hoja, calc_hoja, msa_variable, inferencia, probabilidad, factorial, formatos8, rendimiento  # noqa: F401
     return REGISTRO

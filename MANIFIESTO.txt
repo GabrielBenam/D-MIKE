@@ -138,6 +138,8 @@ pruebas/test_factorial.py
 pruebas/test_formatos_v010.py
 pruebas/test_formatos_v010_interfaz.py
 pruebas/test_formatos_v015_interfaz.py
+pruebas/test_g1_atributos.py
+pruebas/test_g7_persona.py
 pruebas/test_gage_rr.py
 pruebas/test_gestion_interfaz.py
 pruebas/test_hoja.py

@@ -14,6 +14,17 @@ ISO = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})$")
 DMA = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")   # día/mes/año (México)
 
 
+# A1: tres estados además del valor capturado. Un cero tecleado es un valor; una celda vacía o «Sin datos» es dato faltante
+# (queda fuera del cálculo y genera aviso); «N/A» es «no aplica» (queda fuera, pero no cuenta como faltante).
+NA = re.compile(r"^\s*n\s*/\s*a\s*$", re.I)
+SIN_DATOS = re.compile(r"^\s*(sin\s+datos?|s\s*/\s*d)\s*$", re.I)
+TEXTO_NA, TEXTO_SIN_DATOS = "N/A", "Sin datos"
+
+
+def es_na(t): return t is not None and bool(NA.match(t))
+def es_sin_datos_explicito(t): return t is not None and bool(SIN_DATOS.match(t))
+
+
 def a_numero(t):
     t = t.strip()
     if NUM.match(t): return float(t)
@@ -33,7 +44,7 @@ def a_fecha(t):
 
 
 def detectar_tipo(textos):
-    vals = [t for t in textos if t is not None and t.strip() != ""]
+    vals = [t for t in textos if t is not None and t.strip() != "" and not es_na(t) and not es_sin_datos_explicito(t)]
     if not vals: return None
     # Regla de diseño D-MIKE: el tipo lo decide la mayoría de los valores; los que no
     # corresponden quedan marcados como inválidos en vez de convertir toda la columna a texto.
@@ -53,10 +64,19 @@ class Columna:
         self.nombre = ""; self.tipo = None; self.rol = None; self.desc = ""
         self.celdas = [None] * n
 
+    def estado(self, i):
+        """A1: «valor» (capturado, incluido el cero), «sin_datos» (vacía o «Sin datos»), «na» (no aplica) o «invalido» (no corresponde al tipo)."""
+        t = self.celdas[i]
+        if t is None or t.strip() == "" or es_sin_datos_explicito(t): return "sin_datos"
+        if es_na(t): return "na"
+        return "valor" if self.valor(i)[1] else "invalido"
+
     def valor(self, i):
         """(texto_a_mostrar, valido, valor_interpretado)"""
         t = self.celdas[i]
         if t is None or t.strip() == "": return "", True, None
+        if es_na(t): return TEXTO_NA, True, None                     # A1: no aplica
+        if es_sin_datos_explicito(t): return TEXTO_SIN_DATOS, True, None   # A1: faltante declarado
         if self.tipo == "num":
             x = a_numero(t)
             return (mostrar_numero(x), True, x) if x is not None else (t, False, None)
@@ -345,7 +365,9 @@ class Hoja:
         for j, c in enumerate(self.columnas):
             vals = [c.valor(i) for i in range(self.n)]
             cols.append({"etiqueta": f"C{j + 1}{SUFIJO[c.tipo]}", "nombre": c.nombre, "tipo": c.tipo, "rol": c.rol, "desc": c.desc,
-                         "texto": [v[0] for v in vals], "invalida": [i for i, v in enumerate(vals) if not v[1]]})
+                         "texto": [v[0] for v in vals], "invalida": [i for i, v in enumerate(vals) if not v[1]],
+                         "na": [i for i, v in enumerate(vals) if v[0] == TEXTO_NA and c.estado(i) == "na"],
+                         "sin_datos": [i for i, v in enumerate(vals) if v[0] == TEXTO_SIN_DATOS]})
         act = self.filas_activas()
         return {"filas": self.n, "columnas": cols, "visibles": sorted(act) if act is not None else None, "filtro": self.filtro,
                 "vista_filas": max(self.MIN_FILAS, self.n + 20), "vista_columnas": max(self.MIN_COLS, len(self.columnas) + 5)}

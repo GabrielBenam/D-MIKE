@@ -24,7 +24,7 @@ def _n(v):
     """Número con punto decimal y sin separador de miles (Power BI lo lee como número en cualquier región si se
     indica la configuración regional en inglés al importar; ver LEEME)."""
     if v is None or v == "": return ""
-    if isinstance(v, float): return repr(round(v, 10)) if not v.is_integer() else str(int(v))
+    if isinstance(v, float): return repr(v) if not v.is_integer() else str(int(v))    # A4: sin redondeo
     return v
 
 
@@ -71,21 +71,32 @@ def exportar(carpeta, api):
     if "TABLERO" in proy.formatos:
         T = FORMATOS["TABLERO"]; d = T.normalizar(proy.formatos["TABLERO"])
         ns, inicio, series, _ = T.series(d, hoja)
-        dim, hechos = [], []
+        dim, hechos, defs = [], [], []
         from ..modulos.formatos import estado_kpi
+        from . import indicadores as IND
         for i, (f, sr) in enumerate(zip(d["tablas"]["kpi"], series), 1):
             if sr is None: continue
             kid = f.get("kpi_id") or f"KPI{i}"
+            revs = IND.revisiones(proy, kid); por_sem = IND.revision_por_semana(revs, inicio, ns)
             dim.append([kid, f.get("indicador"), f.get("categoria"), f.get("unidad"), "menor_mejor" if sr["sentido"] == "<=" else "mayor_mejor",
-                        _n(sr["meta"]), _n(sr["adv"]), (f.get("tarjeta") or "Sí") == "Sí", "hoja" if sr["desde_hoja"] else "manual"])
+                        _n(sr["meta"]), _n(sr["adv"]), (f.get("tarjeta") or "Sí") == "Sí", "hoja" if sr["desde_hoja"] else "manual",
+                        revs[-1]["revision"] if revs else ""])
+            for r in revs:
+                defs.append([kid, r["revision"], r["nombre"], r["numerador"], r["denominador"], r["unidad_conteo"], r["poblacion"],
+                             r["evento_inicio"], r["evento_fin"], r["vigencia"], r.get("motivo", "")])
             for s in range(1, ns + 1):
                 v = sr["vals"][s]
+                b = sr["bases"].get(s)
                 if v is None: continue
                 hechos.append([kid, s, (inicio + timedelta(days=7 * (s - 1))).isoformat() if inicio else "", _n(v), _n(sr["meta"]),
-                               estado_kpi(v, sr["meta"], sr["sentido"], sr["adv"]) or ""])
+                               estado_kpi(v, sr["meta"], sr["sentido"], sr["adv"]) or "", por_sem[s - 1] or "",
+                               _n(b[0]) if b else "", _n(b[1]) if b and b[1] is not None else ""])
         tabla("dim_indicador.csv", ["indicador_id", "indicador", "categoria", "unidad", "sentido", "meta", "limite_advertencia",
-                                    "en_resumen", "origen"], dim)
-        tabla("hecho_indicador.csv", ["indicador_id", "semana", "inicio_semana", "valor", "meta", "estado"], hechos)
+                                    "en_resumen", "origen", "revision_vigente"], dim)
+        tabla("definicion_indicador.csv", ["indicador_id", "revision", "nombre", "numerador", "denominador", "unidad_conteo", "poblacion",
+                                           "evento_inicio", "evento_fin", "vigencia", "motivo"], defs)
+        tabla("hecho_indicador.csv", ["indicador_id", "semana", "inicio_semana", "valor", "meta", "estado", "revision",
+                                      "base_numerador", "base_denominador"], hechos)
         wip = [[f.get("unidad"), f.get("estado"), f.get("responsable")] for f in d["tablas"]["wip"] if any(f.values())]
         tabla("trabajos_en_proceso.csv", ["unidad", "estado", "responsable"], wip)
 
@@ -141,7 +152,9 @@ Cómo usarlos en Power BI Desktop
 3. Si tu Windows usa coma decimal, presiona «Transformar datos» y en cada columna numérica usa
    Cambiar tipo > Usar configuración regional > Número decimal, Inglés (Estados Unidos).
 4. Relaciones sugeridas (Modelado > Administrar relaciones):
-   hecho_indicador[indicador_id] -> dim_indicador[indicador_id] (muchos a uno).
+   hecho_indicador[indicador_id] -> dim_indicador[indicador_id] (muchos a uno);
+   definicion_indicador[indicador_id] -> dim_indicador[indicador_id] (muchos a uno). Cada valor semanal trae la revisión de la
+   definición que regía esa semana y, en los porcentajes, su base (base_numerador, base_denominador).
 5. Tema: Vista > Temas > Examinar temas, y elige tema_dmike.json.
 
 Las columnas de porcentaje vienen como fracción (0.85 = 85%): dales formato de porcentaje en Power BI.

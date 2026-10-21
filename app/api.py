@@ -9,7 +9,8 @@ from .nucleo import archivo
 from .nucleo import modo as MD
 from .nucleo import seguimiento as SG
 from . import modulos
-from .modulos.base import ErrorEntrada, agregar_nota_persona
+from .nucleo import indicadores as IND
+from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_entrada
 import json, os
 from datetime import datetime
 
@@ -591,6 +592,7 @@ class Api:
         if getattr(cls, "SIN_RESULTADO", False):
             return self._resp(res)
         agregar_nota_persona(res, cls, self.hoja, params)
+        agregar_estados_entrada(res, cls, self.hoja, self._cols_de(cls, params))
         res["definicion"] = self._definicion(cls, mid, params)
         res["definicion"]["congelado"] = self._congelar(cls, params)
         self.proyecto.resultados.append(res)
@@ -613,27 +615,40 @@ class Api:
                 "fecha": datetime.now().isoformat(timespec="seconds"), "filas_hoja": self.hoja.n, "version": VERSION}
 
     # ---------- reproducir contra recalcular (A3) ----------
-    def _cols_de(self, cls, params):
-        out = []
+    def _cols_de(self, cls, params, ncols=None):
+        out = []; ncols = len(self.hoja.columnas) if ncols is None else ncols
         for c in getattr(cls, "CAMPOS", []):
             j = params.get(c["campo"])
-            if c["tipo"] == "col" and isinstance(j, int) and 0 <= j < len(self.hoja.columnas): out.append(j)
-            elif c["tipo"] == "cols" and isinstance(j, list): out += [k for k in j if isinstance(k, int) and 0 <= k < len(self.hoja.columnas)]
+            if c["tipo"] == "col" and isinstance(j, int) and 0 <= j < ncols: out.append(j)
+            elif c["tipo"] == "cols" and isinstance(j, list): out += [k for k in j if isinstance(k, int) and 0 <= k < ncols]
         return sorted(set(out))
 
     @staticmethod
-    def _huella(columnas):
+    def _huella(columnas, filtro=None):
+        """SHA-256 de la copia congelada. Con filtro (formato 2, v0.28) la huella cubre columnas y condiciones del filtro; sin él, solo columnas (formato 1)."""
         import hashlib
-        return hashlib.sha256(json.dumps(columnas, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+        obj = columnas if filtro is None else {"columnas": columnas, "filtro": filtro}
+        return hashlib.sha256(json.dumps(obj, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+
+    def _cols_congeladas(self, cls, params):
+        """Columnas del análisis más las que usa el filtro de filas activo (un filtro oculta filas y cambia el resultado)."""
+        cols = set(self._cols_de(cls, params))
+        cols |= {f["col"] for f in self.hoja.filtro if isinstance(f.get("col"), int) and 0 <= f["col"] < len(self.hoja.columnas)}
+        return sorted(cols)
 
     def _congelar(self, cls, params):
-        """Copia congelada de las entradas: celdas de cada columna usada (texto tal cual), versión del motor y huella SHA-256."""
+        """Copia congelada de las entradas: celdas de cada columna usada (texto tal cual, incluidos N/A y «Sin datos»), el filtro de filas
+        activo, la versión del motor y la huella SHA-256."""
         cols = {}
-        for j in self._cols_de(cls, params):
+        for j in self._cols_congeladas(cls, params):
             c = self.hoja.columnas[j]; cel = list(c.celdas)
             while cel and cel[-1] in (None, ""): cel.pop()
             cols[str(j)] = {"nombre": c.nombre or f"C{j + 1}", "tipo": getattr(c, "tipo", None), "celdas": cel}
-        return {"version": VERSION, "columnas": cols, "huella": self._huella(cols), "parametros": params}
+        filtro = [dict(f) for f in self.hoja.filtro]
+        return {"version": VERSION, "columnas": cols, "filtro": filtro, "huella": self._huella(cols, filtro), "parametros": params}
+
+    def _huella_de_copia(self, cg):
+        return self._huella(cg["columnas"], cg["filtro"]) if "filtro" in cg else self._huella(cg["columnas"])
 
     def estado_resultado(self, uid):
         """«vigente» si los datos de la hoja coinciden con la copia congelada; «desactualizado» si cambiaron; «sin_copia» si es anterior a v0.25."""
@@ -647,7 +662,8 @@ class Api:
             cel = list(self.hoja.columnas[k].celdas)
             while cel and cel[-1] in (None, ""): cel.pop()
             actual[j] = {"nombre": info["nombre"], "tipo": info["tipo"], "celdas": cel}
-        if self._huella(actual) == cg["huella"]: return {"estado": "vigente", "huella": cg["huella"][:12], "version": cg["version"]}
+        actual_h = self._huella(actual, [dict(f) for f in self.hoja.filtro]) if "filtro" in cg else self._huella(actual)
+        if actual_h == cg["huella"]: return {"estado": "vigente", "huella": cg["huella"][:12], "version": cg["version"]}
         return {"estado": "desactualizado", "motivo": "los datos de la hoja cambiaron desde que se corrió", "huella": cg["huella"][:12], "version": cg["version"]}
 
     def reproducir_resultado(self, uid):
@@ -655,7 +671,7 @@ class Api:
         res = self.resultado(uid)
         cg = (res or {}).get("definicion", {}).get("congelado")
         if not cg: return self._resp("Este resultado es anterior a la copia congelada (v0.25); usa «Repetir con datos actuales».", "aviso", error="sin_copia")
-        if self._huella(cg["columnas"]) != cg["huella"]: return self._resp("La copia congelada no coincide con su huella: no se reproduce.", "aviso", error="huella")
+        if self._huella_de_copia(cg) != cg["huella"]: return self._resp("La copia congelada no coincide con su huella: no se reproduce.", "aviso", error="huella")
         from .nucleo.hoja import Hoja
         tmp = Hoja(); n = max([len(v["celdas"]) for v in cg["columnas"].values()] + [1])
         ancho = max(int(j) for j in cg["columnas"]) + 1 if cg["columnas"] else 0
@@ -664,10 +680,14 @@ class Api:
             filas[0][int(j)] = info["nombre"]
             for i, v in enumerate(info["celdas"]): filas[i + 1][int(j)] = "" if v is None else str(v)
         tmp.pegar(-1, 0, "\n".join("\t".join(f) for f in filas))
+        for j, info in cg["columnas"].items():
+            if info.get("tipo") and int(j) < len(tmp.columnas): tmp.columnas[int(j)].tipo = info["tipo"]       # el tipo que tenía al correr
+        if cg.get("filtro"): tmp.filtro = [dict(f) for f in cg["filtro"]]
         cls = self._modulo(res["definicion"]["analisis"])
         try: nuevo = cls.ejecutar(tmp, dict(cg["parametros"]), self.proyecto)
         except ErrorEntrada as e: return self._resp(f"No se pudo reproducir: {e}", "aviso", error="entrada")
         agregar_nota_persona(nuevo, cls, tmp, cg["parametros"])
+        agregar_estados_entrada(nuevo, cls, tmp, self._cols_de(cls, cg["parametros"], len(tmp.columnas)))
         nuevo["titulo"] = res["titulo"] + " (reproducción de la versión guardada)"
         nuevo["definicion"] = dict(res["definicion"]); nuevo["definicion"]["reproduccion_de"] = uid
         nuevo["avisos"] = [f"Reproducido con la copia congelada del {res['definicion'].get('fecha', '')[:10]} (motor v{cg['version']}, huella {cg['huella'][:12]}); no usa la hoja actual."] + nuevo["avisos"]
@@ -765,6 +785,7 @@ class Api:
     # --- tablero de indicadores (vista del programa, a partir del formato TABLERO) ---
     def datos_tablero(self):
         from .modulos import kpis
+        from .modulos import formatos as formatos_tablero
         from .modulos.formatos import estado_kpi
         cls = self.registro["TABLERO"]; d = cls.normalizar(self.proyecto.formatos.get("TABLERO") or cls.vacio())
         ns, inicio, series, av = cls.series(d, self.hoja); ind = []
@@ -772,12 +793,22 @@ class Api:
             if sr is None: continue
             vals = [sr["vals"].get(s) for s in range(1, ns + 1)]; reales = [v for v in vals if v is not None]
             ult = reales[-1] if reales else None
+            sem_ult = max((s for s in range(1, ns + 1) if sr["vals"].get(s) is not None), default=None)
+            b_ult = sr["bases"].get(sem_ult) if sem_ult else None
+            kid = f.get("kpi_id") or ""; revs = IND.revisiones(self.proyecto, kid) if kid else []
+            por_sem = IND.revision_por_semana(revs, inicio, ns)
             ind.append({"i": i, "kpi_id": f.get("kpi_id") or "", "nombre": f.get("indicador") or f"Indicador {i + 1}", "categoria": f.get("categoria") or "Sin categoría",
                         "unidad": f.get("unidad") or "", "sentido": sr["sentido"], "meta": sr["meta"], "adv": sr["adv"], "resumen": (f.get("tarjeta") or "Sí") == "Sí",
                         "vals": vals, "ultimo": ult, "delta": (reales[-1] - reales[-2]) if len(reales) > 1 else None,
                         "estado": estado_kpi(ult, sr["meta"], sr["sentido"], sr["adv"]) if ult is not None else None,
                         "estados": [estado_kpi(v, sr["meta"], sr["sentido"], sr["adv"]) if v is not None else None for v in vals],
-                        "tipo": f.get("tipo_ind") or "", "explicacion": f.get("explicacion") or ""})
+                        "tipo": f.get("tipo_ind") or "", "explicacion": f.get("explicacion") or "",
+                        # A2: base de cada porcentaje (nunca un % sin su base) y definición versionada
+                        "bases": [formatos_tablero.texto_base(sr["bases"].get(s) if (sr["bases"].get(s) or (0, 0))[1] is not None else None) for s in range(1, ns + 1)],
+                        "base": formatos_tablero.texto_base(b_ult) if b_ult and b_ult[1] is not None else (
+                            "base no registrada" if (f.get("unidad") or "") == "%" and ult is not None else ""),
+                        "definicion": {"revision": revs[-1]["revision"] if revs else None, "revisiones": revs, "por_semana": por_sem,
+                                       "nota": IND.nota_cruce(revs, por_sem, vals, f.get("indicador") or "")}})
         est = self.proyecto.estado(self.catalogo) if self.proyecto.perfil else None
         fases = []
         if est:
@@ -785,10 +816,33 @@ class Api:
                 act = est["activos"].get(fz, [])
                 fases.append({"fase": fz, "total": len(act), "hechos": sum(1 for m in act if m.get("avance") == "hecho"),
                               "en_curso": sum(1 for m in act if m.get("avance") == "en_curso")})
+        av = list(av) + [x["definicion"]["nota"] for x in ind if x["definicion"]["nota"]]          # A2: notas de cruce de revisiones
         return {"indicadores": ind, "semanas": ns, "inicio": inicio.isoformat() if inicio else None, "avisos": av, "fases": fases,
                 "fase_actual": est["fase_actual"] if est else None,
                 "wip": [f for f in d["tablas"]["wip"] if any(f.values())], "catalogo": kpis.catalogo(),
                 "proyecto": (self.proyecto.fijos.get("nombre_proyecto") or {}).get("valor") or ""}
+
+    def definicion_indicador(self, i):
+        """A2: definición vigente y revisiones del indicador de la fila i del tablero."""
+        cls = self.registro["TABLERO"]; d = cls.normalizar(self.proyecto.formatos.get("TABLERO") or cls.vacio()); filas = d["tablas"]["kpi"]
+        if not isinstance(i, int) or not 0 <= i < len(filas): return {"error": "El indicador ya no existe."}
+        f = filas[i]; revs = IND.revisiones(self.proyecto, f.get("kpi_id") or "") if f.get("kpi_id") else []
+        return {"nombre": f.get("indicador") or "", "unidad": f.get("unidad") or "", "revisiones": revs, "campos": IND.ETIQUETAS,
+                "vigente": revs[-1] if revs else None}
+
+    def guardar_definicion_indicador(self, i, campos, vigencia, motivo=""):
+        """A2: guarda la definición del indicador. Si cambió, crea una revisión nueva (la anterior queda intacta)."""
+        cls = self.registro["TABLERO"]; d = cls.normalizar(self.proyecto.formatos.get("TABLERO") or cls.vacio()); filas = d["tablas"]["kpi"]
+        if not isinstance(i, int) or not 0 <= i < len(filas): return self._resp("El indicador ya no existe.", "aviso", error="kpi", hoja=False)
+        kid = filas[i].get("kpi_id") or IND.nuevo_id()
+        estado, msg = IND.guardar_definicion(self.proyecto, kid, campos, vigencia, motivo)
+        if estado == "error": return self._resp(msg, "aviso", error="definicion", hoja=False)
+        if estado == "nueva":
+            filas[i]["kpi_id"] = kid
+            if (campos.get("nombre") or "").strip(): filas[i]["indicador"] = campos["nombre"].strip()
+            self.proyecto.formatos["TABLERO"] = cls.normalizar(d)
+            self._sucio = True
+        r = self._resp(msg, hoja=False); r["tablero"] = self.datos_tablero(); return r
 
     def tablero_kpi(self, accion, datos=None):
         """Cambios hechos desde la vista del tablero: agregar o quitar un indicador, fijar meta y advertencia, mostrar en el resumen."""

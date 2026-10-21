@@ -27,6 +27,7 @@ COMPLEMENTARIOS = {
     "CRONOGRAMA": ("Cronograma y ruta crítica", "D", "formato"), "MONTECARLO": ("Monte Carlo del cronograma", "D", "formato"),
     "FODA": ("Análisis FODA", "D", "formato"), "BITACORA": ("Bitácora del proyecto", "D", "formato"),
     "VALOR-GANADO": ("Seguimiento por valor ganado", "C", "formato"),
+    "RENDIMIENTO": ("FPY y RTY (rendimiento a la primera)", "M", "datos"),
 }
 CONSTRUIDOS = set(MVP + EXTRA + ESTADISTICA) | set(COMPLEMENTARIOS)
 

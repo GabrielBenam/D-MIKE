@@ -354,7 +354,8 @@ class CincoS(Formato):
         cal = [N(f.get("calif")) for f in d["tablas"]["s"]]; av = []; cab = {}
         kk = [{"calif": "" if c is None else "ok" if c >= 3 else "advertencia" if c >= 2 else "no"} for c in cal]
         if any(c is not None for c in cal):
-            tot = sum(c or 0 for c in cal); cab["total"] = f"{num(tot)} de 20 ({100 * tot / 20:.0f}%)"
+            dadas = [c for c in cal if c is not None]; tot = sum(dadas); base = 4 * len(dadas)       # A1: una S sin calificar no es cero
+            cab["total"] = f"{num(tot)} de {base} ({100 * tot / base:.0f}%)" + (f"; base: {len(dadas)} de {len(cal)} S calificadas" if len(dadas) < len(cal) else "")
             if all(c is not None for c in cal[:3]) and min(cal[:3]) >= 3 and any(c is not None and c < 3 for c in cal[3:]): av.append("Error común de la base: llegar a 3S y no sostener 4S y 5S.")
             for f, c in zip(d["tablas"]["s"], cal):
                 if c is not None and c < 2 and not f.get("accion"): av.append(f"{f['s']}: calificación baja sin acción.")
@@ -415,7 +416,9 @@ class Scrum(Formato):
     def calcular(cls, d, hoja, proyecto):
         c = d["cabecera"]; cab, av = {}, []; a, b = a_fecha(c.get("fecha_inicio") or ""), a_fecha(c.get("fecha_entrega") or "")
         if a and b: cab["dias"] = str((b - a).days + 1) if b >= a else "fin antes del inicio"
-        est = sum(N(f.get("horas")) or 0 for f in d["tablas"]["historias"]); hd = N(c.get("horas_disponibles"))
+        hs = [N(f.get("horas")) for f in d["tablas"]["historias"] if not fila_vacia(f)]
+        est = sum(h for h in hs if h is not None); hd = N(c.get("horas_disponibles"))              # A1: historia sin horas no es cero horas
+        if any(h is None for h in hs): av.append(f"{sum(h is None for h in hs)} historias sin horas estimadas: la carga solo suma las que tienen horas.")
         if est and hd: cab["carga"] = f"{num(est)} h estimadas de {num(hd)} h ({100 * est / hd:.0f}%)"; av += ["El sprint está sobrecargado: las horas estimadas superan las disponibles."] if est > hd else []
         bd = d["tablas"]["burndown"]; dias = [i for i, f in enumerate(bd) if N(f.get("restante")) is not None]; cc = [{} for _ in bd]; bl = []
         if dias:

@@ -11,7 +11,7 @@ function tbSpark(k, w = 170, h = 34) {
 }
 function tbTarjeta(k) {
   const bien = k.delta == null ? null : (k.sentido === ">=" ? k.delta >= 0 : k.delta <= 0);
-  return `<div class="tb-kpi ${k.estado || ""}" data-i="${k.i}" tabindex="0"><div class="tb-n">${esc(k.nombre)}${k.tipo ? `<span class="tb-tipo" title="Indicador ${k.tipo.toLowerCase()} (PMBOK 7, 2.7.1.1)">${k.tipo === "Adelantado" ? "adelantado" : "atrasado"}</span>` : ""}</div><div class="tb-v">${tbFmt(k, k.ultimo)}</div>${tbSpark(k)}
+  return `<div class="tb-kpi ${k.estado || ""}" data-i="${k.i}" tabindex="0"><div class="tb-n">${esc(k.nombre)}${k.tipo ? `<span class="tb-tipo" title="Indicador ${k.tipo.toLowerCase()} (PMBOK 7, 2.7.1.1)">${k.tipo === "Adelantado" ? "adelantado" : "atrasado"}</span>` : ""}${k.definicion.revision ? `<span class="tb-tipo" title="Revisión vigente de la definición del indicador">rev. ${k.definicion.revision}</span>` : ""}</div><div class="tb-v">${tbFmt(k, k.ultimo)}</div>${k.base ? `<small class="tb-base">base: ${esc(k.base)}</small>` : ""}${tbSpark(k)}${k.definicion.nota ? `<small class="tb-cruce" title="${esc(k.definicion.nota)}">Cruza revisiones de la definición: ver detalle</small>` : ""}
     <div class="tb-m"><span>${k.meta != null ? `Meta ${k.sentido === ">=" ? "≥" : "≤"} ${tbFmt(k, k.meta)}` : "Sin meta"}</span><span class="tb-d ${bien == null ? "" : bien ? "bien" : "mal"}">${k.delta == null ? "" : (k.delta >= 0 ? "▲ " : "▼ ") + Math.abs(+k.delta.toFixed(2))}</span></div></div>`;
 }
 async function pintarTableroVista(recargar = true) {
@@ -88,14 +88,41 @@ function tbDetalle(i) {
   const tipo = el("select", {}, [["", "(sin definir)"], ["Adelantado", "Adelantado (anticipa)"], ["Atrasado", "Atrasado (resultado)"]].map(([v, t]) => el("option", { value: v, selected: v === k.tipo }, t)));
   const expl = el("textarea", { rows: 2, placeholder: "Por qué no cumple y qué se hará (obligatorio si está en rojo)", style: "width:100%" }); expl.value = k.explicacion || "";
   const res = el("input", { type: "checkbox", checked: k.resumen });
-  const cuerpo = el("div", { class: "tb-detalle" }); cuerpo.innerHTML = `<p class="tb-sub">${esc(k.categoria)}${cat ? " · " + esc(cat.formula) : ""}</p>${svg}${stats}`;
+  const cuerpo = el("div", { class: "tb-detalle" }); cuerpo.innerHTML = `<p class="tb-sub">${esc(k.categoria)}${cat ? " · " + esc(cat.formula) : ""}</p>${svg}${stats}${k.base ? `<p class="tb-sub">Base del último valor: ${esc(k.base)}</p>` : ""}${k.definicion.nota ? `<p class="aviso-res">${esc(k.definicion.nota)}</p>` : ""}${tbDefinicionHtml(k)}`;
   cuerpo.append(el("div", { class: "tb-campos" }, el("label", {}, "Meta ", meta, ` ${k.unidad} (${k.sentido === ">=" ? "mayor o igual" : "menor o igual"} es mejor)`),
     el("label", {}, "Límite de advertencia ", adv), el("label", {}, "Tipo ", tipo), el("label", { class: "casilla" }, res, " Mostrar en el resumen ejecutivo"),
     el("label", { class: "tb-expl-campo" }, "Explicación si no cumple la meta (PMBOK 7, 2.7.3.1)", expl),
+    el("button", { class: "boton chico", onclick: () => { document.querySelector(".velo")?.remove(); tbDialogoDefinicion(k); } }, k.definicion.revision ? "Revisar definición…" : "Definir indicador…"),
     el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); const r = await api().tablero_kpi("quitar", { i }); registrarSesion(r.sesion); TB.d = r.tablero; pintarTableroVista(false); } }, "Quitar del tablero")));
   dialogo(k.nombre, cuerpo, async () => {
     let r = await api().tablero_kpi("meta", { i, meta: meta.value, adv: adv.value, tipo: tipo.value, explicacion: expl.value }); if (res.checked !== k.resumen) r = await api().tablero_kpi("resumen", { i, valor: res.checked });
     registrarSesion(r.sesion); TB.d = r.tablero; pintarTableroVista(false);
+  }, "Guardar");
+  document.querySelector(".dialogo").classList.add("ancho");
+}
+
+// ---- A2: definición versionada del indicador ----
+const CAMPOS_DEF = [["nombre", "Nombre"], ["numerador", "Numerador (qué se cuenta o se mide)"], ["denominador", "Denominador (si el indicador es una razón)"],
+  ["unidad_conteo", "Unidad de conteo (texto libre: página, paquete, documento, pieza…)"], ["poblacion", "Población o filtro (qué entra y qué no)"],
+  ["evento_inicio", "Evento de inicio (cuando aplique)"], ["evento_fin", "Evento de fin (cuando aplique)"]];
+const fechaDMA = iso => iso ? iso.split("-").reverse().join("/") : "";
+function tbDefinicionHtml(k) {
+  const revs = k.definicion.revisiones; if (!revs.length) return '<p class="tb-sub">Sin definición registrada: define numerador, denominador y unidad de conteo para que el indicador sea reproducible.</p>';
+  const v = revs[revs.length - 1];
+  return `<div class="tb-def"><h4>Definición vigente · revisión ${v.revision} · desde ${fechaDMA(v.vigencia)}</h4><dl>${CAMPOS_DEF.map(([c, t]) => v[c] ? `<dt>${esc(t.split(" (")[0])}</dt><dd>${esc(v[c])}</dd>` : "").join("")}</dl>
+    ${revs.length > 1 ? `<details><summary>Historial (${revs.length} revisiones)</summary>${revs.slice().reverse().map(r => `<p><b>Rev. ${r.revision}</b> desde ${fechaDMA(r.vigencia)}${r.motivo ? " · " + esc(r.motivo) : ""}<br><small>${esc(r.numerador)}${r.denominador ? " / " + esc(r.denominador) : ""} · ${esc(r.unidad_conteo || "sin unidad de conteo")}</small></p>`).join("")}</details>` : ""}</div>`;
+}
+function tbDialogoDefinicion(k) {
+  const v = k.definicion.revisiones.length ? k.definicion.revisiones[k.definicion.revisiones.length - 1] : { nombre: k.nombre };
+  const campos = {}, filas = CAMPOS_DEF.map(([c, t]) => { const i = c === "numerador" || c === "denominador" || c === "poblacion" ? el("textarea", { rows: 2, style: "width:100%" }) : el("input", { style: "width:100%" }); i.value = v[c] || ""; campos[c] = i; return el("label", { class: "tb-expl-campo" }, t, i); });
+  const hoy = new Date(), dma = `${String(hoy.getDate()).padStart(2, "0")}/${String(hoy.getMonth() + 1).padStart(2, "0")}/${hoy.getFullYear()}`;
+  const vig = el("input", { value: dma, style: "width:120px" }), mot = el("input", { placeholder: "Qué cambió y por qué (se conserva en el historial)", style: "width:100%" });
+  const aviso = k.definicion.revision ? el("p", { class: "tb-sub" }, `Si cambias algún campo se crea la revisión ${k.definicion.revision + 1} y la ${k.definicion.revision} se conserva. Las tendencias que crucen la fecha de vigencia llevarán una nota.`) : el("p", { class: "tb-sub" }, "Se guardará como revisión 1.");
+  const cuerpo = el("div", { class: "tb-detalle" }, aviso, ...filas, el("label", {}, "Vigente desde (DD/MM/AAAA) ", vig), el("label", { class: "tb-expl-campo" }, "Motivo del cambio", mot));
+  dialogo("Definición de " + k.nombre, cuerpo, async () => {
+    const c = {}; for (const n in campos) c[n] = campos[n].value;
+    const r = await api().guardar_definicion_indicador(k.i, c, vig.value, mot.value); registrarSesion(r.sesion);
+    if (r.tablero) { TB.d = r.tablero; pintarTableroVista(false); }
   }, "Guardar");
   document.querySelector(".dialogo").classList.add("ancho");
 }

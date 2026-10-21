@@ -86,12 +86,20 @@ def valor(hoja, j, i):
 
 
 # ---------- formato de números ----------
+class Num(str):
+    """A4: texto para mostrar que conserva el número sin redondear (atributo «crudo»). Es un str normal para todo lo demás;
+    b_tabla lo usa para guardar la precisión completa y exportar sin el redondeo de la pantalla."""
+    crudo = None
+
+
 def num(x, d=4):
     if x is None: return "—"
     if isinstance(x, str): return x
     if isinstance(x, float) and (math.isnan(x) or math.isinf(x)): return "—"
-    if isinstance(x, int) or float(x).is_integer() and abs(x) < 1e12: return f"{int(x):,}"
-    return f"{x:,.{d}f}".rstrip("0").rstrip(".") if abs(x) >= 1e-4 else f"{x:.2e}"
+    if isinstance(x, int) or float(x).is_integer() and abs(x) < 1e12: t = f"{int(x):,}"
+    else: t = f"{x:,.{d}f}".rstrip("0").rstrip(".") if abs(x) >= 1e-4 else f"{x:.2e}"
+    r = Num(t); r.crudo = float(x)
+    return r
 
 
 def p_texto(p, piso=0.001):
@@ -122,6 +130,45 @@ def resultado(modulo, titulo, params, bloques, avisos=(), datos=None, png=None, 
     return {"uid": uuid.uuid4().hex[:10], "modulo": modulo, "titulo": titulo,
             "fecha": datetime.now().strftime("%d/%m/%Y %H:%M"), "params": params, "bloques": bl,
             "avisos": list(avisos), "datos": datos or {}, "png": png}
+
+
+# ---------- A1: faltante no es cero ----------
+def auditar_estados(hoja, cols, independientes=False):
+    """Cuenta, en las columnas que usa un análisis, las celdas «sin datos» (vacías o declaradas) y «N/A». Un faltante queda fuera
+    del cálculo y genera aviso; N/A también queda fuera pero no cuenta como faltante. Solo se miran las filas del rango de datos
+    (hasta el último dato de las columnas usadas, o de cada columna si son muestras independientes) y las no ocultas por el filtro.
+    Devuelve (avisos, resumen por columna)."""
+    act = hoja.filas_activas()
+    filas = [i for i in range(hoja.n) if act is None or i in act]
+    est = {j: [hoja.columnas[j].estado(i) for i in filas] for j in cols}
+    ultimo = lambda lista: max([k for k, e in enumerate(lista) if e != "sin_datos"], default=-1)
+    ext = {j: ultimo(est[j]) for j in cols} if independientes else {j: max([ultimo(est[q]) for q in cols], default=-1) for j in cols}
+    avisos, resumen = [], {}
+    for j in cols:
+        dentro = est[j][:ext[j] + 1]
+        falt = [filas[k] + 1 for k, e in enumerate(dentro) if e == "sin_datos"]
+        n_na = sum(e == "na" for e in est[j])
+        if not falt and not n_na: continue
+        nom = nombre_col(hoja, j)
+        resumen[nom] = {"sin_datos": len(falt), "na": n_na}
+        if falt:
+            lista = ", ".join(map(str, falt[:5])) + (f" y {len(falt) - 5} más" if len(falt) > 5 else "")
+            avisos.append(f"Sin datos: {nom} tiene {len(falt)} {'celda' if len(falt) == 1 else 'celdas'} sin dato (filas {lista}); "
+                          "quedan fuera del cálculo y no se cuentan como cero.")
+    return avisos, resumen
+
+
+def agregar_estados_entrada(res, cls, hoja, cols):
+    """Agrega al resultado los avisos de faltantes y la nota de N/A (A1)."""
+    avisos, resumen = auditar_estados(hoja, cols, getattr(cls, "INDEPENDIENTES", False))
+    if not resumen: return res
+    res["avisos"] = list(res["avisos"]) + avisos
+    res.setdefault("datos", {})["estados_entrada"] = resumen
+    n_na = sum(v["na"] for v in resumen.values())
+    if n_na:
+        res["bloques"].append(b_texto(f"N/A (no aplica): {n_na} {'celda' if n_na == 1 else 'celdas'} quedaron fuera del cálculo y "
+                                      "no cuentan como datos faltantes.", "nota"))
+    return res
 
 
 # ---------- G7: análisis por persona ----------
@@ -158,7 +205,7 @@ def nota_persona(cls, hoja, params):
 def agregar_nota_persona(res, cls, hoja, params):
     b = nota_persona(cls, hoja, params)
     if b and not any(x.get("clase") == "advertencia" and x.get("texto") == NOTA_PERSONA for x in res["bloques"]):
-        res["bloques"].insert(1 if res["bloques"] and res["bloques"][0]["tipo"] == "grafica" else 0, b)
+        res["bloques"].append(b)
     return res
 
 
@@ -189,7 +236,10 @@ def _f(v):
 
 def b_tabla(titulo, cabeza, filas, alinear=None):
     """A4: «filas» trae el texto redondeado para mostrar; «crudas» conserva la precisión completa de cada número para exportar."""
-    crudas = [[float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v else None for v in f] for f in filas]
+    def cruda(v):
+        if isinstance(v, Num): return v.crudo
+        return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v else None
+    crudas = [[cruda(v) for v in f] for f in filas]
     extra = {"crudas": crudas} if any(x is not None for f in crudas for x in f) else {}
     return {"tipo": "tabla", "titulo": titulo, "cabeza": cabeza, **extra, "filas": [[num(v) if not isinstance(v, str) else v
                                                                           for v in f] for f in filas],
