@@ -11,8 +11,15 @@ from scipy import stats as st
 
 ROJO = "#b3261e"
 TIPOS = [["imr", "I-MR (individuales, n = 1)"], ["xr", "X̄-R (subgrupos de 2 a 10)"], ["xs", "X̄-S (subgrupos de más de 10)"],
-         ["p", "p (proporción de defectuosos, n variable)"], ["np", "np (número de defectuosos, n constante)"],
-         ["c", "c (número de defectos, n constante)"], ["u", "u (defectos por unidad, n variable)"]]
+         ["p", "p (unidades defectuosas, n variable)"], ["np", "np (unidades defectuosas, n constante)"],
+         ["c", "c (defectos, n constante)"], ["u", "u (defectos, n variable)"]]
+# G1 (19_GB_CONTROLAR, SPC-TIPOS-CARTA): el usuario declara qué cuenta. Defectos (errores, Poisson) -> c o u;
+# unidades defectuosas (binomial) -> np o p. La declaración debe coincidir con la carta elegida.
+CUENTA = [["", "Declarar qué se cuenta (obligatorio en p, np, c y u)"],
+          ["defectuosas", "Unidades defectuosas: cada unidad es buena o mala (binomial)"],
+          ["defectos", "Defectos o errores: una unidad puede tener varios (Poisson)"]]
+CARTAS_CUENTA = {"p": "defectuosas", "np": "defectuosas", "c": "defectos", "u": "defectos"}
+CARTA_SUGERIDA = {("defectuosas", True): "np", ("defectuosas", False): "p", ("defectos", True): "c", ("defectos", False): "u"}
 OP_PRUEBAS = [[str(k), f"{k}. {t}"] for k, t in S.PRUEBAS.items()]
 
 
@@ -55,6 +62,7 @@ def dibujar_carta(ax, c, etiquetas, viol, k=None, titulo=""):
 class Spc(ModuloDialogo):
     ID, TITULO = "SPC", "Cartas de control"
     CAMPOS = [{"campo": "tipo", "etiqueta": "Tipo de carta (19_GB, SPC-TIPOS-CARTA)", "tipo": "opcion", "opciones": TIPOS, "defecto": "imr"},
+              {"campo": "cuenta", "etiqueta": "Qué cuentas (solo cartas de atributo)", "tipo": "opcion", "opciones": CUENTA, "defecto": ""},
               {"campo": "y", "etiqueta": "Datos: mediciones, defectuosos o defectos", "tipo": "col", "filtro": "num", "rol": ["respuesta"]},
               {"campo": "tam", "etiqueta": "Tamaño de subgrupo constante (o tamaño de muestra en p, np y u)", "tipo": "numero", "defecto": "1"},
               {"campo": "sub", "etiqueta": "Identificador de subgrupo (opcional, en lugar del tamaño)", "tipo": "col", "opcional": True},
@@ -75,6 +83,23 @@ class Spc(ModuloDialogo):
         activas = tuple(int(x) for x in (p.get("pruebas") or []))
         nom = hoja.columnas[j].nombre or nombre_col(hoja, j)
         avisos = []
+        cuenta = p.get("cuenta")
+        if tipo in CARTAS_CUENTA:
+            esperada = CARTAS_CUENTA[tipo]
+            if cuenta is None:                     # receta o resultado guardado antes de G1: se deduce de la carta y se avisa
+                cuenta = esperada
+                avisos.append(f"Resultado anterior a la declaración de lo que se cuenta: se tomó «{dict(CUENTA)[esperada].split(':')[0]}» "
+                              f"por la carta {tipo}. Confírmalo al repetir el análisis.")
+            elif cuenta == "":
+                raise ErrorEntrada("Declara qué cuentas: unidades defectuosas (cartas np o p) o defectos (cartas c o u).")
+            elif cuenta != esperada:
+                const = tipo in ("np", "c")
+                otra = CARTA_SUGERIDA[(cuenta, const)]
+                raise ErrorEntrada(f"Declaraste {'unidades defectuosas' if cuenta == 'defectuosas' else 'defectos'}, pero la carta {tipo} cuenta "
+                                   f"{'unidades defectuosas' if esperada == 'defectuosas' else 'defectos'}. Con tamaño de muestra "
+                                   f"{'constante' if const else 'variable'} usa la carta {otra} (19_GB SPC-TIPOS-CARTA).")
+        elif cuenta:
+            avisos.append("La declaración de lo que se cuenta no aplica a cartas de variable y se ignoró.")
         try:
             if tipo in ("imr", "xr", "xs"):
                 if tipo == "imr" and sub is not None: raise ErrorEntrada("La carta I-MR es para datos individuales; quita el identificador de subgrupo.")
@@ -143,6 +168,9 @@ class Spc(ModuloDialogo):
             b_tabla("Puntos con señal de causa especial", ["Carta", "Subgrupo", "Valor", "Pruebas", "Descripción"], filas_v,
                     ["i", "i", "d", "i", "i"]) if filas_v else b_texto("Sin señales en las pruebas elegidas.", "nota"),
             b_tabla("Parámetros estimados", ["Parámetro", "Valor"], info_t),
+            *([b_texto(f"Se cuentan {'unidades defectuosas (modelo binomial)' if cuenta == 'defectuosas' else 'defectos (modelo Poisson)'}; "
+                       f"tamaño de muestra {'constante' if tipo in ('np', 'c') else 'variable'}: carta {tipo} (19_GB SPC-TIPOS-CARTA).")]
+              if tipo in CARTAS_CUENTA else []),
             b_texto("Fórmulas y constantes: 19_GB_CONTROLAR, SPC-CONSTANTES y SPC-CARTAS-*; pruebas: SPC-PATRONES (zonas A, B y C). "
                     "Para recalcular límites tras un cambio, deben cumplirse las 4 condiciones de SPC-RECALCULO. Constantes de X̄-S y d2: "
                     "no respaldadas por la base.")],

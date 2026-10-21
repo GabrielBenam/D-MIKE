@@ -85,6 +85,7 @@ TIPOS_H = [["t1", "t de 1 muestra (media contra un valor)"], ["z1", "Z de 1 mues
 @registrar
 class Hipotesis(ModuloDialogo):
     ID, TITULO = "HIPOTESIS", "Pruebas de hipótesis"
+    INDEPENDIENTES = True        # A1: las muestras pueden tener distinto tamaño; las celdas vacías al final no son faltantes
     CAMPOS = [{"campo": "tipo", "etiqueta": "Prueba", "tipo": "opcion", "opciones": TIPOS_H, "defecto": "t1"},
               {"campo": "y", "etiqueta": "Datos (muestra 1)", "tipo": "col", "filtro": "num", "rol": ["respuesta"], "opcional": True},
               {"campo": "y2", "etiqueta": "Muestra 2 o «después» (2 muestras y pareada)", "tipo": "col", "filtro": "num", "opcional": True},
@@ -621,6 +622,7 @@ class Potencia(ModuloDialogo):
 @registrar
 class NoParam(ModuloDialogo):
     ID, TITULO = "NOPARAM", "Pruebas no paramétricas"
+    INDEPENDIENTES = True
     CAMPOS = [{"campo": "tipo", "etiqueta": "Prueba", "tipo": "opcion", "defecto": "mann",
                "opciones": [["mann", "Mann-Whitney (2 muestras independientes)"], ["kruskal", "Kruskal-Wallis (3 o más grupos)"], ["mood", "Mediana de Mood (2 o más grupos)"],
                             ["wilcoxon", "Wilcoxon (mediana contra un valor)"], ["pareada", "Wilcoxon pareada (antes y después)"], ["signos", "Prueba de signos (mediana contra un valor)"]]},

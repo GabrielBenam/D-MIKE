@@ -82,6 +82,8 @@ body { font-family: "Montserrat", "Segoe UI", sans-serif; font-size: 13px; color
 .hoja { position: relative; }
 .hoja td.t { text-align: left; }
 .hoja td.mal { color: #b3261e; background: #fdecea; }
+.hoja td.na { color: var(--tinta-suave); font-style: italic; }
+.hoja td.sd { color: #9a3d0d; font-style: italic; }
 .hoja thead tr.nom th.nombre { color: var(--tinta); font-weight: 600; cursor: cell; }
 .hoja td { cursor: cell; }
 .hoja th.sel { box-shadow: inset 0 0 0 2px var(--acento); }
@@ -145,6 +147,7 @@ button.pestana { padding: 6px 12px; }
 .texto-res { line-height: 1.5; margin: 6px 0 10px; max-width: 900px; }
 .texto-res.conclusion { font-weight: 600; background: var(--acento-suave); border-left: 3px solid var(--acento); padding: 8px 12px; border-radius: 4px; }
 .texto-res.nota { color: var(--tinta-suave); font-size: 11.5px; }
+.texto-res.advertencia { background: var(--panel); border-left: 3px solid var(--acento); padding: 8px 12px; border-radius: 4px; font-size: 12px; }
 .texto-res.aviso, .aviso-res { color: #9a3d0d; margin: 4px 0; }
 .tabla-marco { margin: 10px 0 14px; overflow-x: auto; }
 .tabla-titulo { font-weight: 700; font-size: 12.5px; margin: 12px 0 6px; }
@@ -679,3 +682,9 @@ body.sin-panel .columna-dmaic { display: none !important; }
 .tabla-seg { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 8px; }
 .tabla-seg th, .tabla-seg td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--linea); vertical-align: top; }
 .tabla-seg th { background: var(--encabezado); font-weight: 600; }
+
+.tb-base { display: block; color: var(--tinta-suave); font-size: 11px; margin: -2px 0 4px; }
+.tb-cruce { display: block; color: #9a3d0d; font-size: 10.5px; margin-top: 4px; }
+.tb-def { background: var(--panel); border-left: 3px solid var(--acento); padding: 8px 12px; border-radius: 4px; margin: 10px 0; }
+.tb-def h4 { margin: 0 0 6px; font-size: 12.5px; } .tb-def dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 12px; }
+.tb-def dt { color: var(--tinta-suave); } .tb-def dd { margin: 0; } .tb-def details { margin-top: 8px; font-size: 12px; }

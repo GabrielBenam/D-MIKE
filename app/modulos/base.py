@@ -86,12 +86,20 @@ def valor(hoja, j, i):
 
 
 # ---------- formato de números ----------
+class Num(str):
+    """A4: texto para mostrar que conserva el número sin redondear (atributo «crudo»). Es un str normal para todo lo demás;
+    b_tabla lo usa para guardar la precisión completa y exportar sin el redondeo de la pantalla."""
+    crudo = None
+
+
 def num(x, d=4):
     if x is None: return "—"
     if isinstance(x, str): return x
     if isinstance(x, float) and (math.isnan(x) or math.isinf(x)): return "—"
-    if isinstance(x, int) or float(x).is_integer() and abs(x) < 1e12: return f"{int(x):,}"
-    return f"{x:,.{d}f}".rstrip("0").rstrip(".") if abs(x) >= 1e-4 else f"{x:.2e}"
+    if isinstance(x, int) or float(x).is_integer() and abs(x) < 1e12: t = f"{int(x):,}"
+    else: t = f"{x:,.{d}f}".rstrip("0").rstrip(".") if abs(x) >= 1e-4 else f"{x:.2e}"
+    r = Num(t); r.crudo = float(x)
+    return r
 
 
 def p_texto(p, piso=0.001):
@@ -124,6 +132,83 @@ def resultado(modulo, titulo, params, bloques, avisos=(), datos=None, png=None, 
             "avisos": list(avisos), "datos": datos or {}, "png": png}
 
 
+# ---------- A1: faltante no es cero ----------
+def auditar_estados(hoja, cols, independientes=False):
+    """Cuenta, en las columnas que usa un análisis, las celdas «sin datos» (vacías o declaradas) y «N/A». Un faltante queda fuera
+    del cálculo y genera aviso; N/A también queda fuera pero no cuenta como faltante. Solo se miran las filas del rango de datos
+    (hasta el último dato de las columnas usadas, o de cada columna si son muestras independientes) y las no ocultas por el filtro.
+    Devuelve (avisos, resumen por columna)."""
+    act = hoja.filas_activas()
+    filas = [i for i in range(hoja.n) if act is None or i in act]
+    est = {j: [hoja.columnas[j].estado(i) for i in filas] for j in cols}
+    ultimo = lambda lista: max([k for k, e in enumerate(lista) if e != "sin_datos"], default=-1)
+    ext = {j: ultimo(est[j]) for j in cols} if independientes else {j: max([ultimo(est[q]) for q in cols], default=-1) for j in cols}
+    avisos, resumen = [], {}
+    for j in cols:
+        dentro = est[j][:ext[j] + 1]
+        falt = [filas[k] + 1 for k, e in enumerate(dentro) if e == "sin_datos"]
+        n_na = sum(e == "na" for e in est[j])
+        if not falt and not n_na: continue
+        nom = nombre_col(hoja, j)
+        resumen[nom] = {"sin_datos": len(falt), "na": n_na}
+        if falt:
+            lista = ", ".join(map(str, falt[:5])) + (f" y {len(falt) - 5} más" if len(falt) > 5 else "")
+            avisos.append(f"Sin datos: {nom} tiene {len(falt)} {'celda' if len(falt) == 1 else 'celdas'} sin dato (filas {lista}); "
+                          "quedan fuera del cálculo y no se cuentan como cero.")
+    return avisos, resumen
+
+
+def agregar_estados_entrada(res, cls, hoja, cols):
+    """Agrega al resultado los avisos de faltantes y la nota de N/A (A1)."""
+    avisos, resumen = auditar_estados(hoja, cols, getattr(cls, "INDEPENDIENTES", False))
+    if not resumen: return res
+    res["avisos"] = list(res["avisos"]) + avisos
+    res.setdefault("datos", {})["estados_entrada"] = resumen
+    n_na = sum(v["na"] for v in resumen.values())
+    if n_na:
+        res["bloques"].append(b_texto(f"N/A (no aplica): {n_na} {'celda' if n_na == 1 else 'celdas'} quedaron fuera del cálculo y "
+                                      "no cuentan como datos faltantes.", "nota"))
+    return res
+
+
+# ---------- G7: análisis por persona ----------
+NOTA_PERSONA = ("Atención: no compares el desempeño individual de personas sin normalizar por tipo y complejidad del trabajo. "
+                "Las diferencias entre personas pueden venir de la mezcla de trabajos que recibe cada una y no de su desempeño. "
+                "Esta nota no bloquea el cálculo.")
+_PERSONA = ("persona", "operador", "analista", "tecnico", "inspector", "revisor", "responsable", "empleado", "colaborador",
+            "capturista", "autor", "redactor", "evaluador", "ingeniero", "dibujante", "auditor", "usuario", "trabajador", "elaboro", "asignado")
+SIN_NOTA_PERSONA = ("MSA-ATR", "MSA-VAR")     # en un MSA los evaluadores son parte del sistema de medición que se estudia
+
+
+def _sin_acentos(t):
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", str(t).lower()) if unicodedata.category(c) != "Mn")
+
+
+def es_columna_persona(nombre):
+    n = _sin_acentos(nombre)
+    return any(k in n for k in _PERSONA)
+
+
+def nota_persona(cls, hoja, params):
+    """G7: bloque de texto (o None) para el Pareto y para cualquier análisis cuya columna de agrupación parezca identificar personas."""
+    if cls.ID in SIN_NOTA_PERSONA: return None
+    if cls.ID == "PARETO": return b_texto(NOTA_PERSONA, "advertencia")
+    for c in getattr(cls, "CAMPOS", []):
+        j = params.get(c["campo"])
+        if c.get("tipo") == "col" and c.get("filtro") == "texto" and isinstance(j, int) and 0 <= j < len(hoja.columnas) \
+                and es_columna_persona(hoja.columnas[j].nombre or ""):
+            return b_texto(NOTA_PERSONA, "advertencia")
+    return None
+
+
+def agregar_nota_persona(res, cls, hoja, params):
+    b = nota_persona(cls, hoja, params)
+    if b and not any(x.get("clase") == "advertencia" and x.get("texto") == NOTA_PERSONA for x in res["bloques"]):
+        res["bloques"].append(b)
+    return res
+
+
 def frase_p(p, alfa, h0, ha):
     """Conclusión de una prueba con redacción correcta (no afirma igualdad cuando no se rechaza H0)."""
     if p < alfa:
@@ -151,7 +236,10 @@ def _f(v):
 
 def b_tabla(titulo, cabeza, filas, alinear=None):
     """A4: «filas» trae el texto redondeado para mostrar; «crudas» conserva la precisión completa de cada número para exportar."""
-    crudas = [[float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v else None for v in f] for f in filas]
+    def cruda(v):
+        if isinstance(v, Num): return v.crudo
+        return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v else None
+    crudas = [[cruda(v) for v in f] for f in filas]
     extra = {"crudas": crudas} if any(x is not None for f in crudas for x in f) else {}
     return {"tipo": "tabla", "titulo": titulo, "cabeza": cabeza, **extra, "filas": [[num(v) if not isinstance(v, str) else v
                                                                           for v in f] for f in filas],

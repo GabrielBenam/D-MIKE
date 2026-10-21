@@ -14,7 +14,7 @@ def abrir_perfil(pagina, ruta=PERFIL):
 
 def test_abrir_perfil_puebla_panel_franja_y_hoja(pagina):
     abrir_perfil(pagina)
-    expect(pagina.locator(".fase[data-fase='M'] .fase-cuenta")).to_have_text("6 de 26")          # 21 del árbol + 5 complementarios de Medir (v0.20)
+    expect(pagina.locator(".fase[data-fase='M'] .fase-cuenta")).to_have_text("6 de 27")          # 21 del árbol + 6 complementarios de Medir (v0.20; v0.28 agrega FPY y RTY)
     expect(pagina.locator(".fase.actual .letra")).to_have_text("M")
     expect(pagina.locator(".fase[data-fase='M'] li.activo[data-id='HOJA-DATOS'] .sig")).to_have_text("siguiente")
     expect(pagina.locator("#franja")).to_contain_text("Proyecto de prueba")

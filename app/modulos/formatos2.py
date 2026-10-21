@@ -235,8 +235,11 @@ class Charter(Formato):
         if not c.get("criterios_aprobacion"): av.append("Falta definir qué es éxito, quién lo decide y quién firma (requisitos de aprobación).")
         if not c.get("criterios_salida"): av.append("Faltan los criterios de salida: condiciones para cerrar o cancelar.")
         if not any(f.get("hito") for f in d["tablas"]["hitos"]): av.append("Falta el cronograma resumido de hitos.")
-        ahorro = sum(a_numero(f.get("ahorro") or "") or 0 for f in d["tablas"]["objetivos"])
-        bloques = [{"tipo": "texto", "clase": "conclusion", "texto": f"Ahorro total esperado: {num(ahorro, 2)}"}] if ahorro else []
+        ahorros = [a_numero(f.get("ahorro") or "") for f in d["tablas"]["objetivos"] if not fila_vacia(f)]       # A1: vacío no es cero
+        dados = [x for x in ahorros if x is not None]
+        bloques = [{"tipo": "texto", "clase": "conclusion", "texto": f"Ahorro total esperado: {num(sum(dados), 2)} (base: {len(dados)} de {len(ahorros)} "
+                    f"objetivos con ahorro capturado" + ("; los demás quedan sin dato, no cuentan como cero)" if len(dados) < len(ahorros) else ")")}] if dados else []
+        if dados and len(dados) < len(ahorros): av.append(f"{len(ahorros) - len(dados)} objetivos sin ahorro capturado: el total solo suma los que lo tienen.")
         cab = {}
         enf = ((proyecto.formatos.get("ENFOQUE") or {}).get("cabecera") or {}).get("elegido") if proyecto is not None else None
         if enf: cab["enfoque"] = enf

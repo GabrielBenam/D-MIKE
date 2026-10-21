@@ -48,8 +48,9 @@ function dibujarFilas(forzar = false) {
     h += `<tr><th class="fila" data-r="${r}" data-f="${f}">${f + 1}</th>`;
     for (let j = 0; j < H.nc; j++) {
       const c = cols[j], t = c && f < H.estado.filas ? c.texto[f] : "";
-      const mal = c && H.malas[j].has(f), cls = [c && c.tipo && c.tipo !== "num" ? "t" : "", mal ? "mal" : ""].join(" ").trim();
-      h += `<td data-r="${r}" data-f="${f}" data-c="${j}"${cls ? ` class="${cls}"` : ""}${mal ? ' title="No corresponde al tipo de la columna; no entra en los cálculos"' : ""}>${esc(t)}</td>`;
+      const mal = c && H.malas[j].has(f), est = !mal && (t === "N/A" ? "na" : t === "Sin datos" ? "sd" : ""),
+        cls = [c && c.tipo && c.tipo !== "num" ? "t" : "", mal ? "mal" : "", est].join(" ").trim();
+      h += `<td data-r="${r}" data-f="${f}" data-c="${j}"${cls ? ` class="${cls}"` : ""}${mal ? ' title="No corresponde al tipo de la columna; no entra en los cálculos"' : est === "na" ? ' title="No aplica: queda fuera del cálculo y no cuenta como faltante"' : est === "sd" ? ' title="Sin datos: faltante declarado; queda fuera del cálculo y genera aviso"' : ""}>${esc(t)}</td>`;
     }
     h += "</tr>";
   }
