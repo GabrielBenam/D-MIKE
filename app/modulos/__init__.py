@@ -20,7 +20,7 @@ def autoprueba():
                    ("CAPACIDAD", {"y": 0, "tam": "4", "lie": "8", "lse": "20"}), ("CORREL", {"vars": [0, 4]}), ("REGRESION", {"y": 0, "xs": [4]})):
         r = a.ejecutar_modulo(mid, p)
         if r["error"]: raise RuntimeError(f"{mid}: {r['sesion'][0]['texto']}")
-    d = a.ejecutar_modulo("DISENO-RSM", {"tipo": "ccd", "nombres": "A, B", "bajos": "1, 10", "altos": "3, 20", "semilla": "1"})
+    d = a.ejecutar_modulo("DISENO-RSM", {"tipo": "ccd", "nombres": "A, B", "bajos": "1, 10", "altos": "3, 20", "limites": "0, 4; 5, 25", "semilla": "1"})
     if d["error"]: raise RuntimeError("DISENO-RSM: " + d["sesion"][0]["texto"])
     info = d["resultado"]["datos"]["diseno"]          # nombres reales (pueden cambiar si ya existían columnas iguales)
     yj = a.hoja.indice(info["respuesta"]); ja, jb = (a.hoja.indice(f["nombre"]) for f in info["factores"])

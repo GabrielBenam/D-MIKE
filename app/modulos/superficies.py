@@ -37,6 +37,8 @@ class DisenoRsm(ModuloDialogo):
               {"campo": "altos", "etiqueta": "Nivel alto de cada factor", "tipo": "texto", "defecto": "1, 1"},
               {"campo": "alfa", "etiqueta": "DCC: distancia de los puntos axiales", "tipo": "opcion", "defecto": "rotable",
                "opciones": [["rotable", "Rotable (2^(k/4))"], ["caras", "Centrado en las caras (α = 1)"]]},
+              {"campo": "limites", "etiqueta": "Límites seguros: mínimo y máximo de cada factor, un par por factor en el mismo orden (ej. 90, 125; 5, 40)", "tipo": "texto", "defecto": ""},
+              {"campo": "limites_como_axiales", "etiqueta": "DCC con α = 1: usar los límites seguros como niveles bajo y alto (puntos axiales en las caras). No nombrado por el curso", "tipo": "bool", "defecto": False},
               {"campo": "bloques", "etiqueta": "DCC: bloques", "tipo": "opcion", "defecto": "1", "opciones": [["1", "Sin bloques"], ["2", "2 bloques (cubo y estrella)"]]},
               {"campo": "fraccion", "etiqueta": "Fraccionado: p (1 = mitad, 2 = cuarta parte…)", "tipo": "opcion", "defecto": "1",
                "opciones": [["1", "1 (mitad)"], ["2", "2 (cuarta parte)"], ["3", "3 (octava parte)"], ["4", "4"]]},
@@ -57,13 +59,28 @@ class DisenoRsm(ModuloDialogo):
         bajos, altos = _lista(p.get("bajos"), "Nivel bajo", k), _lista(p.get("altos"), "Nivel alto", k)
         if any(b >= a for b, a in zip(bajos, altos)): raise ErrorEntrada("Cada nivel bajo debe ser menor que su nivel alto.")
         tipo = p.get("tipo") or "ccd"
+        # ---- región autorizada (Entrega 3, Decisión 5) ----
+        real = proyecto is not None and not MD.es_demo(proyecto)
+        texto_lim = (p.get("limites") or "").strip(); lim = None; alfa_dcc = p.get("alfa") or "rotable"
+        if texto_lim:
+            v = _lista(texto_lim, "Límites seguros", 2 * k)
+            lim = [(v[2 * q], v[2 * q + 1]) for q in range(k)]
+            if any(a >= b for a, b in lim): raise ErrorEntrada("Cada límite seguro mínimo debe ser menor que su máximo.")
+        elif real and not p.get("limites_opcionales"):
+            raise ErrorEntrada("En un proyecto real declara los límites seguros de cada factor (mínimo y máximo): son la región autorizada para experimentar y no son los niveles "
+                               "bajo y alto del diseño. Escribe un par por factor, por ejemplo «90, 125; 5, 40».")
+        usar_limites = bool(p.get("limites_como_axiales"))
+        if usar_limites:
+            if tipo != "ccd": raise ErrorEntrada("La alternativa de usar los límites seguros como puntos axiales solo aplica al diseño central compuesto.")
+            if lim is None: raise ErrorEntrada("Para usar los límites seguros como puntos axiales hay que declararlos.")
+            bajos, altos, alfa_dcc = [a for a, _ in lim], [b for _, b in lim], "caras"          # α = 1: los axiales caen en las caras del cubo, que es la región declarada
         cen = cls.numero(p, "centros", "Los puntos centrales", minimo=-1)
         cen = int(cen) if cen is not None else None
         rep = int(cls.numero(p, "replicas", "Las réplicas", minimo=0) or 1)
         try:
             if tipo == "ccd":
                 bl = int(p.get("bloques") or 1)
-                filas, alfa = D.diseno_ccd(k, p.get("alfa") or "rotable", bl, centros_cubo=cen, replicas=rep,
+                filas, alfa = D.diseno_ccd(k, alfa_dcc, bl, centros_cubo=cen, replicas=rep,
                                            centros_estrella=(cen if bl == 2 and cen is not None else None))
             elif tipo == "bb": filas, alfa = D.diseno_box_behnken(k, cen, rep)
             elif tipo == "frac":
@@ -73,6 +90,15 @@ class DisenoRsm(ModuloDialogo):
             else: filas, alfa = D.diseno_factorial(k, cen or 0, rep)
         except ValueError as e:
             raise ErrorEntrada(str(e))
+        if lim is not None:                  # todo punto fuera de la región se rechaza (axiales incluidos) antes de escribir nada en la hoja
+            fuera = D.puntos_fuera(filas, bajos, altos, lim)
+            if fuera:
+                det = "; ".join(f"{D.NOMBRE_PUNTO.get(t, 'punto')} (corrida estándar {i}), {nombres[q]} = {num(v, 6)} fuera de [{num(lim[q][0])}, {num(lim[q][1])}]" for i, t, q, v in fuera[:6])
+                extra = f" (y {len(fuera) - 6} más)" if len(fuera) > 6 else ""
+                alt = (" Alternativa, solo con α = 1: marca «usar los límites seguros como niveles bajo y alto». Es un uso no nombrado por el curso (el ejemplo de 28_BB, línea 57, es "
+                       "consistente con cubo y axiales en el mismo rango). Rotable, otros valores de α y cualquier otra alternativa no están respaldados por la base."
+                       if tipo == "ccd" else " Ajusta los niveles bajo y alto para que todo punto quede dentro de la región.")
+                raise ErrorEntrada(f"El diseño sale de la región segura en {len(fuera)} puntos: {det}{extra}. No se escribió nada en la hoja." + alt)
         n = len(filas)
         semilla = cls.numero(p, "semilla", "La semilla")
         orden = D.aleatorizar(n, int(semilla) if semilla is not None else None) if p.get("aleatorio", True) else list(range(n))
@@ -89,6 +115,10 @@ class DisenoRsm(ModuloDialogo):
         info = {"tipo": tipo, "factores": [{"nombre": reales[4 + j], "bajo": bajos[j], "alto": altos[j]} for j in range(k)],
                 "alfa": alfa, "respuesta": reales[-1], "bloque": reales[3], "tipo_punto": reales[2], "corridas": n,
                 "orden_est": reales[0], "orden_corrida": reales[1]}
+        if lim is not None:
+            info["limites_seguros"] = {info["factores"][q]["nombre"]: {"min": lim[q][0], "max": lim[q][1]} for q in range(k)}
+            info["region"] = "declarada"; info["alternativa_axial_en_limites"] = usar_limites
+        else: info["region"] = "no_declarada"
         columnas_nuevas = list(range(col0, col0 + len(cab)))
         runid = False
         if proyecto is not None:
@@ -109,6 +139,10 @@ class DisenoRsm(ModuloDialogo):
                          ["Relación definidora", "I = " + " = ".join(pal)], ["Resolución", ["", "", "", "III", "IV", "V", "VI", "VII"][R]],
                          ["Letras", ", ".join(f"{a} = {b}" for a, b in letras.items())]]
             info["fraccion"] = {"p": pf, "signo": sg, "palabras": pal, "resolucion": R}
+        region = ([["Región segura (límites por factor)", "; ".join(f"{f['nombre']}: {num(lim[q][0])} a {num(lim[q][1])}" for q, f in enumerate(info["factores"]))],
+                   ["Puntos fuera de la región", "ninguno (cubo, centrales y axiales verificados)"]] if lim is not None
+                  else [["Región segura (límites por factor)", "No declarada (opcional en demostración)"]])
+        if usar_limites: region.append(["Alternativa de puntos axiales", "Los límites seguros son los niveles bajo y alto y los axiales caen en las caras (α = 1). Es un uso no nombrado por el curso (el ejemplo de 28_BB, línea 57, es consistente con cubo y axiales en el mismo rango)."])
         identidad = [["Identificador del diseño (design_id)", info.get("design_id", "—")], ["Versión del diseño", info.get("version_diseno", "—")],
                      ["Identificador de cada corrida", "RunId = design_id + OrdenEst" + (" (columna de solo lectura al final de la hoja)" if runid else " (derivado de OrdenEst; la hoja no se modifica en demostración)")]]
         resumen = [["Tipo", dict(TIPOS_DISENO)[tipo] + (f" 2^({k}-{int(p.get('fraccion') or 1)})" if tipo == "frac" else "")], ["Factores", k], ["Corridas", n],
@@ -118,6 +152,9 @@ class DisenoRsm(ModuloDialogo):
         fact = [[f["nombre"], num(f["bajo"]), num(f["alto"]), num(D.a_original([-alfa], [f["bajo"]], [f["alto"]])[0]) if tipo == "ccd" else "—",
                  num(D.a_original([alfa], [f["bajo"]], [f["alto"]])[0]) if tipo == "ccd" else "—"] for f in info["factores"]]
         avisos = []
+        if usar_limites:
+            avisos.append("Alternativa elegida: los límites seguros son los niveles bajo y alto del diseño y los puntos axiales caen en las caras (α = 1). Es un uso "
+                          "no nombrado por el curso (el ejemplo de 28_BB, línea 57, es consistente con cubo y axiales en el mismo rango); D-MIKE no le atribuye otras propiedades.")
         if tipo == "ccd" and alfa > 1:
             avisos.append("Los puntos axiales quedan fuera de los niveles bajo y alto: verifica que el proceso pueda operar en ellos; si no, "
                           "usa el diseño centrado en las caras.")
@@ -125,7 +162,7 @@ class DisenoRsm(ModuloDialogo):
             b_texto(f"Se agregaron {len(columnas_nuevas)} columnas a la hoja, a partir de C{col0 + 1}. Corre los experimentos en el orden de "
                     f"«OrdenCorrida», captura la respuesta en «{info['respuesta']}» y luego usa Estadística > Superficie de respuesta > Analizar.",
                     "conclusion"),
-            b_tabla("Resumen del diseño", ["Concepto", "Valor"], resumen + frac_info + identidad),
+            b_tabla("Resumen del diseño", ["Concepto", "Valor"], resumen + frac_info + region + identidad),
             b_tabla("Factores (unidades reales)", ["Factor", "Bajo (-1)", "Alto (+1)", "Axial -α", "Axial +α"], fact),
             b_texto("Procedimiento: 28_BB RSM-PROCEDIMIENTO (factorial con puntos centrales, ascenso, DCC). No respaldados por la base: "
                     "α rotable, Box-Behnken, cantidad de puntos centrales por omisión y reparto en bloques.")],

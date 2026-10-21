@@ -218,6 +218,7 @@ def descriptores(proyecto, hoja):
                     "tipo": info.get("tipo"), "corridas": info.get("corridas"), "estado_definicion": estado_definicion(hoja, info),
                     "col_runid": info.get("col_runid"), "run_ids": sum(1 for r in ids if r), "problemas": prob,
                     "respuestas": dict(zip(("n", "version"), estado_respuestas(hoja, info))), "importaciones": len(info.get("importaciones") or []),
+                    "region": info.get("region") or "no_declarada", "limites_seguros": info.get("limites_seguros"),
                     "historial_versiones": list(info.get("historial_versiones") or [])})
     return out
 

@@ -41,7 +41,7 @@ def test_montgomery_filtracion_sin_replicas():
 
 def test_fraccionado_desde_el_diseno_y_alias_en_el_analisis():
     a = Api()
-    d = a.ejecutar_modulo("DISENO-RSM", {"tipo": "frac", "nombres": "Temp, Tiempo, Enfr, TempE", "bajos": "180, 6, 3, 100", "altos": "220, 10, 6, 120",
+    d = a.ejecutar_modulo("DISENO-RSM", {"tipo": "frac", "nombres": "Temp, Tiempo, Enfr, TempE", "bajos": "180, 6, 3, 100", "altos": "220, 10, 6, 120", "limites": "100, 300; 1, 20; 1, 10; 50, 150",
                                          "fraccion": "1", "signo": "1", "aleatorio": False})
     assert d["error"] is None
     res = d["resultado"]; t = next(b for b in res["bloques"] if b.get("titulo") == "Resumen del diseño")

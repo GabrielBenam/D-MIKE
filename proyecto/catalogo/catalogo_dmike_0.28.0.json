@@ -3045,6 +3045,16 @@
      ]
     },
     {
+     "campo": "limites",
+     "etiqueta": "Límites seguros: mínimo y máximo de cada factor, un par por factor en el mismo orden (ej. 90, 125; 5, 40)",
+     "tipo": "texto"
+    },
+    {
+     "campo": "limites_como_axiales",
+     "etiqueta": "DCC con α = 1: usar los límites seguros como niveles bajo y alto (puntos axiales en las caras). No nombrado por el curso",
+     "tipo": "bool"
+    },
+    {
      "campo": "bloques",
      "etiqueta": "DCC: bloques",
      "tipo": "opcion",

@@ -259,6 +259,7 @@ async function dialogoDisenos() {
     return el("div", { class: "tb-def" },
       el("h4", {}, `${d.design_id} · versión ${d.version_diseno} · ${d.corridas ?? "?"} corridas`),
       el("p", {}, `Respuesta: ${d.respuesta}. Factores: ${d.factores.join(", ")}. RunId: ${d.col_runid ? "columna " + d.col_runid + " (solo lectura)" : "derivado de OrdenEst, sin columna"}.`),
+      el("p", {}, d.region === "declarada" ? "Región segura: " + Object.entries(d.limites_seguros || {}).map(([f, l]) => `${f} ${l.min} a ${l.max}`).join("; ") + "." : "Región segura: no declarada."),
       el("p", {}, `Definición: ${ESTADO_DEF[d.estado_definicion] || d.estado_definicion}. Respuestas en la hoja: ${d.respuestas.n}${d.respuestas.n ? ` (versión ${d.respuestas.version ?? "sin etiqueta"})` : ""}${mezcla ? " · no coinciden con la versión vigente: no se analizan" : ""}.`),
       d.historial_versiones.length ? el("p", { class: "tb-sub" }, "Versiones anteriores: " + d.historial_versiones.map(h => `v${h.version}${h.motivo ? " (" + h.motivo + ")" : ""}`).join("; ")) : "",
       el("div", {}, 

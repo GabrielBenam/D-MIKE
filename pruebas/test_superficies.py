@@ -11,7 +11,7 @@ OTRA = lambda t, p: 20 + 0.1 * (t - 140) + 1.5 * (p - 3)                        
 
 def con_diseno(tipo="ccd", ruido=0.05, f=VERDAD, extra=None):
     a = Api()
-    d = a.ejecutar_modulo("DISENO-RSM", {"tipo": tipo, "nombres": "Temperatura, Presion", "bajos": "140, 3", "altos": "160, 5",
+    d = a.ejecutar_modulo("DISENO-RSM", {"tipo": tipo, "nombres": "Temperatura, Presion", "bajos": "140, 3", "altos": "160, 5", "limites": "130, 170; 2, 6",
                                          "respuesta": "Rendimiento", "semilla": "7", "centros": "5" if tipo != "ccd" else ""})
     assert d["error"] is None, d["sesion"][0]["texto"]
     info = d["resultado"]["datos"]["diseno"]
@@ -108,10 +108,10 @@ def test_optimizador_validaciones():
 
 def test_diseno_validaciones_y_box_behnken():
     a = Api()
-    assert a.ejecutar_modulo("DISENO-RSM", {"nombres": "A", "bajos": "1", "altos": "2"})["error"] == "entrada"
-    assert a.ejecutar_modulo("DISENO-RSM", {"nombres": "A, B", "bajos": "1, 5", "altos": "2, 4"})["error"] == "entrada"
-    assert a.ejecutar_modulo("DISENO-RSM", {"tipo": "bb", "nombres": "A, B", "bajos": "1, 1", "altos": "2, 2"})["error"] == "entrada"
-    r = a.ejecutar_modulo("DISENO-RSM", {"tipo": "bb", "nombres": "A, B, C", "bajos": "1, 1, 1", "altos": "2, 2, 2", "aleatorio": False})
+    assert a.ejecutar_modulo("DISENO-RSM", {"nombres": "A", "bajos": "1", "altos": "2", "limites": "0, 10"})["error"] == "entrada"
+    assert a.ejecutar_modulo("DISENO-RSM", {"nombres": "A, B", "bajos": "1, 5", "altos": "2, 4", "limites": "0, 10; 0, 10"})["error"] == "entrada"
+    assert a.ejecutar_modulo("DISENO-RSM", {"tipo": "bb", "nombres": "A, B", "bajos": "1, 1", "altos": "2, 2", "limites": "0, 10; 0, 10"})["error"] == "entrada"
+    r = a.ejecutar_modulo("DISENO-RSM", {"tipo": "bb", "nombres": "A, B, C", "bajos": "1, 1, 1", "altos": "2, 2, 2", "limites": "0, 3; 0, 3; 0, 3", "aleatorio": False})
     assert r["error"] is None and r["resultado"]["datos"]["diseno"]["corridas"] == 15
 
 

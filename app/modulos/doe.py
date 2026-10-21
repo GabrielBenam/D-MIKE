@@ -75,6 +75,21 @@ def a_original(coded, bajo, alto):
     return [(b + a) / 2 + c * (a - b) / 2 for c, b, a in zip(coded, bajo, alto)]
 
 
+NOMBRE_PUNTO = {1: "punto del cubo", -1: "punto axial", 0: "punto central", 2: "punto de arista (Box-Behnken)"}
+
+
+def puntos_fuera(filas, bajos, altos, limites, tol=1e-9):
+    """Región autorizada (Entrega 3, Decisión 5): puntos del diseño, en unidades reales, que quedan fuera de [mínimo, máximo] seguros de algún
+    factor. filas: salida de diseno_*; limites: [(mínimo, máximo)] por factor. Devuelve [(número de corrida estándar, tipo de punto, índice del factor,
+    valor real)] en orden de corrida estándar; vacío si todo punto está dentro. Incluye los puntos axiales."""
+    fuera = []
+    for i, f in enumerate(filas, 1):
+        for q, v in enumerate(a_original(f["coded"], bajos, altos)):
+            lo, hi = limites[q]
+            if v < lo - tol * max(1.0, abs(lo)) or v > hi + tol * max(1.0, abs(hi)): fuera.append((i, f["tipo"], q, v))
+    return fuera
+
+
 def a_codificado(orig, bajo, alto):
     return [(o - (b + a) / 2) / ((a - b) / 2) for o, b, a in zip(orig, bajo, alto)]
 

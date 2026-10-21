@@ -210,6 +210,17 @@ def solo_datos(api, receta, datos, id_proyecto=None):
 def _vacio(v): return v in (None, "", [], {})
 
 
+def _parametros_con_limites(d):
+    """Parámetros del diseño con su región autorizada (Entrega 3, Decisión 5). Si la receta trae limites_seguros por factor, se pasan como «limites»; si no, el diseño
+    se crea sin región declarada (recetas anteriores a 0.29: compatibilidad) y queda marcado «región no declarada»."""
+    p = dict(d.get("parametros") or {}); ls = d.get("limites_seguros")
+    nombres = [x.strip() for x in str(p.get("nombres") or "").replace(";", ",").split(",") if x.strip()]
+    if isinstance(ls, dict) and nombres and all(isinstance(ls.get(n), dict) and ls[n].get("min") is not None and ls[n].get("max") is not None for n in nombres):
+        p["limites"] = "; ".join(f"{ls[n]['min']}, {ls[n]['max']}" for n in nombres)
+    elif not p.get("limites"): p["limites_opcionales"] = True
+    return p
+
+
 def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
     """Arma el proyecto en la sesión actual. Con actualizar=True agrega solo lo nuevo al proyecto abierto: no sobrescribe columnas
     con datos ni campos de formatos ya escritos, y no repite análisis ya corridos con esta receta (se reconocen por su id)."""
@@ -249,7 +260,7 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
                 log.append(f"Diseño «{d.get('id')}»: ya estaba en el proyecto."); continue
             log.append(f"Diseño «{d.get('id')}»: ya estaba en el proyecto; se revisan sus respuestas.")
         else:
-            r = a.ejecutar_modulo(d["modulo"], d["parametros"])
+            r = a.ejecutar_modulo(d["modulo"], _parametros_con_limites(d))
             if r["error"]: avisos.append(f"Diseño «{d.get('id')}»: {r['sesion'][0]['texto']}"); continue
             ref[d["id"]] = r["resultado"]["uid"]; info = r["resultado"]["datos"]["diseno"]
         filas = datos.get(d.get("hoja") or "")
