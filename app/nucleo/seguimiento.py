@@ -47,6 +47,26 @@ def motivo_columnas(faltan, vacias):
 
 
 # ---------------- variables (12.2) ----------------
+def _clave_nombre(t):
+    """Nombre comparable: sin acentos, en minúsculas y con espacios simples (el mismo criterio para emparejar columna y variable)."""
+    import unicodedata
+    base = "".join(c for c in unicodedata.normalize("NFD", str(t or "").lower()) if unicodedata.category(c) != "Mn")
+    return " ".join(base.split())
+
+
+def variables_de_columna(proyecto, nombre_columna):
+    """Variables declaradas en _variables cuyo nombre coincide con el de la columna (igualdad tras normalizar; sin coincidencias parciales).
+    Sin nombre de columna o sin variables declaradas devuelve lista vacía."""
+    clave = _clave_nombre(nombre_columna)
+    if not clave or proyecto is None: return []
+    return [v for v in _lista(proyecto.formatos.get("_variables")) if _clave_nombre(v.get("nombre")) == clave]
+
+
+def ensayo_destructivo(proyecto, nombre_columna):
+    """Variable declarada como ensayo destructivo que corresponde a la columna, o None. Con varias coincidencias basta una declarada
+    destructiva. Si la columna no corresponde a ninguna variable declarada, devuelve None (no se avisa)."""
+    return next((v for v in variables_de_columna(proyecto, nombre_columna) if v.get("ensayo_destructivo") is True), None)
+
 def conflictos_variables(proyecto, nuevas):
     """Variables que bajarían de REAL_VERIFICADO a otro estado. Nunca ocurre en silencio: se trata como conflicto de revisión (12.5)."""
     previas = {v.get("nombre"): v for v in _lista(proyecto.formatos.get("_variables"))}

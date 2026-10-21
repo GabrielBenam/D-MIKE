@@ -141,6 +141,7 @@ pruebas/test_capturas_manual.py
 pruebas/test_catalogo.py
 pruebas/test_compilacion.py
 pruebas/test_doe.py
+pruebas/test_e3_1_destructivo.py
 pruebas/test_estadistica.py
 pruebas/test_exportar_catalogo.py
 pruebas/test_factorial.py

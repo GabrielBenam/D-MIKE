@@ -1558,7 +1558,7 @@
 "H"
 ],
 "e": "P",
-"d": "Pruebas destructivas"
+"d": "Pruebas destructivas. Diferido y no respaldado por la base; Gage R&R de variable avisa cuando la variable es ensayo destructivo"
 },
 {
 "cat": "Estadística",
