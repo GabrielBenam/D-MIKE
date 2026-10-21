@@ -1,6 +1,6 @@
 # ESPEC_receta_v2 — Contrato de receta v2 de D-MIKE
 
-Versión del documento: 1.1 (14/10/2026). Programa objetivo: D-MIKE 0.26.0 (secciones 1 a 11, entregadas) y 0.27.0 (secciones 12 a 15, Entrega 2). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; nada de lo descrito como «nuevo» está implementado todavía. Lo no verificado en código se marca «pendiente de validación».
+Versión del documento: 1.2 (14/10/2026). Programa objetivo: D-MIKE 0.26.0 (secciones 1 a 11, entregadas) y 0.27.0 (secciones 12 a 15, Entrega 2). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; nada de lo descrito como «nuevo» está implementado todavía. Lo no verificado en código se marca «pendiente de validación».
 
 ## 1. Alcance
 
@@ -137,7 +137,7 @@ Punto de partida verificado en el código de 0.26.0 (app/nucleo/receta.py): `eje
 
 ### 12.2 Variables
 
-Se fusionan por `nombre`. Un estado nuevo reemplaza al previo salvo que el previo sea `REAL_VERIFICADO` y el nuevo no lo sea: bajar de verificado nunca ocurre en silencio y se trata como conflicto (12.5). `SINTETICO_DEMO` solo existe en demostración (ya validado en 0.26.0).
+Se fusionan por `nombre`. Un estado nuevo reemplaza al previo salvo que el previo sea `REAL_VERIFICADO` y el nuevo no lo sea: bajar de verificado nunca ocurre en silencio y se trata como conflicto (12.5). `SINTETICO_DEMO` solo existe en demostración (ya validado en 0.26.0). Las variables que la receta nueva ya no menciona se conservan. Aun con «aplicar solo lo nuevo», un estado verificado se conserva con aviso.
 
 ### 12.3 Tareas
 
@@ -149,10 +149,10 @@ Se fusionan por `id`. Los pendientes que hoy se muestran como texto pasan a tare
 
 ### 12.5 Revisiones y conflictos
 
-Sea `n` la última revisión aplicada al proyecto destino (nula si ninguna) y `r` la `revision` de la receta recibida:
+El control de revisión rige al actualizar un proyecto existente; al crear un proyecto nuevo no hay destino y no se aplica. Sea `n` la última revisión aplicada al proyecto destino (nula si ninguna) y `r` la `revision` de la receta recibida:
 
 1. Receta sin `revision` (v1 o v2 sin campo): se aplica como hoy y `revision` queda nula.
-2. Misma `huella` que una ya aplicada: no se hace nada y se avisa «ya aplicada».
+2. Misma `huella` que una ya aplicada: no se cambia la estructura y se avisa «ya aplicada». Excepción aprobada: si la plantilla trae mediciones que el proyecto aún no tiene, se aplican solo esas columnas (es la forma normal de cargar datos de una plantilla ya llenada); sin datos nuevos es «ya aplicada».
 3. `r` mayor que `n` y `revision_base` igual a `n` (ambas nulas cuenta como igual): se aplica.
 4. `r` menor o igual que `n`: se avisa «más antigua» y por defecto no se aplica; el usuario puede forzar.
 5. `r` mayor que `n` pero `revision_base` distinta de `n`: conflicto. El usuario elige entre cancelar o aplicar solo lo nuevo (la semántica actual de «Actualizar»). No hay fusión automática de campos distintos.
@@ -184,7 +184,7 @@ Archivo `.json` que D-MIKE exporta y el diagnóstico importa. Contiene solo esta
 }
 ```
 
-Reglas: `huella` se calcula igual que la de la receta. Sin `id_proyecto` no se puede exportar y se explica por qué (el proyecto viene de una receta v1 o se creó sin receta). `estado_ruta` toma uno de los valores de ESPEC_flujo 4.5 solo cuando se deduce de la existencia de objetos: `Sin datos` (hoja vacía), `Historicos cargados` (hay columnas con datos), `DOE disenado` (hay un diseño creado), `DOE ejecutado` (un diseño con todas sus respuestas capturadas). El resto de valores (medición evaluada, línea base, causas, mejora validada, control) no se infieren: se devuelve `no_determinado`. `disenos[].id` es el id de la receta; el `design_id` formal llega con la Entrega 3. `tareas_abiertas[].descripcion` se limita a texto generado por D-MIKE o por la receta, nunca a contenido de celdas.
+Reglas: `huella` se calcula igual que la de la receta. Sin `id_proyecto` no se puede exportar y se explica por qué (el proyecto viene de una receta v1 o se creó sin receta). `estado_ruta` toma uno de los valores de ESPEC_flujo 4.5 solo cuando se deduce de la existencia de objetos: `Sin datos` (hoja vacía), `Historicos cargados` (hay columnas con datos), `DOE disenado` (hay un diseño creado), `DOE ejecutado` (un diseño con todas sus respuestas capturadas). El resto de valores (medición evaluada, línea base, causas, mejora validada, control) no se infieren: se devuelve `no_determinado`. `disenos[].estado` es `creado` o `ejecutado` (valores definidos en la Entrega 2). `disenos[].id` es el id de la receta; el `design_id` formal llega con la Entrega 3. `tareas_abiertas[].descripcion` se limita a texto generado por D-MIKE o por la receta, nunca a contenido de celdas.
 
 ## 14. Botones de reciprocidad
 
