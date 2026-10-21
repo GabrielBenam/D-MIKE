@@ -26,6 +26,7 @@ def _clave(t):
 
 
 RUNID, VERSION, RESPUESTAS_GENERICAS = {"runid"}, {"versiondiseno", "versiondeldiseno", "version"}, {"respuesta", "response"}
+COLUMNAS_DEL_ARCHIVO_DE_CORRIDAS = {"ordencorrida", "ordenest", "tipopunto", "bloque", "marca"}     # las trae el archivo que exporta E3-4: se ignoran sin aviso
 PATRON_RUNID = re.compile(r"^(DIS-.+)-R\d+$")
 
 
@@ -104,7 +105,7 @@ def analizar(proyecto, hoja, filas, design_id=None, sobrescribir=False):
     elif len(f_cols) < len(cols["factores"]):
         A.append("El archivo trae los niveles de " + ", ".join(f_cols) + " pero no de todos los factores: solo esos se verificaron.")
     reconocidas = {j_run, j_ver, j_resp} | {j for j, _ in f_cols.values()}
-    ignoradas = [enc[i] for i in range(len(enc)) if i not in reconocidas and enc[i].strip()]
+    ignoradas = [enc[i] for i in range(len(enc)) if i not in reconocidas and enc[i].strip() and _clave(enc[i]) not in COLUMNAS_DEL_ARCHIVO_DE_CORRIDAS]
     if ignoradas: A.append("Columnas que se ignoran: " + ", ".join(ignoradas) + ".")
     # filas
     vistos, repetidos, desconocidos, versiones, niveles, no_num, sin_run, conflictos = {}, [], [], [], [], [], [], []

@@ -80,6 +80,7 @@ const ACCIONES_UI = {
   exportar: () => aplicarProyecto(api().exportar()), exportar_powerbi: () => aplicarProyecto(api().exportar_powerbi()),
   exportar_avance: () => aplicarProyecto(api().exportar_avance()), seguimiento: () => dialogoSeguimiento(),
   disenos_dialogo: () => dialogoDisenos(), importar_respuestas: () => aplicar(api().importar_respuestas()),
+  exportar_corridas: async () => { const ds = await api().disenos(); if (ds.length > 1) return dialogoDisenos(); aplicar(api().exportar_corridas()); },
   importar_receta: async () => { if (window.guardarTabs) guardarTabs(); const r = await aplicarProyecto(api().abrir_receta()); if (r.receta) preguntarReceta(r.receta); },
   deshacer: () => aplicar(api().deshacer()), rehacer: () => aplicar(api().rehacer()), importar: () => aplicar(api().importar()),
 };
@@ -263,6 +264,7 @@ async function dialogoDisenos() {
       el("div", {}, 
         (d.estado_definicion === "cambiada" || d.estado_definicion === "sin_linea_base") ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Registrar versión nueva", d.estado_definicion === "cambiada" ? "La definición cambió: se registrará la versión " + (d.version_diseno + 1) + ". Las respuestas actuales dejarán de coincidir con la versión vigente." : "Este diseño no tenía línea base: se tomará su estado actual como versión 1.", async m => recargar(await api().registrar_version_diseno(d.design_id, m))) }, d.estado_definicion === "cambiada" ? "Registrar versión nueva…" : "Tomar línea base…") : "",
         mezcla ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Confirmar respuestas", `Declaras que las respuestas de la hoja corresponden a la versión ${d.version_diseno}. Escribe por qué.`, async m => recargar(await api().confirmar_respuestas_diseno(d.design_id, m))) }, "Confirmar que son de la versión vigente…") : "",
+        el("button", { class: "boton chico", title: "Corridas en el orden en que se corren, con RunId y la respuesta en blanco", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().exportar_corridas(d.design_id)); } }, "Exportar corridas…"),
         el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…")));
   }) : el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos."));
   dialogo("Diseños del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
