@@ -133,6 +133,7 @@ pruebas/test_a1_estados.py
 pruebas/test_a2_indicadores.py
 pruebas/test_a3_reproducir.py
 pruebas/test_a4_redondeo.py
+pruebas/test_a6_graficas.py
 pruebas/test_archivo.py
 pruebas/test_archivo_interfaz.py
 pruebas/test_calc_hoja.py

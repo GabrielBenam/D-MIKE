@@ -22,7 +22,7 @@ MENUS = [
                      ("§ANOVA", None), ("ANOVA de un factor…", "mod:ANOVA"), ("ANOVA de dos factores…", "mod:ANOVA2"), ("Comparaciones de Tukey…", "mod:TUKEY"),
                      ("§Relaciones", None), ("Correlación…", "mod:CORREL"), ("Regresión…", "mod:REGRESION"),
                      ("§Calidad del proceso", None), ("Cartas de control…", "mod:SPC"), ("Capacidad de proceso…", "mod:CAPACIDAD"), ("Gage R&R de variable…", "mod:MSA-VAR"),
-                     ("MSA de atributos…", "mod:MSA-ATR"), ("FPY y RTY…", "mod:RENDIMIENTO"),
+                     ("MSA de atributos…", "mod:MSA-ATR"), ("Rendimientos: tradicional, FTY y RTY…", "mod:RENDIMIENTO"),
                      ("§Diseño de experimentos", None), ("Crear diseño de experimentos…", "mod:DISENO-RSM"), ("Analizar diseño factorial…", "mod:FACTORIAL"),
                      ("Analizar superficie de respuesta…", "mod:RSM"), ("Optimizador de respuestas…", "mod:OPTIMIZADOR")]),
     ("Gráficas", [("§Tiempo y dispersión", None), ("Gráfica de corrida…", "mod:CORRIDA"), ("Diagrama de caja…", "mod:BOXPLOT"),

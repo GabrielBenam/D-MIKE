@@ -1572,13 +1572,13 @@
 },
 {
 "cat": "Estadística",
-"n": "FPY y RTY",
+"n": "Rendimientos: tradicional, FTY y RTY",
 "a": "—",
 "c": [
 "H"
 ],
 "e": "D",
-"d": "Rendimiento a la primera por paso y producto de los pasos (regla de primer evento)"
+"d": "Rendimiento tradicional, FTY (promedio de los pasos) y RTY (producto), con regla de primer evento"
 },
 {
 "cat": "Estadística",

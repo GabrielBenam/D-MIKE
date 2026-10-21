@@ -169,7 +169,8 @@ class Spc(ModuloDialogo):
                     ["i", "i", "d", "i", "i"]) if filas_v else b_texto("Sin señales en las pruebas elegidas.", "nota"),
             b_tabla("Parámetros estimados", ["Parámetro", "Valor"], info_t),
             *([b_texto(f"Se cuentan {'unidades defectuosas (modelo binomial)' if cuenta == 'defectuosas' else 'defectos (modelo Poisson)'}; "
-                       f"tamaño de muestra {'constante' if tipo in ('np', 'c') else 'variable'}: carta {tipo} (19_GB SPC-TIPOS-CARTA).")]
+                       f"tamaño de muestra {'constante' if tipo in ('np', 'c') else 'variable'}: carta {tipo} (19_GB SPC-TIPOS-CARTA). "
+                       "Verificación: fórmulas de límites verificadas con datos sintéticos construidos a partir de los resúmenes de 19_GB; sin datos crudos del curso.")]
               if tipo in CARTAS_CUENTA else []),
             b_texto("Fórmulas y constantes: 19_GB_CONTROLAR, SPC-CONSTANTES y SPC-CARTAS-*; pruebas: SPC-PATRONES (zonas A, B y C). "
                     "Para recalcular límites tras un cambio, deben cumplirse las 4 condiciones de SPC-RECALCULO. Constantes de X̄-S y d2: "
