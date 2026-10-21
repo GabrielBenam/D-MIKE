@@ -1,6 +1,6 @@
 # ESPEC_receta_v2 — Contrato de receta v2 de D-MIKE
 
-Versión del documento: 1.2 (14/10/2026). Programa objetivo: D-MIKE 0.26.0 (secciones 1 a 11, entregadas) y 0.27.0 (secciones 12 a 15, Entrega 2). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; nada de lo descrito como «nuevo» está implementado todavía. Lo no verificado en código se marca «pendiente de validación».
+Versión del documento: 1.2 (14/10/2026; encabezado sincronizado el 21/10/2026). Programa objetivo: D-MIKE 0.28.0 (secciones 1 a 15, implementadas hasta 0.27.0) y 0.29.0 (Entrega 3). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; las secciones 1 a 15 están implementadas hasta 0.27.0 y verificadas con pruebas (pruebas/test_receta.py, test_receta_e2.py, test_modo_v026.py); lo de la Entrega 3 (secciones 7 y 8, `design_id`, `run_id`, `limites_seguros`, `omitido`) sigue sin implementar. Lo no verificado en código se marca «pendiente de validación».
 
 ## 1. Alcance
 
@@ -194,3 +194,22 @@ D-MIKE: `Archivo › Importar receta del diagnóstico…` (mismo flujo de Abrir 
 
 D-MIKE pasa a 0.27.0. Las recetas que usen campos de la Entrega 2 declaran `dmike_minimo` «0.27»; un 0.26.0 las rechaza con «requiere D-MIKE 0.27». Un `.dmike` de 0.26.0 abre en 0.27.0 sin cambios; uno guardado en 0.27.0 abre en 0.26.0 ignorando las claves nuevas. `limites_seguros`, `design_id` y `run_id` siguen en la Entrega 3.
 
+## 16. Entrega 3 — identidad del diseño (E3-2, implementada en el camino a 0.29.0)
+
+Complementa las secciones 2.1 y 6.4. Todo vive en `proyecto.formatos["_disenos"][respuesta]` (`version_formato` sigue en 1); una versión anterior ignora las claves nuevas y un `.dmike` anterior abre sin cambios.
+
+- `design_id`: «DIS-» y el nombre real de la columna de la respuesta («DIS-Y», «DIS-Y_2»), único en el proyecto. Lo asigna D-MIKE al crear el diseño; nunca la receta ni el usuario. Inmutable.
+- `run_id`: `design_id` + «-R» + `OrdenEst` con 3 dígitos. Se deriva siempre del valor de la columna `OrdenEst` de la fila, nunca de su posición, y no se guarda: ordenar o filtrar la hoja no lo cambia. No viaja en la receta.
+- `version_diseno`: entero que asigna solo D-MIKE. Nace en 1 al crear el diseño y sube en 1 únicamente cuando el usuario registra una versión nueva, después de que cambió la definición del diseño. La definición es la huella SHA-256 de los niveles reales de cada factor, el tipo de punto y el bloque de cada corrida (identificada por `OrdenEst`) y los nombres de los factores. La respuesta y `OrdenCorrida` no son parte de la definición. Mientras la huella actual difiere de la guardada, el estado de la definición es «cambiada». Cada versión reemplazada queda en `historial_versiones`. Regla de uso (E3-3): no se mezclan respuestas de versiones distintas.
+- Proyecto real: el diseño agrega al final la columna `RunId` (rol `run_id`), de solo lectura. Demostración: la hoja no se toca; el `run_id` se deriva igual de `OrdenEst`.
+- Diseños anteriores a 0.29 (sección 6.4): `design_id` derivado de su clave, versión 1 y `run_id` derivado de `OrdenEst`, sin escribir nada al abrir ni al consultar. Sin huella guardada su estado es «sin_linea_base»; al registrar una versión se guarda la huella de ese momento como línea base. No se les agrega la columna `RunId`.
+
+## 17. Entrega 3 — respuestas por `run_id` (E3-3, implementada en el camino a 0.29.0)
+
+Complementa la sección 16 y las reglas para DOE de ESPEC_flujo_real_dmaic (sección 5): nunca se empareja por el número de fila.
+
+- Archivo de respuestas (CSV, TXT o Excel, primera fila de encabezados): `RunId` y `version_diseno` obligatorias; la columna de la respuesta con el nombre de la respuesta del diseño (o «Respuesta» o «Response»); una columna por factor, opcional, con su nombre. Si vienen los factores se verifican sus niveles contra los del diseño; si no vienen, la identidad se verifica solo con `RunId` y versión y se avisa. Las demás columnas se ignoran con aviso.
+- Importación atómica: con un solo desajuste no se escribe nada y se informa cada error. Se rechaza: columna obligatoria ausente, corrida repetida, `RunId` que no pertenece al diseño o de más de un diseño, versión distinta de la vigente, niveles que no coinciden, respuesta no numérica, fila con respuesta y sin `RunId`, definición cambiada sin registrar, respuestas existentes de otra versión, y respuestas existentes distintas (salvo `sobrescribir`). Un vacío no se escribe ni cuenta como cero; N/A se respeta.
+- No se mezclan versiones: `respuestas_version` (la deja D-MIKE) debe coincidir con `version_diseno` para analizar (FACTORIAL y RSM). La resolución manual, auditable y con motivo obligatorio, es declarar que las respuestas corresponden a la versión vigente (`confirmaciones_respuestas`). Cada importación queda en `importaciones` con el SHA-256 del archivo.
+- Diseños anteriores a 0.29: no se verifican ni se modifican al abrir; al importar o registrar versión toman su línea base.
+- Límite: el canal de la receta empata las respuestas de su plantilla por fila verificando los niveles de todos los factores; como la receta no lleva `run_id` (sección 2.1), no distingue réplicas ni puntos centrales de niveles idénticos.

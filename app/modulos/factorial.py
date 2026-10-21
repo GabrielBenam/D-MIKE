@@ -12,6 +12,7 @@ from .base import _f
 from .base import (ErrorEntrada, columna, filas_validas, valor, figura, a_svg_png, num, p_texto, p_igual, frase_p, resultado,
                    b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO, PALETA)
 from .dialogo import ModuloDialogo
+from ..nucleo import disenos as DIS
 
 
 def codificar(vals):
@@ -65,6 +66,7 @@ class Factorial(ModuloDialogo):
         filas, fuera = filas_validas(hoja, [yj] + xs)
         y = np.array([valor(hoja, yj, i) for i in filas], float); k = len(xs)
         nombres = [hoja.columnas[j].nombre or f"C{j + 1}" for j in xs]; ny = hoja.columnas[yj].nombre or f"C{yj + 1}"
+        if (motivo := DIS.verificar_para_analisis(proyecto, hoja, ny)): raise ErrorEntrada(motivo)          # E3-3: no se mezclan versiones del diseño
         letras = D.LETRAS[:k]
         Xc, niveles, centro = [], [], np.zeros(len(y), bool)
         for q, j in enumerate(xs):

@@ -1558,7 +1558,7 @@
 "H"
 ],
 "e": "P",
-"d": "Pruebas destructivas"
+"d": "Pruebas destructivas. Diferido y no respaldado por la base; Gage R&R de variable avisa cuando la variable es ensayo destructivo"
 },
 {
 "cat": "Estadística",
@@ -1589,6 +1589,26 @@
 ],
 "e": "D",
 "d": "DCC, Box-Behnken, factorial y fraccionado"
+},
+{
+"cat": "Estadística",
+"n": "Diseños del proyecto",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Identidad, versión y estado de cada diseño; registrar versión y confirmar respuestas"
+},
+{
+"cat": "Estadística",
+"n": "Importar respuestas del diseño",
+"a": "—",
+"c": [
+"G"
+],
+"e": "D",
+"d": "Respuestas por RunId con verificación de versión y de niveles; atómica"
 },
 {
 "cat": "Estadística",

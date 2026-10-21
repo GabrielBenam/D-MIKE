@@ -47,6 +47,7 @@ app/modulos/verificacion.py
 app/nucleo/__init__.py
 app/nucleo/archivo.py
 app/nucleo/catalogo.py
+app/nucleo/disenos.py
 app/nucleo/hoja.py
 app/nucleo/importar.py
 app/nucleo/indicadores.py
@@ -56,6 +57,7 @@ app/nucleo/perfil.py
 app/nucleo/powerbi.py
 app/nucleo/proyecto.py
 app/nucleo/receta.py
+app/nucleo/respuestas.py
 app/nucleo/rutas.py
 app/nucleo/seguimiento.py
 app/nucleo/sesion.py
@@ -141,6 +143,9 @@ pruebas/test_capturas_manual.py
 pruebas/test_catalogo.py
 pruebas/test_compilacion.py
 pruebas/test_doe.py
+pruebas/test_e3_1_destructivo.py
+pruebas/test_e3_2_identidad.py
+pruebas/test_e3_3_respuestas.py
 pruebas/test_estadistica.py
 pruebas/test_exportar_catalogo.py
 pruebas/test_factorial.py

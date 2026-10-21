@@ -11,6 +11,7 @@ from . import registrar
 from .base import (ErrorEntrada, columna, filas_validas, valor, figura, a_svg_png, num, p_igual, p_texto, resultado,
                    b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO, PALETA)
 from .dialogo import ModuloDialogo
+from ..nucleo.seguimiento import ensayo_destructivo
 
 
 def componentes(ss_p, ss_o, ss_po, ss_e, p, o, r, alfa_inter=0.25):
@@ -67,6 +68,12 @@ def anova_dos_factores(datos):
     ss_e = sum((v - mc[k]) ** 2 for k, g in datos.items() for v in g)
     return {"ss_p": ss_p, "ss_o": ss_o, "ss_po": ss_po, "ss_e": ss_e, "p": p, "o": o, "r": r, "piezas": piezas, "ops": ops, "medias_celda": mc,
             "media_pieza": mp, "media_op": mo, "gran_media": gm}
+
+
+AVISO_DESTRUCTIVO = ("Ensayo destructivo: la variable «{variable}» está declarada como ensayo destructivo. Las probetas no son equivalentes a mediciones "
+                     "repetidas de la misma pieza, por lo que el diseño cruzado de este Gage R&R no aplica y su resultado no debe leerse como evaluación del "
+                     "sistema de medición. El estudio necesita otro diseño (anidado); el Gage R&R anidado está diferido y no respaldado por la base "
+                     "(no hay fuente del curso verificada en el repositorio). Este aviso no bloquea el cálculo.")
 
 
 @registrar
@@ -160,10 +167,17 @@ class GageRR(ModuloDialogo):
         supuestos = [("Piezas que representan el rango del proceso", "Lo define el muestreo del estudio", "Revísalo: piezas muy parecidas inflan el %R&R"),
                      ("Mediciones independientes y en orden aleatorio", "Procedimiento del estudio", "Mide en orden aleatorio, sin que el evaluador sepa la pieza"),
                      ("Residuos aproximadamente normales", "Gráficas del estudio", "Revisa las mediciones por pieza y por evaluador")]
-        return resultado(cls.ID, f"Gage R&R de {nom}", p, [
+        destructivo = ensayo_destructivo(proyecto, hoja.columnas[jy].nombre)
+        if destructivo is not None:
+            avisos.append(AVISO_DESTRUCTIVO.format(variable=destructivo.get("nombre")))
+        res = resultado(cls.ID, f"Gage R&R de {nom}", p, [
             b_grafica(svg), b_texto(concl, "conclusion"),
             b_tabla("ANOVA de dos factores" + (" con interacción" if c["con_inter"] else " sin interacción"), ["Fuente", "GL", "SC", "CM", "F", "Valor p"], anova),
             b_tabla("Componentes de varianza", cab_c, comp), b_tabla("Variación del estudio", cab_s, sv),
             b_texto("Método ANOVA. Criterio de aceptación: 14_GB_MEDIR, MED-RR-VARIABLE. No respaldados por la base: componentes de varianza por "
                     "cuadrados medios esperados, alfa de la interacción, ndc = 1.41·σpieza/σR&R, %tolerancia = kσ/tolerancia y las gráficas.")],
             avisos, supuestos=supuestos, interpretacion=interp, datos={"columnas": [jp, jo, jy], "ndc": ndc}, png=png)
+        if destructivo is not None:                       # E3-1 (Decisión 4): nunca bloquea; deja el aviso visible y trazable en el resultado
+            res["bloques"].append(b_texto(AVISO_DESTRUCTIVO.format(variable=destructivo.get("nombre")), "advertencia"))
+            res["datos"]["ensayo_destructivo"] = {"variable": destructivo.get("nombre"), "cruzado_aplica": False}
+        return res
