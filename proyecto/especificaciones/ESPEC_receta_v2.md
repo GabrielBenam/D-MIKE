@@ -184,7 +184,7 @@ Archivo `.json` que D-MIKE exporta y el diagnóstico importa. Contiene solo esta
 }
 ```
 
-Reglas: `huella` se calcula igual que la de la receta. Sin `id_proyecto` no se puede exportar y se explica por qué (el proyecto viene de una receta v1 o se creó sin receta). `estado_ruta` toma uno de los valores de ESPEC_flujo 4.5 solo cuando se deduce de la existencia de objetos: `Sin datos` (hoja vacía), `Historicos cargados` (hay columnas con datos), `DOE disenado` (hay un diseño creado), `DOE ejecutado` (un diseño con todas sus respuestas capturadas). El resto de valores (medición evaluada, línea base, causas, mejora validada, control) no se infieren: se devuelve `no_determinado`. `disenos[].estado` es `creado` o `ejecutado` (valores definidos en la Entrega 2). `disenos[].id` es el id de la receta; el `design_id` formal llega con la Entrega 3. `tareas_abiertas[].descripcion` se limita a texto generado por D-MIKE o por la receta, nunca a contenido de celdas.
+Reglas: `huella` se calcula igual que la de la receta. Sin `id_proyecto` no se puede exportar y se explica por qué (el proyecto viene de una receta v1 o se creó sin receta). `estado_ruta` toma uno de los valores de ESPEC_flujo 4.5 solo cuando se deduce de la existencia de objetos: `Sin datos` (hoja vacía), `Historicos cargados` (hay columnas con datos), `DOE disenado` (hay un diseño creado), `DOE ejecutado` (un diseño con todas sus respuestas capturadas). El resto de valores (medición evaluada, línea base, causas, mejora validada, control) no se infieren: se devuelve `no_determinado`. `disenos[].estado` es `creado` o `ejecutado` (valores definidos en la Entrega 2). `disenos[].id` es el id de la receta; desde la Entrega 3 cada elemento trae además `design_id` y `version_diseno` (sección 16), claves opcionales: `avance_version` sigue en 1 y no viajan niveles, `RunId`, huellas ni respuestas. `tareas_abiertas[].descripcion` se limita a texto generado por D-MIKE o por la receta, nunca a contenido de celdas.
 
 ## 14. Botones de reciprocidad
 
@@ -213,3 +213,11 @@ Complementa la sección 16 y las reglas para DOE de ESPEC_flujo_real_dmaic (secc
 - No se mezclan versiones: `respuestas_version` (la deja D-MIKE) debe coincidir con `version_diseno` para analizar (FACTORIAL y RSM). La resolución manual, auditable y con motivo obligatorio, es declarar que las respuestas corresponden a la versión vigente (`confirmaciones_respuestas`). Cada importación queda en `importaciones` con el SHA-256 del archivo.
 - Diseños anteriores a 0.29: no se verifican ni se modifican al abrir; al importar o registrar versión toman su línea base.
 - Límite: el canal de la receta empata las respuestas de su plantilla por fila verificando los niveles de todos los factores; como la receta no lleva `run_id` (sección 2.1), no distingue réplicas ni puntos centrales de niveles idénticos.
+
+## 18. Entrega 3 — archivo de corridas (E3-4, implementada en el camino a 0.29.0)
+
+El diseño sale sin respuestas y vuelve con ellas por `run_id` (criterio 5 de ESPEC_flujo_real_dmaic).
+
+- Exportar corridas: CSV UTF-8 con BOM, coma y punto decimal, o Excel (hoja «Corridas» y hoja «Diseño» con `design_id`, `version_diseno`, huella de la definición y niveles). Columnas, en el orden en que se corre: `RunId`, `version_diseno`, `OrdenCorrida`, `TipoPunto`, `Bloque`, los factores con sus niveles reales y la respuesta en blanco. No precarga respuestas aunque la hoja ya las tenga (salvo petición expresa). En demostración agrega la columna «marca» con la etiqueta sintética; en un proyecto real nunca.
+- Se vuelve a importar con la sección 17: el archivo trae los factores, así que sus niveles se verifican; las columnas del archivo de corridas (`OrdenCorrida`, `TipoPunto`, `Bloque`, `marca`) se ignoran sin aviso. Un archivo de una versión anterior del diseño se rechaza.
+- Con varios diseños en el proyecto se elige uno (`design_id`); se rechaza un diseño inexistente y la hoja con `OrdenEst` repetido.
