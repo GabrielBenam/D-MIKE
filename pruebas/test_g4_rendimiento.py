@@ -136,3 +136,28 @@ def test_nota_del_modulo_declara_que_no_hay_ejemplo_del_curso():
     nota = " ".join(b["texto"] for b in r["bloques"] if b["tipo"] == "texto" and b["clase"] == "nota")
     assert "DES-RENDIMIENTO" in nota and "Sin ejemplo del curso; verificado con cálculo a mano" in nota
     assert r["titulo"].startswith("Rendimientos de") and "FPY" not in " ".join(str(b) for b in r["bloques"])
+
+
+# ---------- «salen» cuenta las unidades que terminan el proceso, también después del retrabajo ----------
+def test_salen_incluye_las_unidades_que_terminan_tras_el_retrabajo():
+    base = eventos_a_mano()
+    d = corre(base)["resultado"]["datos"]["tradicional"]
+    assert (d["entran"], d["salen"]) == (10, 10)          # U9 y U10 se retrabajaron en Revisión y U10 también en Liberación: aun así salen
+    # si U10 nunca logra pasar Liberación (se queda en el rechazo del intento 1), ya no sale: 9 de 10; el RTY no cambia
+    sin = "\n".join(l for l in base.splitlines() if l != "U10\tLiberación\tAprobado\t2")
+    r = corre(sin)["resultado"]["datos"]
+    assert (r["tradicional"]["entran"], r["tradicional"]["salen"]) == (10, 9) and math.isclose(r["tradicional"]["valor"], 0.9)
+    assert math.isclose(r["rty"], 0.72)
+
+
+def test_una_unidad_que_no_entro_no_cuenta_como_salida():
+    t = "unidad\tpaso\tresultado\tintento\nA\tP1\tOK\t1\nB\tP1\tOK\t1\nA\tP2\tOK\t1\nB\tP2\tOK\t1\nZ\tP2\tOK\t1"        # Z solo aparece en P2
+    r = corre(t)["resultado"]
+    assert r["datos"]["tradicional"]["salen"] == 2 and r["datos"]["tradicional"]["entran"] == 2 and r["datos"]["tradicional"]["valor"] == 1.0
+    assert any("no cuentan como salidas" in a for a in r["avisos"])
+
+
+def test_la_nota_dice_que_el_orden_de_los_pasos_es_decision_de_d_mike():
+    r = corre(eventos_a_mano())["resultado"]
+    nota = " ".join(b["texto"] for b in r["bloques"] if b["tipo"] == "texto" and b["clase"] == "nota")
+    assert "Orden de los pasos: el de la hoja; esa regla es una decisión de D-MIKE, no del curso (no respaldado)" in nota
