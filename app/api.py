@@ -9,7 +9,7 @@ from .nucleo import archivo
 from .nucleo import modo as MD
 from .nucleo import seguimiento as SG
 from . import modulos
-from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR, auditoria as AUD
+from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR, auditoria as AUD, confirmacion as CONF
 from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_entrada
 import json, os
 from datetime import datetime
@@ -890,6 +890,28 @@ class Api:
         if a is None: return {"error": "auditoria", "mensaje": motivo}
         return {"error": None, "auditoria": a}
 
+    def planes_confirmacion(self, design_id=None):
+        """E3-9: planes de confirmación o vigilancia registrados (de un diseño, o todos)."""
+        return CONF.planes(self.proyecto, design_id)
+
+    def registrar_plan_confirmacion(self, tipo, n_corridas, criterio, condiciones, origen, design_id=None, predicho=None, resultado_uid=None, x0=None):
+        """E3-9: registra un plan de confirmación experimental o de vigilancia posterior. Tamaño de muestra, criterio de éxito y condiciones los define el usuario."""
+        estado, r = CONF.registrar_plan(self.proyecto, tipo, n_corridas, criterio, condiciones, origen, design_id or None, predicho, resultado_uid or None, x0)
+        if estado == "error": return self._resp(r, "aviso", error="confirmacion", hoja=False)
+        out = self._resp(f"Plan {r['id']} registrado ({CONF.TIPOS[r['tipo']]}, {r['n_corridas']} corridas). Valor predicho: {r['predicho']['valor']:.6g}.", hoja=False)
+        out["plan"] = r; return out
+
+    def registrar_observados_confirmacion(self, plan_id, valores):
+        """E3-9: captura las observaciones de un plan de confirmación (números separados por punto y coma, o por coma si el decimal es punto)."""
+        estado, msg = CONF.registrar_observados(self.proyecto, plan_id, valores)
+        return self._resp(msg, "aviso" if estado == "error" else "info", error="confirmacion" if estado == "error" else None, hoja=False)
+
+    def comparar_confirmacion(self, plan_id):
+        """E3-9: observado menos predicho; el intervalo de predicción solo en regresión simple (27_BB REG-PREDICCION)."""
+        c, motivo = CONF.comparar(self.proyecto, plan_id)
+        if c is None: return {"error": "confirmacion", "mensaje": motivo}
+        return {"error": None, "comparacion": c}
+
     def omitir_paso_doe(self, que, motivo=""):
         """E3-7: el usuario omite el cribado, el DCC o el DOE completo con un motivo registrado (sin motivo no se omite)."""
         estado, msg = DIS.omitir(self.proyecto, que, motivo)
@@ -1083,7 +1105,7 @@ class Api:
 _HOJA = ("editar", "pegar", "renombrar", "cambiar_tipo", "insertar_columna", "eliminar_columna", "insertar_fila", "eliminar_fila",
          "borrar_rango", "llenar_con", "rellenar", "insertar_filas", "eliminar_filas", "eliminar_columnas", "filtrar", "importar", "abrir_perfil",
          "ejecutar_modulo", "importar_respuestas")
-_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno", "declarar_limites_diseno", "omitir_paso_doe"}
+_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno", "declarar_limites_diseno", "omitir_paso_doe", "registrar_plan_confirmacion", "registrar_observados_confirmacion"}
 
 
 def _con_deshacer(f, cambia_hoja):

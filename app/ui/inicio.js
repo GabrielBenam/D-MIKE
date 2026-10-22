@@ -269,6 +269,41 @@ async function dialogoAuditoria(d) {
       el("tbody", {}, a.revisiones.map(x => el("tr", {}, [x.titulo, ETIQ_AUD[x.estado] || x.estado, x.detalle, x.fuente].map(c => el("td", {}, c)))))));
   dialogo("Auditoría de " + d.design_id, cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
 }
+const TIPOS_CONF = [["confirmacion", "Confirmación experimental"], ["vigilancia", "Vigilancia posterior a la implementación"]];
+async function pedirPlanConfirmacion(d, recargar) {
+  const regs = (await api().resultados()).filter(r => r.modulo === "REGRESION");
+  const campo = (n, ph) => el("input", { name: n, placeholder: ph, style: "width:100%", autocomplete: "off" });
+  const tipo = el("select", { name: "tipo" }, TIPOS_CONF.map(([v, t]) => el("option", { value: v }, t)));
+  const de = el("select", { name: "resultado" }, [el("option", { value: "" }, "Lo escribo yo (modelo de superficie, múltiple u otro)")].concat(regs.map(r => el("option", { value: r.uid }, `Regresión: ${r.titulo} (${r.fecha})`))));
+  const f = { n: campo("n_corridas", "Número de corridas (lo defines tú)"), criterio: campo("criterio", "Criterio de éxito (lo defines tú)"), cond: campo("condiciones", "Condiciones: lote, equipo, ajustes"),
+              origen: campo("origen", "De dónde sale el valor predicho"), pred: campo("predicho", "Valor predicho (si lo escribes tú)"), x0: campo("x0", "Valor del predictor en la confirmación (solo regresión simple)") };
+  dialogo("Plan de confirmación de " + d.design_id, el("div", { class: "formulario" },
+    el("p", { class: "tb-sub" }, "D-MIKE no propone el tamaño de muestra ni el criterio de éxito: los defines tú. El intervalo de predicción solo se calcula con una regresión simple (27_BB REG-PREDICCION)."),
+    el("label", {}, "Tipo ", tipo), el("label", {}, f.n), el("label", {}, f.criterio), el("label", {}, f.cond), el("label", {}, "El valor predicho sale de ", de),
+    el("label", {}, f.origen), el("label", {}, f.pred), el("label", {}, f.x0)),
+    async () => { const r = await api().registrar_plan_confirmacion(tipo.value, f.n.value, f.criterio.value, f.cond.value, f.origen.value, d.design_id, f.pred.value, de.value, f.x0.value);
+      if (r && r.error) { registrarSesion(r.sesion); return false; } await recargar(r); return true; }, "Registrar plan");
+}
+async function dialogoComparacion(id) {
+  const r = await api().comparar_confirmacion(id);
+  if (r.error) { dialogo("Confirmación", el("p", {}, r.mensaje), () => true, "Cerrar"); return; }
+  const c = r.comparacion, n = v => v === null || v === undefined ? "—" : (+v.toPrecision(6)).toString();
+  const filas = c.observados.map((v, i) => [i + 1, n(v), n(c.diferencias[i]), c.fuera_del_intervalo ? (c.fuera_del_intervalo[i] ? "fuera" : "dentro") : "—"]);
+  dialogo(`${c.id} · ${c.tipo}`, el("div", { class: "ficha", id: "comparacion" },
+    el("p", {}, `Valor predicho: ${n(c.predicho)} (${c.origen}). Corridas previstas: ${c.n_corridas}; faltan ${c.faltan}.`),
+    el("p", {}, `Criterio de éxito (tuyo): ${c.criterio_exito}. Condiciones: ${c.condiciones}.`),
+    filas.length ? el("table", { class: "tabla-seg" }, el("thead", {}, el("tr", {}, ["Corrida", "Observado", "Observado − predicho", "Intervalo de predicción"].map(h => el("th", {}, h)))),
+      el("tbody", {}, filas.map(fl => el("tr", {}, fl.map(x => el("td", {}, String(x))))))) : el("p", { class: "vacio" }, "Todavía no hay observaciones."),
+    c.diferencia_media !== null ? el("p", {}, `Media observada: ${n(c.media)}. Diferencia media (observado − predicho): ${n(c.diferencia_media)}.`) : "",
+    c.intervalo ? el("p", {}, `Intervalo de predicción individual: ${n(c.intervalo.inferior)} a ${n(c.intervalo.superior)}.`) : "",
+    el("p", { class: "tb-sub" }, c.nota_intervalo || ""), ...c.avisos.map(a => el("p", { class: "tb-sub" }, a))), () => true, "Cerrar");
+  document.querySelector(".dialogo").classList.add("ancho");
+}
+function pedirObservados(plan, recargar) {
+  const campo = el("input", { placeholder: "ej. 57.1; 58.0 (punto y coma entre valores)", style: "width:100%", autocomplete: "off" });
+  dialogo("Observaciones de " + plan.id, el("div", { class: "formulario" }, el("p", { class: "tb-sub" }, `Llevas ${plan.observados.length} de ${plan.n_corridas}. Captura lo que mediste en las corridas de confirmación.`), el("label", {}, campo)),
+    async () => { const r = await api().registrar_observados_confirmacion(plan.id, campo.value); if (r && r.error) { registrarSesion(r.sesion); return false; } await recargar(r); return true; }, "Guardar");
+}
 const OMITIBLES_UI = [["cribado", "El cribado"], ["dcc", "El diseño central compuesto (DCC)"], ["doe", "El diseño de experimentos completo"]];
 function pedirOmision(recargar) {
   const que = el("select", {}, OMITIBLES_UI.map(([v, t]) => el("option", { value: v }, t)));
@@ -279,7 +314,7 @@ function pedirOmision(recargar) {
     async () => { const r = await api().omitir_paso_doe(que.value, motivo.value); if (r && r.error) { registrarSesion(r.sesion); return false; } await recargar(r); return true; }, "Omitir");
 }
 async function dialogoDisenos() {
-  const ds = await api().disenos(); const omis = await api().omisiones();
+  const ds = await api().disenos(); const omis = await api().omisiones(); const planes = await api().planes_confirmacion();
   const recargar = async r => { if (r && r.sesion) registrarSesion(r.sesion); document.querySelector(".velo")?.remove(); await dialogoDisenos(); };
   const cuerpo = el("div", { class: "ficha", id: "disenos" }, ds.length ? ds.map(d => {
     const mezcla = d.respuestas.version != null && d.respuestas.version !== d.version_diseno;
@@ -295,7 +330,11 @@ async function dialogoDisenos() {
         mezcla ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Confirmar respuestas", `Declaras que las respuestas de la hoja corresponden a la versión ${d.version_diseno}. Escribe por qué.`, async m => recargar(await api().confirmar_respuestas_diseno(d.design_id, m))) }, "Confirmar que son de la versión vigente…") : "",
         el("button", { class: "boton chico", title: "Corridas en el orden en que se corren, con RunId y la respuesta en blanco", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().exportar_corridas(d.design_id)); } }, "Exportar corridas…"),
         el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…"),
-        el("button", { class: "boton chico", title: "Alias, aleatorización, restricciones, curvatura, falta de ajuste y confirmación", onclick: () => { document.querySelector(".velo")?.remove(); dialogoAuditoria(d); } }, "Auditar diseño…")));
+        el("button", { class: "boton chico", title: "Alias, aleatorización, restricciones, curvatura, falta de ajuste y confirmación", onclick: () => { document.querySelector(".velo")?.remove(); dialogoAuditoria(d); } }, "Auditar diseño…"),
+        el("button", { class: "boton chico", onclick: () => pedirPlanConfirmacion(d, recargar) }, "Plan de confirmación…")),
+      ...planes.filter(p => p.design_id === d.design_id).map(p => el("p", {}, `${p.id} · ${p.tipo === "vigilancia" ? "vigilancia" : "confirmación"} · ${p.observados.length} de ${p.n_corridas} observaciones `,
+        el("button", { class: "boton chico", onclick: () => pedirObservados(p, recargar) }, "Capturar observaciones…"),
+        el("button", { class: "boton chico", onclick: () => { document.querySelector(".velo")?.remove(); dialogoComparacion(p.id); } }, "Comparar…"))));
   }).concat([el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
       omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
       el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"))])
