@@ -223,6 +223,10 @@ class Rsm(ModuloDialogo):
         if any(a <= b for b, a in niveles): raise ErrorEntrada("Cada factor necesita un nivel bajo menor que el alto (revisa que varíe).")
         bajos, altos = [b for b, _ in niveles], [a for _, a in niveles]
         Xc = [D.a_codificado(r, bajos, altos) for r in X]
+        region = DIS.region_del_modelo(proyecto, ny, nombres)          # E3-6: región autorizada (límites seguros del diseño)
+        sin_reco = region["estado"] == "no_declarada"                  # modo real, diseño de D-MIKE sin región: se analiza, no se recomienda
+        def en_region(orig):
+            return all(l is None or l[0] - 1e-9 * max(1.0, abs(l[0])) <= v <= l[1] + 1e-9 * max(1.0, abs(l[1])) for v, l in zip(orig, region["limites"]))
         modelo = p.get("modelo") or "cuadratico"
         def _letras(t):           # «A*B» o «A*A» también sirven: cada letra es un factor en el orden elegido
             partes = [x.strip() for x in t.split("*")]
@@ -307,6 +311,7 @@ class Rsm(ModuloDialogo):
                         b_tabla("Resumen del modelo", ["S", "PRESS", "R²", "R² ajustado", "R² de predicción"], resumen),
                         b_tabla("Análisis de varianza (SC ajustada)", ["Fuente", "GL", "SC", "CM", "F", "Valor p"], anova)]
         # ---------- punto estacionario o ascenso ----------
+        avisos_region = []
         interp = [frase_p(next(a for a in sup["anova"] if a["fuente"] == "Modelo")["p"], alfa, "ningún término explica la respuesta",
                           f"el modelo explica parte de la variación de {ny}")]
         hay_cuad = any(len(t) == 2 and t[0] == t[1] for t in ts)
@@ -318,11 +323,31 @@ class Rsm(ModuloDialogo):
                                        [[nombres[i], num(ps["x"][i], 4), num(orig[i], 5)] for i in range(k)] +
                                        [[f"{ny} predicha", "", num(ps["y"], 5)], ["Tipo", "", ps["tipo"]],
                                         ["Valores propios", "", ", ".join(num(v, 4) for v in ps["valores_propios"])]]))
-            interp.append(f"El punto estacionario es un {ps['tipo']}" + (" y queda dentro de la región experimentada." if dentro else
-                          ", pero queda fuera de la región experimentada: no lo uses sin confirmarlo; considera moverte hacia él con nuevos experimentos.")
-                          + (" Para maximizar o minimizar en un punto silla, usa el optimizador dentro de la región." if ps["tipo"] == "punto silla" else ""))
+            if sin_reco:
+                interp.append(f"El punto estacionario es un {ps['tipo']}, pero la región autorizada de este diseño no está declarada: es un resultado del modelo, "
+                              "no una recomendación. Declárala en «Diseños del proyecto» (límites seguros) antes de usarlo.")
+            elif region["estado"] == "declarada" and not en_region(orig):
+                interp.append(f"El punto estacionario es un {ps['tipo']}, pero queda fuera de la región autorizada (límites seguros): no se recomienda. "
+                              "Usa el optimizador, que busca solo dentro de la región, o plantea otro diseño dentro de ella.")
+            else:
+                interp.append(f"El punto estacionario es un {ps['tipo']}" + (" y queda dentro de la región experimentada." if dentro else
+                              ", pero queda fuera de la región experimentada: no lo uses sin confirmarlo; considera moverte hacia él con nuevos experimentos.")
+                              + (" Para maximizar o minimizar en un punto silla, usa el optimizador dentro de la región." if ps["tipo"] == "punto silla" else ""))
         elif not hay_cuad:
             i, pasos = D.ascenso(b, 5, (p.get("meta") or "max") == "max")
+            n_total = len(pasos)
+            if region["estado"] == "declarada":                       # la ruta se detiene antes del primer paso que cruza la región
+                dentro_r = []
+                for q in pasos:
+                    if not en_region(D.a_original(q, bajos, altos)): break
+                    dentro_r.append(q)
+                if len(dentro_r) < n_total:
+                    avisos_region.append(f"La ruta de ascenso se detiene en el paso {len(dentro_r) - 1 if dentro_r else 0}: el paso {len(dentro_r)} cruzaría los límites seguros. "
+                                         "No se muestran pasos fuera de la región autorizada.")
+                pasos = dentro_r
+            elif sin_reco:
+                pasos = []
+                avisos_region.append("Región autorizada no declarada: no se muestra la ruta de ascenso como recomendación. Declara los límites seguros del diseño.")
             if pasos:
                 filas_a = [[f"{s} Δ"] + [num(v, 5) for v in D.a_original(q, bajos, altos)] + [num(D.predecir_codificado((b0, b, B), q), 5)]
                            for s, q in enumerate(pasos)]
@@ -365,13 +390,16 @@ class Rsm(ModuloDialogo):
                      ("Varianza constante", "Residuos contra ajustados", "Revisa que no haya forma de embudo"),
                      ("Independencia", "Residuos contra orden de corrida", "Corre los experimentos en orden aleatorio y revisa que no haya tendencia")]
         avisos = [f"{fuera} filas incompletas quedaron fuera (corridas sin respuesta)."] if fuera else []
+        avisos += avisos_region
+        if sin_reco: avisos.append("Región autorizada no declarada (modo real): el análisis corre, pero no se recomiendan parámetros hasta declarar los límites seguros del diseño.")
+        if region["estado"] == "sin_diseno": avisos.append("Esta respuesta no viene de un diseño de D-MIKE: no hay región autorizada que comprobar. Las predicciones fuera de la región experimentada son solo una guía.")
         if retenidos: avisos.append("Se conservaron por jerarquía los términos lineales: " + ", ".join(retenidos) + ".")
         if desconocidos: avisos.append("No se reconocieron estos términos a quitar: " + ", ".join(desconocidos) + ".")
         if not diseno and not p.get("niveles"):
             avisos.append("Niveles bajo y alto inferidos de los datos: " + "; ".join(f"{n} {num(b_)} a {num(a_)}" for n, b_, a_ in zip(nombres, bajos, altos))
                           + ". Si no son los del diseño, indícalos en «Niveles».")
         modelo_guardado = {"respuesta": ny, "factores": nombres, "bajos": bajos, "altos": altos, "b0": b0, "b": b.tolist(), "B": B.tolist(),
-                           "limite": lim, "terminos": [D.nombre_termino(t, nombres) for t in ts]}
+                           "limite": lim, "region": region, "terminos": [D.nombre_termino(t, nombres) for t in ts]}
         return resultado(cls.ID, f"Superficie de respuesta de {ny}", p, bloques_out, avisos, supuestos=supuestos, interpretacion=interp,
                          datos={"columnas": [yj] + xs + ([bj] if bc else []), "modelo_rsm": modelo_guardado}, png=png)
 
@@ -431,10 +459,28 @@ class Optimizador(ModuloDialogo):
             if [f.lower() for f in r["mr"]["factores"]] != [f.lower() for f in base["factores"]] or r["mr"]["bajos"] != base["bajos"] or r["mr"]["altos"] != base["altos"]:
                 raise ErrorEntrada("Todas las respuestas deben venir de modelos con los mismos factores y niveles.")
         k = len(base["factores"]); lim = 1.0 if (p.get("region") or "cubo") == "cubo" else base["limite"]
-        opt = D.optimizar(resp, k, lim)
+        # E3-6: región autorizada. Sin región declarada en modo real no se recomienda nada; con región, la búsqueda queda dentro de ella.
+        regiones = [(r["mr"].get("region") or {}) for r in resp]
+        if any(g.get("estado") == "no_declarada" for g in regiones):
+            nombres_sin = ", ".join(r["mr"]["respuesta"] for r, g in zip(resp, regiones) if g.get("estado") == "no_declarada")
+            msg = (f"No se recomiendan parámetros: la región autorizada (límites seguros) del diseño de {nombres_sin} no está declarada. Decláralos en «Diseños del proyecto» "
+                   "y vuelve a analizar la superficie; el optimizador solo busca dentro de la región autorizada.")
+            return resultado(cls.ID, "Optimización de " + ", ".join(r["mr"]["respuesta"] for r in resp), p, [b_texto(msg, "conclusion")],
+                             [msg], interpretacion=["Mientras la región no esté declarada, el optimizador no emite una combinación sugerida (modo real)."], datos={"columnas": []})
+        cod = [[-lim, lim] for _ in range(k)]
+        for g in regiones:
+            if g.get("estado") != "declarada": continue
+            for i, l in enumerate(g.get("limites") or []):
+                if l is None: continue
+                c, h = (base["bajos"][i] + base["altos"][i]) / 2, (base["altos"][i] - base["bajos"][i]) / 2
+                cod[i] = [max(cod[i][0], (l[0] - c) / h), min(cod[i][1], (l[1] - c) / h)]
+        if any(a >= b for a, b in cod):
+            raise ErrorEntrada("La región de búsqueda elegida no se cruza con la región autorizada (límites seguros) de algún factor: elige otra región o declara otros límites.")
+        con_region = any(g.get("estado") == "declarada" for g in regiones)
+        opt = D.optimizar(resp, k, [tuple(q) for q in cod] if con_region else lim)
         orig = D.a_original(opt["x"], base["bajos"], base["altos"])
-        fac = [[base["factores"][i], num(orig[i], 5), num(opt["x"][i], 4), f"{num(D.a_original([-lim], [base['bajos'][i]], [base['altos'][i]])[0], 5)} a "
-                f"{num(D.a_original([lim], [base['bajos'][i]], [base['altos'][i]])[0], 5)}"] for i in range(k)]
+        fac = [[base["factores"][i], num(orig[i], 5), num(opt["x"][i], 4), f"{num(D.a_original([cod[i][0]], [base['bajos'][i]], [base['altos'][i]])[0], 5)} a "
+                f"{num(D.a_original([cod[i][1]], [base['bajos'][i]], [base['altos'][i]])[0], 5)}"] for i in range(k)]
         sal = [[r["mr"]["respuesta"], dict(METAS)[r["meta"]], num(r["inferior"]), num(r["objetivo"]), num(r["superior"]), num(y, 5), num(d, 4)]
                for r, y, d in zip(resp, opt["y"], opt["d"])]
         # gráfica de optimización: cada respuesta contra cada factor, con los demás en el óptimo
@@ -444,6 +490,7 @@ class Optimizador(ModuloDialogo):
         for a_, r in enumerate(resp):
             for i in range(k):
                 ax = axs[a_][i]; vals = []
+                g = np.linspace(cod[i][0], cod[i][1], 81)
                 for v in g:
                     xv = np.array(opt["x"], float); xv[i] = v; vals.append(D.predecir_codificado(r["modelo"], xv))
                 xo = [D.a_original([v], [base["bajos"][i]], [base["altos"][i]])[0] for v in g]
@@ -455,6 +502,8 @@ class Optimizador(ModuloDialogo):
         svg, png = a_svg_png(fig)
         concl = (f"Combinación sugerida: " + ", ".join(f"{base['factores'][i]} = {num(orig[i], 5)}" for i in range(k)) +
                  f". Deseabilidad compuesta D = {opt['D']:.4f} (1 = todas las respuestas en su ideal; 0 = alguna fuera de lo aceptable).")
+        if con_region: avisos_opt = ["La búsqueda se limitó a la región autorizada (límites seguros del diseño), intersecada con la región elegida."]
+        else: avisos_opt = []
         interp = ["El óptimo es una predicción del modelo: confírmalo con corridas de verificación antes de fijarlo en el proceso "
                   "(28_BB RSM-PUNTO-ESTACIONARIO usa el optimizador y después se confirma).",
                   "La búsqueda se limita a la región elegida; fuera de ella el modelo no está respaldado por datos."]
@@ -465,4 +514,4 @@ class Optimizador(ModuloDialogo):
             b_tabla("Respuestas", ["Respuesta", "Meta", "Inferior", "Objetivo", "Superior", "Predicción", "Deseabilidad"], sal),
             b_texto("Deseabilidad de Derringer y Suich con peso e importancia (como el optimizador de respuesta de Minitab); búsqueda global por "
                     "evolución diferencial con refinamiento local. No respaldados por la base: la función de deseabilidad y el método de búsqueda.")],
-            interpretacion=interp, datos={"columnas": []}, png=png)
+            avisos_opt, interpretacion=interp, datos={"columnas": []}, png=png)

@@ -203,6 +203,23 @@ def tareas_derivadas(proyecto):
     return out
 
 
+def region_del_modelo(proyecto, respuesta, nombres):
+    """Región autorizada con la que se analiza una respuesta (E3-6). Devuelve {estado, limites}: estado «declarada», «no_declarada» (diseño de D-MIKE
+    sin límites seguros), «sin_diseno» (la respuesta no viene de un diseño de D-MIKE: no hay a qué declarar la región) o «no_aplica» (demostración o sin
+    proyecto: la región es opcional). limites: [[mín, máx] o None] por factor, en el orden de «nombres»."""
+    from . import modo as MD
+    if proyecto is None or MD.es_demo(proyecto): estado = "no_aplica"
+    else: estado = None
+    info = _disenos(proyecto).get(respuesta) if proyecto is not None else None
+    lim = (info or {}).get("limites_seguros") if (info or {}).get("region") == "declarada" else None
+    por_nombre = {str(n).lower(): v for n, v in (lim or {}).items()}
+    limites = [([por_nombre[n.lower()]["min"], por_nombre[n.lower()]["max"]] if n.lower() in por_nombre else None) for n in nombres]
+    if estado is None:
+        estado = "sin_diseno" if info is None else "declarada" if lim and all(x is not None for x in limites) else "no_declarada"
+    elif lim and all(x is not None for x in limites): estado = "declarada"
+    return {"estado": estado, "limites": limites}
+
+
 # ---------------- respuestas del diseño (E3-3) ----------------
 def estado_respuestas(hoja, info):
     """(cuántas respuestas hay en la hoja, versión con la que se capturaron o None). Cuenta las celdas no vacías de la columna de respuestas

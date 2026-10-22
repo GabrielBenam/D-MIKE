@@ -256,7 +256,7 @@ def deseabilidad(y, meta, inferior=None, objetivo=None, superior=None, peso=1.0)
 
 
 def optimizar(respuestas, k, limite, semilla=0):
-    """Busca la combinación de factores (codificados, dentro de ±limite) que maximiza la deseabilidad compuesta
+    """Busca la combinación de factores (codificados, dentro de ±limite o de los límites por factor) que maximiza la deseabilidad compuesta
     D = (Π di^ri)^(1/Σri). respuestas: [{modelo: (b0,b,B), meta, inferior, objetivo, superior, peso, importancia}]."""
     def D(x):
         ds, rs = [], []
@@ -278,9 +278,10 @@ def optimizar(respuestas, k, limite, semilla=0):
             elif r["meta"] == "min": pen += max(0.0, y - r["superior"])
             else: pen += max(0.0, r["inferior"] - y) + max(0.0, y - r["superior"])
         return pen * 1e3
-    lim = [(-limite, limite)] * k
+    # limite: un número (cubo ±limite) o un (mín, máx) codificado por factor (región autorizada, E3-6)
+    lim = [tuple(q) for q in limite] if isinstance(limite, (list, tuple)) else [(-limite, limite)] * k
     res = optimize.differential_evolution(objetivo_neg, lim, seed=semilla, tol=1e-10, polish=True, maxiter=400)
-    x = np.clip(res.x, -limite, limite)
+    x = np.clip(res.x, [a for a, _ in lim], [b for _, b in lim])
     d, ds = D(x)
     return {"x": x.tolist(), "D": d, "d": ds, "y": [predecir_codificado(r["modelo"], x) for r in respuestas]}
 
