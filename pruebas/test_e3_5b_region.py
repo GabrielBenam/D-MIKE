@@ -60,10 +60,11 @@ def test_estructura_de_los_limites_se_valida_en_cualquier_version():
     assert err(rec(dmike_minimo="0.28", limites={**LIM, "Otro": {"min": 0, "max": 1}})) == []           # factores de más se toleran (claves desconocidas)
 
 
-def test_receta_029_se_rechaza_hoy_por_la_version_y_la_exigencia_queda_lista(tmp_path):
-    from app.api import VERSION
-    a = Api(); r = a.abrir_receta(archivo(tmp_path, rec(limites=LIM)))
-    assert VERSION < "0.29" and r["error"] == "receta" and "requiere D-MIKE 0.29 o posterior" in r["sesion"][-1]["texto"]
+def test_con_la_0_29_la_receta_029_con_limites_se_acepta_y_sin_ellos_se_rechaza(tmp_path):
+    a = Api(); assert a.abrir_receta(archivo(tmp_path, rec(limites=LIM)))["error"] is None
+    assert a.ejecutar_receta(archivo(tmp_path, rec(limites=LIM)))["error"] is None and a.disenos()[0]["region"] == "declarada"                         # desde la 0.29.0 la receta 0.29 ya no se rechaza por la versión
+    b = Api(); r = b.abrir_receta(archivo(tmp_path, rec(), "sin.json"))
+    assert r["error"] == "receta" and "no trae limites_seguros" in r["sesion"][-1]["texto"] and not b.proyecto.formatos.get("_disenos")
 
 
 # ---------- región no declarada y tarea ----------

@@ -1,6 +1,6 @@
 # ESPEC_receta_v2 — Contrato de receta v2 de D-MIKE
 
-Versión del documento: 1.2 (14/10/2026; encabezado sincronizado el 21/10/2026). Programa objetivo: D-MIKE 0.28.0 (secciones 1 a 15, implementadas hasta 0.27.0) y 0.29.0 (Entrega 3). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; las secciones 1 a 15 están implementadas hasta 0.27.0 y verificadas con pruebas (pruebas/test_receta.py, test_receta_e2.py, test_modo_v026.py); lo de la Entrega 3 (secciones 7 y 8, `design_id`, `run_id`, `limites_seguros`, `omitido`) sigue sin implementar. Lo no verificado en código se marca «pendiente de validación».
+Versión del documento: 1.2 (14/10/2026; encabezado sincronizado el 21/10/2026). Programa: D-MIKE 0.29.0 (secciones 1 a 15, implementadas hasta 0.27.0; secciones 16 a 19.5, Entrega 3, implementadas en 0.29.0). Base: ENTREGA_0_auditoria_AS-IS.md, ESPEC_flujo_real_dmaic.md (secciones 3 a 5 y 10) y lectura del código publicado del Diagnóstico en línea. Estado de verificación: diseño aprobado por el usuario; las secciones 1 a 15 están implementadas hasta 0.27.0 y verificadas con pruebas (pruebas/test_receta.py, test_receta_e2.py, test_modo_v026.py); lo de la Entrega 3 (secciones 7 y 8, `design_id`, `run_id`, `limites_seguros`, `omitido`) sigue sin implementar. Lo no verificado en código se marca «pendiente de validación».
 
 ## 1. Alcance
 
