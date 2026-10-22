@@ -218,6 +218,9 @@ def region_del_modelo(proyecto, respuesta, nombres):
     if proyecto is None or MD.es_demo(proyecto): estado = "no_aplica"
     else: estado = None
     info = _disenos(proyecto).get(respuesta) if proyecto is not None else None
+    if info is None and proyecto is not None:        # una segunda respuesta medida en las mismas corridas de un diseño: se liga por sus factores
+        nm = {n.lower() for n in nombres}
+        info = next((i for i in _disenos(proyecto).values() if nm and nm <= {f["nombre"].lower() for f in i.get("factores", [])}), None)
     lim = (info or {}).get("limites_seguros") if (info or {}).get("region") == "declarada" else None
     por_nombre = {str(n).lower(): v for n, v in (lim or {}).items()}
     limites = [([por_nombre[n.lower()]["min"], por_nombre[n.lower()]["max"]] if n.lower() in por_nombre else None) for n in nombres]
