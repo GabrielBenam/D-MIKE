@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib import colors as mcolors
 from . import registrar, doe as D, estadistica as E
 from .analisis import _prob_normal
-from .base import _f
+from .base import _f, espec_probnormal, espec_residuos
 from .base import (ErrorEntrada, columna, filas_validas, valor, figura, a_svg_png, num, p_igual, p_texto, frase_p,
                    resultado, b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO)
 from .dialogo import ModuloDialogo
@@ -209,6 +209,7 @@ class Rsm(ModuloDialogo):
         bj = p.get("bloque"); bc = columna(hoja, bj, "los bloques", obligatoria=False)
         alfa = float(p.get("alfa") or 0.05)
         filas, fuera = filas_validas(hoja, [yj] + xs + ([bj] if bc else []))
+        if not filas: raise ErrorEntrada("No hay filas completas (respuesta y todos los factores) para analizar: captura o importa las respuestas del diseño.")
         y = [valor(hoja, yj, i) for i in filas]
         X = [[valor(hoja, j, i) for j in xs] for i in filas]
         nombres = [hoja.columnas[j].nombre or f"C{j + 1}" for j in xs]
@@ -359,6 +360,19 @@ class Rsm(ModuloDialogo):
                            for s, q in enumerate(pasos)]
                 bloques_out.append(b_tabla(f"Ruta de {'ascenso' if (p.get('meta') or 'max') == 'max' else 'descenso'} más pronunciado "
                                            f"(28_BB RSM-ASCENSO; paso base en {nombres[i]})", ["Paso"] + nombres + [f"{ny} del modelo"], filas_a))
+                reales = [D.a_original(q, bajos, altos) for q in pasos]
+                fig_a, axs_a = figura(max(5.0, 2.4 * (k + 1)), 2.6, ncols=k + 1); axs_a = np.atleast_1d(axs_a)
+                axs_a[0].plot(range(len(pasos)), [D.predecir_codificado((b0, b, B), q) for q in pasos], color=NARANJA, marker="o", ms=4)
+                axs_a[0].set_xlabel("Paso"); axs_a[0].set_title(f"{ny} del modelo", fontsize=8)
+                for q_ in range(k):
+                    axs_a[q_ + 1].plot(range(len(pasos)), [r[q_] for r in reales], color=TINTA, marker="o", ms=4); axs_a[q_ + 1].set_xlabel("Paso"); axs_a[q_ + 1].set_title(nombres[q_], fontsize=8)
+                    if region["estado"] == "declarada" and region["limites"][q_]:
+                        for lv in region["limites"][q_]: axs_a[q_ + 1].axhline(lv, color="#b3261e", ls="--", lw=1)
+                svg_asc, _ = a_svg_png(fig_a)
+                bloques_out.append(b_grafica(svg_asc, {"g": "ascenso", "titulo": f"Ruta de {'ascenso' if (p.get('meta') or 'max') == 'max' else 'descenso'} de {ny}", "yl": ny,
+                                                    "pasos": list(range(len(pasos))), "y": [_f(D.predecir_codificado((b0, b, B), q)) for q in pasos],
+                                                    "factores": [{"nombre": nombres[q], "valores": [_f(r[q]) for r in reales], "limite": (region["limites"][q] if region["estado"] == "declarada" else None)}
+                                                                 for q in range(k)], "detenida": len(pasos) < n_total}))
                 interp.append("El modelo es de primer orden: corre experimentos sobre la ruta hasta que la respuesta deje de mejorar y en esa "
                               "vecindad plantea un diseño central compuesto (RSM-VECINDAD y RSM-DCC). Las predicciones fuera de la región son "
                               "solo una guía.")
@@ -386,7 +400,7 @@ class Rsm(ModuloDialogo):
         axs[1][0].hist(res, bins=min(10, max(5, int(math.sqrt(len(res))))), color=CLARO, edgecolor=NARANJA); axs[1][0].set_title("Histograma de residuos")
         axs[1][1].plot(range(1, len(res) + 1), res, color=NARANJA, marker="o", ms=3, lw=0.8); axs[1][1].axhline(0, color=TINTA, lw=1)
         axs[1][1].set_title("Residuos contra orden")
-        bloques_out += [b_grafica(a_svg_png(fig)[0])]
+        bloques_out += [b_grafica(a_svg_png(fig)[0], espec_residuos(res, aj, f"Residuos de {ny}"))]
         bloques_out.append(b_texto("Método: 28_BB_SUPERFICIES_RESPUESTA y 27_BB_REGRESION (pruebas del modelo, falta de ajuste, sumas extra). "
                                    "Unidades codificadas: -1 en el nivel bajo y +1 en el alto. No respaldados por la base: análisis canónico con "
                                    "valores propios, codificación de bloques por efectos y la gráfica de superficie."))
@@ -494,6 +508,7 @@ class Optimizador(ModuloDialogo):
         # gráfica de optimización: cada respuesta contra cada factor, con los demás en el óptimo
         fig, axs = figura(max(4.0, 2.4 * k), 2.0 * len(resp) + 0.6, nrows=len(resp), ncols=k)
         axs = np.array(axs).reshape(len(resp), k)
+        curvas = {}
         g = np.linspace(-lim, lim, 81)
         for a_, r in enumerate(resp):
             for i in range(k):
@@ -502,6 +517,7 @@ class Optimizador(ModuloDialogo):
                 for v in g:
                     xv = np.array(opt["x"], float); xv[i] = v; vals.append(D.predecir_codificado(r["modelo"], xv))
                 xo = [D.a_original([v], [base["bajos"][i]], [base["altos"][i]])[0] for v in g]
+                curvas.setdefault(a_, []).append({"x": [_f(v) for v in xo], "y": [_f(v) for v in vals]})
                 ax.plot(xo, vals, color=TINTA, lw=1.1); ax.axvline(orig[i], color="#b3261e", lw=1); ax.tick_params(labelsize=6)
                 if r["objetivo"] is not None: ax.axhline(r["objetivo"], color=NARANJA, lw=0.8, ls="--")
                 if a_ == 0: ax.set_title(f"{base['factores'][i]}\n{num(orig[i], 4)}", fontsize=8)
@@ -516,8 +532,11 @@ class Optimizador(ModuloDialogo):
                   "(28_BB RSM-PUNTO-ESTACIONARIO usa el optimizador y después se confirma).",
                   "La búsqueda se limita a la región elegida; fuera de ella el modelo no está respaldado por datos."]
         if opt["D"] == 0: interp.insert(0, "Ninguna combinación dentro de la región deja todas las respuestas en su rango aceptable: revisa los límites o la región.")
+        espec_opt = {"g": "optimizacion", "titulo": f"Optimización: deseabilidad compuesta D = {opt['D']:.4f}", "factores": list(base["factores"]), "optimo": [_f(v) for v in orig],
+                     "busqueda": [[_f(D.a_original([cod[i][0]], [base["bajos"][i]], [base["altos"][i]])[0]), _f(D.a_original([cod[i][1]], [base["bajos"][i]], [base["altos"][i]])[0])] for i in range(k)],
+                     "autorizada": con_region, "resps": [{"nombre": r["mr"]["respuesta"], "y_opt": _f(opt["y"][a_]), "objetivo": _f(r["objetivo"]), "curvas": curvas[a_]} for a_, r in enumerate(resp)]}
         return resultado(cls.ID, "Optimización de " + ", ".join(r["mr"]["respuesta"] for r in resp), p, [
-            b_texto(concl, "conclusion"), b_grafica(svg),
+            b_texto(concl, "conclusion"), b_grafica(svg, espec_opt),
             b_tabla("Ajuste óptimo de los factores", ["Factor", "Valor", "Codificado", "Región de búsqueda"], fac),
             b_tabla("Respuestas", ["Respuesta", "Meta", "Inferior", "Objetivo", "Superior", "Predicción", "Deseabilidad"], sal),
             b_texto("Deseabilidad de Derringer y Suich con peso e importancia (como el optimizador de respuesta de Minitab); búsqueda global por "

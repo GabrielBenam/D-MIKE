@@ -3,7 +3,7 @@ import math
 from collections import OrderedDict
 from scipy import stats as st
 from . import registrar, estadistica as E
-from .base import _f
+from .base import _f, espec_probnormal
 from .base import (ErrorEntrada, columna, nombre_col, filas_validas, valor, figura, a_svg_png, num, p_texto, p_igual, frase_p,
                    resultado, b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO)
 from .dialogo import ModuloDialogo
@@ -179,8 +179,13 @@ class Distrib(ModuloDialogo):
         _prob_normal(a2, x, f"Gráfica de probabilidad normal")
         a2.text(0.02, 0.97, f"AD = {ad['a2']:.3f}\n{p_igual(ad['p'], .005)}", transform=a2.transAxes, va="top", fontsize=8, color=TINTA)
         svg, png = a_svg_png(fig)
+        fig, ax_pn = figura(5.4, 4.0)
+        _prob_normal(ax_pn, x, f"Probabilidad normal de {nom}")
+        ax_pn.text(0.02, 0.97, f"AD = {ad['a2']:.3f}\n{p_igual(ad['p'], .005)}", transform=ax_pn.transAxes, va="top", fontsize=8, color=TINTA)
+        svg_pn, _ = a_svg_png(fig)
         bloques = [b_grafica(svg, {"g": "histograma", "titulo": f"Histograma de {nom}", "x": [_f(v) for v in x], "media": _f(d["media"]), "desv": _f(d["desv"]),
                                    "lie": _f(lie), "lse": _f(lse), "bordes": [_f(b) for b in bordes]}),
+                   b_grafica(svg_pn, espec_probnormal(x, f"Probabilidad normal de {nom}", nom)),
                    b_texto(f"Prueba de normalidad (Anderson-Darling): {p_igual(ad['p'], .005)}. " + (
                        "Como p > 0.05, los datos no permiten rechazar la normalidad y se trabaja suponiéndola (25_BB_DISTRIBUCIONES, "
                        "DIST-IDENTIFICAR). Esto no demuestra que sean normales: con pocos datos la prueba tiene poca sensibilidad."

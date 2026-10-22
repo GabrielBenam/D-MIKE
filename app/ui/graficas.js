@@ -11,6 +11,13 @@ const gH = (y, c, d = "dash") => ({ type: "line", xref: "paper", x0: 0, x1: 1, y
 const gV = (x, c, d = "solid") => ({ type: "line", yref: "paper", y0: 0, y1: 1, x0: x, x1: x, line: { color: c, dash: d, width: 2 } });
 const pdf = (v, m, s) => Math.exp(-(((v - m) / s) ** 2) / 2) / (s * Math.sqrt(2 * Math.PI));
 // ---------- catálogo: estilos (propuestas), elementos encendibles y dibujo a partir de la especificación del módulo ----------
+// probabilidad normal (la usan probnormal y residuos 4 en 1)
+function gPN(s, o, p) {
+  const col = s.x.map((_, i) => s.marcar && s.marcar[i] ? gcss("--acento") : gTono(p, .5)), d = [{ type: "scatter", x: s.x, y: s.q, mode: o.e.eti && s.marcar ? "markers+text" : "markers",
+    marker: { size: 7, color: col }, text: s.x.map((_, i) => (o.e.eti && s.marcar && s.marcar[i]) ? s.etiq[i] : ""), textposition: "top left", textfont: { size: 9 }, name: "Datos" }], sh = [];
+  if (o.e.lin && s.linea) d.push({ type: "scatter", x: s.linea.x, y: s.linea.q, mode: "lines", line: { color: gcss("--tinta"), width: 1 }, name: "Normal" });
+  return { d, l: gLay({ showlegend: false, xaxis: { title: s.xl || "", gridcolor: gcss("--linea") }, yaxis: { title: "Porcentaje", tickvals: s.tq, ticktext: s.tl, gridcolor: gcss("--linea") }, shapes: sh }) };
+}
 const GCAT = {
   pareto: { est: ["Barras con acumulado", "Barras horizontales"], el: { acum: ["Línea acumulada", 1], c80: ["Corte en 80 %", 1], eti: ["Valores", 0] },
     f: (s, o, p) => { const col = s.conteo.map((_, i) => gTono(p, .85 - i * .6 / Math.max(1, s.conteo.length - 1)));
@@ -85,6 +92,39 @@ const GCAT = {
     f: (s, o, p) => { const n = s.pares.length, lay = gLay({ grid: { rows: 1, columns: n, pattern: "independent" }, showlegend: false }), d = [];
       s.pares.forEach((pr, q) => { const ax = q ? String(q + 1) : ""; pr.series.forEach((se, k) => d.push({ type: "scatter", x: pr.niveles, y: se.medias, xaxis: "x" + ax, yaxis: "y" + ax, mode: o.e.pts ? "lines+markers" : "lines", line: { color: gTono(p, k ? .75 : .3), width: 3, dash: k ? "dash" : "solid" }, name: se.nombre }));
         lay["xaxis" + ax] = { title: { text: pr.par, font: { size: 10 } }, type: "category" }; lay["yaxis" + ax] = { gridcolor: gcss("--linea") }; });
+      return { d, l: lay }; } },
+  probnormal: { est: ["Puntos con recta"], el: { lin: ["Recta de referencia", 1], eti: ["Etiquetas de los puntos marcados", 1] },
+    f: (s, o, p) => gPN(s, o, p, "", "") },
+  residuos: { est: ["4 en 1"], el: { lin: ["Recta de referencia", 1], cero: ["Línea en cero", 1] },
+    f: (s, o, p) => { const pn = gPN(s.pn, o, p, "", ""), n = s.res.length, d = [], lay = gLay({ grid: { rows: 2, columns: 2, pattern: "independent" }, showlegend: false, margin: { l: 56, r: 18, t: 44, b: 44 } });
+      pn.d.forEach(t => d.push(Object.assign({}, t, { xaxis: "x", yaxis: "y" })));
+      d.push({ type: "scatter", x: s.aj, y: s.res, mode: "markers", xaxis: "x2", yaxis: "y2", marker: { color: gTono(p, .45), size: 6 } });
+      d.push({ type: "histogram", x: s.res, xaxis: "x3", yaxis: "y3", marker: { color: gTono(p, .75), line: { color: gTono(p, .35), width: 1 } } });
+      d.push({ type: "scatter", x: s.res.map((_, i) => i + 1), y: s.res, mode: "lines+markers", xaxis: "x4", yaxis: "y4", line: { color: gTono(p, .5), width: 1 }, marker: { size: 4, color: gTono(p, .4) } });
+      Object.assign(lay, { xaxis: { title: "Residuo", gridcolor: gcss("--linea") }, yaxis: pn.l.yaxis, xaxis2: { title: "Ajustado", gridcolor: gcss("--linea") }, yaxis2: { title: "Residuo", gridcolor: gcss("--linea") },
+        xaxis3: { title: "Residuo", gridcolor: gcss("--linea") }, yaxis3: { title: "Frecuencia", gridcolor: gcss("--linea") }, xaxis4: { title: "Orden de observación", gridcolor: gcss("--linea") }, yaxis4: { title: "Residuo", gridcolor: gcss("--linea") } });
+      lay.shapes = (o.e.lin ? (pn.l.shapes || []).map(sh => Object.assign({}, sh, { xref: "x", yref: "y" })) : []);
+      if (o.e.cero) [["x2", "y2"], ["x4", "y4"]].forEach(([xa, ya]) => lay.shapes.push({ type: "line", xref: xa + " domain", yref: ya, x0: 0, x1: 1, y0: 0, y1: 0, line: { color: gcss("--tinta"), width: 1 } }));
+      return { d, l: lay }; } },
+  ascenso: { est: ["Respuesta y factores por paso"], el: { lim: ["Límites seguros", 1] },
+    f: (s, o, p) => { const n = s.factores.length + 1, d = [], lay = gLay({ grid: { rows: 1, columns: n, pattern: "independent" }, showlegend: false, margin: { l: 52, r: 18, t: 44, b: 44 } }), sh = [];
+      d.push({ type: "scatter", x: s.pasos, y: s.y, mode: "lines+markers", line: { color: gTono(p, .5) }, marker: { size: 6, color: gTono(p, .4) }, name: s.yl });
+      lay.xaxis = { title: "Paso", dtick: 1, gridcolor: gcss("--linea") }; lay.yaxis = { title: s.yl + " del modelo", gridcolor: gcss("--linea") };
+      s.factores.forEach((f, q) => { const ax = String(q + 2);
+        d.push({ type: "scatter", x: s.pasos, y: f.valores, xaxis: "x" + ax, yaxis: "y" + ax, mode: "lines+markers", line: { color: gTono(p, .3 + .5 * q / Math.max(1, n - 2)) }, marker: { size: 6 }, name: f.nombre });
+        lay["xaxis" + ax] = { title: "Paso", dtick: 1, gridcolor: gcss("--linea") }; lay["yaxis" + ax] = { title: f.nombre, gridcolor: gcss("--linea") };
+        if (o.e.lim && f.limite) f.limite.forEach(v => sh.push({ type: "line", xref: "x" + ax + " domain", yref: "y" + ax, x0: 0, x1: 1, y0: v, y1: v, line: { color: "#b3261e", dash: "dash" } })); });
+      lay.shapes = sh; if (s.detenida) lay.annotations = [{ xref: "paper", yref: "paper", x: .5, y: -.28, showarrow: false, text: "La ruta se detiene antes del primer paso que cruzaría los límites seguros", font: { size: 10 } }];
+      return { d, l: lay }; } },
+  optimizacion: { est: ["Respuestas contra factores"], el: { opt: ["Óptimo", 1], obj: ["Objetivo", 1], reg: ["Región de búsqueda", 1] },
+    f: (s, o, p) => { const R = s.resps.length, C = s.factores.length, d = [], sh = [], lay = gLay({ grid: { rows: R, columns: C, pattern: "independent" }, showlegend: false, margin: { l: 56, r: 18, t: 44, b: 44 } });
+      s.resps.forEach((r, a) => s.factores.forEach((fn, i) => { const k = a * C + i + 1, ax = k > 1 ? String(k) : "", cv = r.curvas[i];
+        d.push({ type: "scatter", x: cv.x, y: cv.y, mode: "lines", xaxis: "x" + ax, yaxis: "y" + ax, line: { color: gTono(p, .5), width: 2 } });
+        lay["xaxis" + ax] = { title: a === R - 1 ? fn : "", gridcolor: gcss("--linea") }; lay["yaxis" + ax] = { title: i === 0 ? r.nombre : "", gridcolor: gcss("--linea") };
+        if (o.e.opt) sh.push({ type: "line", xref: "x" + ax, yref: "y" + ax + " domain", x0: s.optimo[i], x1: s.optimo[i], y0: 0, y1: 1, line: { color: "#b3261e", width: 1.4 } });
+        if (o.e.obj && r.objetivo !== null) sh.push({ type: "line", xref: "x" + ax + " domain", yref: "y" + ax, x0: 0, x1: 1, y0: r.objetivo, y1: r.objetivo, line: { color: gTono(p, .3), dash: "dash" } });
+        if (o.e.reg) { const [lo, hi] = s.busqueda[i]; [lo, hi].forEach(v => sh.push({ type: "line", xref: "x" + ax, yref: "y" + ax + " domain", x0: v, x1: v, y0: 0, y1: 1, line: { color: gcss("--linea"), dash: "dot" } })); } }));
+      lay.shapes = sh; lay.annotations = [{ xref: "paper", yref: "paper", x: 0, y: 1.1, xanchor: "left", showarrow: false, font: { size: 10 }, text: "Línea roja: óptimo · punteado: región de búsqueda" + (s.autorizada ? " (limitada por los límites seguros)" : "") }];
       return { d, l: lay }; } },
 };
 // ---------- estado por gráfica (se guarda con el proyecto) ----------

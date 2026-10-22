@@ -1,0 +1,80 @@
+"""Gráficas de prioridad media, primera tanda (aprobada por el usuario el 22/10/2026): residuos 4 en 1, normal de efectos, probabilidad normal, ruta de ascenso
+y optimizador. Cada una entrega su especificación junto a la imagen fija (que sigue sirviendo a los reportes) y se dibuja interactiva y editable. Datos SINTÉTICOS."""
+import json
+from pathlib import Path
+from app.api import Api
+from pruebas.test_e3_6_region import monta, rsm, col
+
+
+def insp(r): return [b for b in r["bloques"] if b["tipo"] == "grafica"]
+def tipos(r): return [b.get("inter", {}).get("g") for b in insp(r)]
+
+
+def test_rsm_entrega_residuos_4_en_1_con_imagen_fija(tmp_path):
+    a = monta(tmp_path); r = rsm(a)["resultado"]; g = next(b for b in insp(r) if b.get("inter", {}).get("g") == "residuos")
+    assert g["svg"].startswith("<svg") and len(g["inter"]["res"]) == len(g["inter"]["aj"]) == a.hoja.n and len(g["inter"]["pn"]["x"]) == a.hoja.n
+    assert g["inter"]["pn"]["tq"] and g["inter"]["pn"]["tl"][4] == "50"
+
+
+def test_factorial_entrega_la_normal_de_efectos_con_los_significativos_marcados(tmp_path):
+    a = monta(tmp_path, tipo="fact", f=lambda t, ti: 50 + 3 * (t - 110) + 0.1 * (ti - 20))
+    r = a.ejecutar_modulo("FACTORIAL", {"y": col(a, "Resistencia"), "xs": [col(a, "Temp"), col(a, "Tiempo")]})["resultado"]
+    g = next(b for b in insp(r) if b.get("inter", {}).get("g") == "probnormal")["inter"]
+    assert len(g["x"]) == len(g["etiq"]) == len(g["marcar"]) >= 3 and any(g["marcar"]) and g["linea"]["x"][0] < g["linea"]["x"][1]
+
+
+def test_normalidad_entrega_la_probabilidad_normal():
+    a = Api(); a.pegar(-1, 0, "x\n" + "\n".join(str(10 + (i * 7) % 11 + i / 10) for i in range(30)))
+    r = a.ejecutar_modulo("DISTRIB", {"y": 0})
+    assert r["error"] is None and "probnormal" in tipos(r["resultado"])
+
+
+def test_ruta_de_ascenso_lleva_los_limites_y_avisa_si_se_detiene(tmp_path):
+    f = lambda t, ti: 50 + 2 * (t - 110) + 0.5 * (ti - 20)
+    a = monta(tmp_path, tipo="fact", limites="100, 125; 10, 30", centros="2", f=f)
+    r = a.ejecutar_modulo("RSM", {"y": col(a, "Resistencia"), "xs": [col(a, "Temp"), col(a, "Tiempo")], "modelo": "lineal"})["resultado"]
+    g = next(b for b in insp(r) if b.get("inter", {}).get("g") == "ascenso"); sp = g["inter"]
+    assert g["svg"].startswith("<svg") and sp["detenida"] is True and len(sp["pasos"]) < 6 and len(sp["factores"]) == 2
+    assert sp["factores"][0]["limite"] == [100, 125] and max(sp["factores"][0]["valores"]) <= 125 + 1e-9
+
+
+def test_optimizador_entrega_curvas_por_respuesta_y_factor(tmp_path):
+    a = monta(tmp_path); rsm(a); uid = a.proyecto.resultados[-1]["uid"]
+    r = a.ejecutar_modulo("OPTIMIZADOR", {"r1": uid, "meta1": "max", "inf1": 50, "obj1": 100, "peso1": 1, "imp1": 1})["resultado"]
+    sp = next(b for b in insp(r) if b.get("inter", {}).get("g") == "optimizacion")["inter"]
+    assert sp["factores"] == ["Temp", "Tiempo"] and len(sp["optimo"]) == 2 and len(sp["resps"]) == 1 and len(sp["resps"][0]["curvas"]) == 2
+    assert len(sp["resps"][0]["curvas"][0]["x"]) == len(sp["resps"][0]["curvas"][0]["y"]) and sp["autorizada"] is True
+
+
+def test_en_la_interfaz_las_cinco_se_dibujan_con_plotly(pagina, tmp_path):
+    from playwright.sync_api import expect
+    a = pagina.api
+    resultados = []
+    a.ejecutar_modulo("DISENO-RSM", {"nombres": "Temp, Tiempo", "bajos": "100, 10", "altos": "120, 30", "respuesta": "Resistencia", "semilla": "11", "limites": "80, 140; 5, 45",
+                                      "tipo": "ccd", "alfa": "caras", "centros": "3"})
+    info = a.proyecto.formatos["_disenos"]["Resistencia"]
+    from app.nucleo import disenos as DIS
+    ids, _ = DIS.run_ids(a.hoja, info, "Resistencia")
+    import csv
+    ruta = tmp_path / "r.csv"
+    with open(ruta, "w", encoding="utf-8", newline="") as fh:
+        w = csv.writer(fh); w.writerow(["RunId", "version_diseno", "Resistencia"])
+        for i in range(a.hoja.n):
+            t = float(a.hoja.columnas[col(a, "Temp")].valor(i)[0]); ti = float(a.hoja.columnas[col(a, "Tiempo")].valor(i)[0])
+            w.writerow([ids[i], 1, 60 - 0.05 * (t - 112) ** 2 - 0.04 * (ti - 22) ** 2 + 0.03 * (i % 3)])
+    a.importar_respuestas(str(ruta))
+    r1 = a.ejecutar_modulo("RSM", {"y": col(a, "Resistencia"), "xs": [col(a, "Temp"), col(a, "Tiempo")]}); assert r1["error"] is None, r1["sesion"][-1]["texto"]; r1 = r1["resultado"]; resultados.append(("residuos", r1))
+    r2 = a.ejecutar_modulo("OPTIMIZADOR", {"r1": r1["uid"], "meta1": "max", "inf1": 40, "obj1": 60})["resultado"]; resultados.append(("optimizacion", r2))
+    a.pegar(-1, len(a.hoja.columnas), "Z\n" + "\n".join(str(10 + (i * 7) % 11 + i / 10) for i in range(a.hoja.n)))
+    r3 = a.ejecutar_modulo("DISTRIB", {"y": col(a, "Z")})["resultado"]; resultados.append(("probnormal", r3))
+    r4 = a.ejecutar_modulo("RSM", {"y": col(a, "Resistencia"), "xs": [col(a, "Temp"), col(a, "Tiempo")], "modelo": "lineal"})["resultado"]; resultados.append(("ascenso", r4))
+    pagina.reload(); pagina.wait_for_selector("body[data-listo='1']"); pagina.evaluate("document.getElementById('inicio') && document.getElementById('inicio').remove()")
+    pagina.evaluate('localStorage.setItem("dmike_graficas_int", "1")')               # las pruebas antiguas arrancan con las gráficas interactivas apagadas
+    errores = []; pagina.on("pageerror", lambda e: errores.append(str(e))); pagina.on("console", lambda m: errores.append(m.text) if m.type == "error" else None)
+    for g, r in resultados:
+        res = a.resultado(r["uid"])
+        pagina.evaluate("r => abrirPestana('res:' + r.uid, r)", res)
+        pagina.wait_for_selector(".js-plotly-plot", timeout=8000)
+        n = pagina.evaluate("g => [...document.querySelectorAll('.js-plotly-plot')].filter(d => d.data && d.data.length && d.offsetParent !== null).length", g)
+        assert n >= 1, g
+    assert not errores, errores

@@ -1,4 +1,4 @@
-"""A6: las gráficas de prioridad alta (12 tipos) ya son editables desde v0.25; las de prioridad media esperan confirmación del usuario."""
+"""A6: las gráficas de prioridad alta (12 tipos) ya son editables desde v0.25; las de prioridad media van por tandas (ver test_graficas_media.py)."""
 
 def test_a6_resultado_viejo_avisa_que_la_grafica_es_fija(pagina):
     """A6 (pendiente de v0.25): un resultado sin especificación de gráfica editable indica cómo obtenerla."""
