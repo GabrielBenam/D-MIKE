@@ -50,6 +50,7 @@ app/nucleo/auditoria.py
 app/nucleo/catalogo.py
 app/nucleo/confirmacion.py
 app/nucleo/corridas.py
+app/nucleo/decisiones.py
 app/nucleo/disenos.py
 app/nucleo/hoja.py
 app/nucleo/importar.py
@@ -158,6 +159,7 @@ pruebas/test_e3_6_region.py
 pruebas/test_e3_7_omitido.py
 pruebas/test_e3_8_auditoria.py
 pruebas/test_e3_9_confirmacion.py
+pruebas/test_e4_decisiones.py
 pruebas/test_estadistica.py
 pruebas/test_exportar_catalogo.py
 pruebas/test_factorial.py

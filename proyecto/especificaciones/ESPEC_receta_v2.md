@@ -267,3 +267,9 @@ Concreta la sección 8 (Decisión 5).
 
 - En modo real, `RSM` solo analiza la respuesta de un diseño de D-MIKE o una segunda respuesta medida en las mismas corridas (se liga por los nombres de los factores). En demostración no se bloquea. El optimizador solo usa modelos `RSM` guardados.
 - Un plan de confirmación puede no pertenecer a un diseño (`design_id` nulo): se registra y se compara igual y se ve en la sección «Planes de confirmación» de «Diseños del proyecto».
+
+## 20. Entrega 4 — decisiones y historial (implementada después del cierre de 0.29.0)
+
+- `_decisiones` (en el `.dmike`): `{id, tipo, motivo, design_id, evidencia, fecha}`. Tipos: `mejora_sin_doe` (justificación obligatoria) y `segundo_doe` (solo con respuestas y análisis guardado del diseño base; la evidencia se copia en la decisión). No se borran ni se editan.
+- Paquete de avance: clave opcional `decisiones` con `{id, tipo, design_id}`; el motivo no viaja.
+- Historial de cambios: lectura de los registros existentes; no agrega almacenamiento.
