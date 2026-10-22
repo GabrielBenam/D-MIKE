@@ -14,7 +14,7 @@ from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_en
 import json, os
 from datetime import datetime
 
-VERSION = "0.28.0"
+VERSION = "0.29.0"
 NOMBRE_TIPO = {"num": "numérico", "texto": "texto", "fecha": "fecha"}
 
 

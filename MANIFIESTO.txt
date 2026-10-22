@@ -115,7 +115,7 @@ proyecto/artefactos/diagnostico/index.html
 proyecto/artefactos/guia_dmike.html
 proyecto/artefactos/tablero.plantilla.html
 proyecto/artefactos/visor.plantilla.html
-proyecto/catalogo/catalogo_dmike_0.28.0.json
+proyecto/catalogo/catalogo_dmike_0.29.0.json
 proyecto/especificaciones/ESPEC_flujo_real_dmaic.md
 proyecto/especificaciones/ESPEC_manual_v026.md
 proyecto/especificaciones/ESPEC_receta_v2.md
@@ -146,6 +146,7 @@ pruebas/test_capturas_manual.py
 pruebas/test_catalogo.py
 pruebas/test_compilacion.py
 pruebas/test_doe.py
+pruebas/test_e2e_c_d.py
 pruebas/test_e3_1_destructivo.py
 pruebas/test_e3_2_identidad.py
 pruebas/test_e3_3_respuestas.py
