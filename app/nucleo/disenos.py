@@ -157,6 +157,19 @@ def parse_limites(texto, k):
     return lim
 
 
+def puntos_fuera_region(hoja, info, clave, lim):
+    """Descripciones de los puntos que hay AHORA en la hoja fuera de la región lim ([(mín, máx)] por factor): «RunId: factor = valor fuera de [mín, máx]».
+    Una celda vacía en un factor cuenta como fuera. Supone que las columnas OrdenEst y de factores existen (quien llama lo comprueba)."""
+    cols = columnas(hoja, info); ids, _ = run_ids(hoja, info, clave); fuera = []
+    for i, r in enumerate(ids):
+        if not r: continue
+        for q, jf in enumerate(cols["factores"]):
+            v = _num(hoja, jf, i)
+            if v is None or v < lim[q][0] - 1e-9 * max(1.0, abs(lim[q][0])) or v > lim[q][1] + 1e-9 * max(1.0, abs(lim[q][1])):
+                fuera.append(f"{r}: {info['factores'][q]['nombre']} = {'vacío' if v is None else f'{v:.6g}'} fuera de [{lim[q][0]:g}, {lim[q][1]:g}]")
+    return fuera
+
+
 def declarar_limites(proyecto, hoja, design_id, texto, ahora=None):
     """Declara (o cambia) la región autorizada de un diseño que ya existe. Todos sus puntos actuales deben caber en ella: si no, se rechaza y no se
     guarda nada (un diseño no se mueve; para salirse de esos niveles hay que crear otro dentro de la región). Un cambio de una región ya declarada queda
@@ -169,13 +182,7 @@ def declarar_limites(proyecto, hoja, design_id, texto, ahora=None):
         cols = columnas(hoja, info)
         if cols["orden_est"] is None or any(j is None for j in cols["factores"]):
             return "error", f"Faltan en la hoja columnas de {design_id} (OrdenEst o factores): no se puede comprobar que sus puntos caben en la región."
-        ids, _ = run_ids(hoja, info, clave); fuera = []
-        for i, r in enumerate(ids):
-            if not r: continue
-            for q, jf in enumerate(cols["factores"]):
-                v = _num(hoja, jf, i)
-                if v is None or v < lim[q][0] - 1e-9 * max(1.0, abs(lim[q][0])) or v > lim[q][1] + 1e-9 * max(1.0, abs(lim[q][1])):
-                    fuera.append(f"{r}: {info['factores'][q]['nombre']} = {'vacío' if v is None else f'{v:.6g}'} fuera de [{lim[q][0]:g}, {lim[q][1]:g}]")
+        fuera = puntos_fuera_region(hoja, info, clave, lim)
         if fuera:
             extra = f" (y {len(fuera) - 6} más)" if len(fuera) > 6 else ""
             return "error", (f"El diseño {design_id} ya tiene {len(fuera)} puntos fuera de esa región: " + "; ".join(fuera[:6]) + extra +

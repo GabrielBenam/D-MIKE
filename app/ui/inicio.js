@@ -258,8 +258,28 @@ function pedirLimites(d, recargar) {
     el("p", { class: "tb-sub" }, `Un par mínimo, máximo por factor, en este orden: ${d.factores.join(", ")}. Son la región autorizada para experimentar; todos los puntos del diseño deben caber en ella. Un diseño que ya existe no se mueve.`),
     el("label", {}, campo)), async () => { await recargar(await api().declarar_limites_diseno(d.design_id, campo.value)); return true; }, "Guardar");
 }
+const ETIQ_AUD = { cumple: "Cumple", no_cumple: "No cumple", no_evaluable: "No evaluable", no_aplica: "No aplica", aviso: "Aviso" };
+async function dialogoAuditoria(d) {
+  const r = await api().auditar_diseno(d.design_id);
+  if (r.error) { dialogo("Auditoría de " + d.design_id, el("p", {}, r.mensaje), () => true, "Cerrar"); return; }
+  const a = r.auditoria;
+  const cuerpo = el("div", { class: "ficha", id: "auditoria" },
+    el("p", { class: "tb-sub" }, `${a.design_id} · versión ${a.version_diseno} · respuestas en la hoja: ${a.respuestas}. Comprobaciones sobre lo que hay ahora en el proyecto; solo en pantalla, no viajan en el paquete de avance.`),
+    el("table", { class: "tabla-seg" }, el("thead", {}, el("tr", {}, ["Revisión", "Resultado", "Detalle", "Fuente"].map(c => el("th", {}, c)))),
+      el("tbody", {}, a.revisiones.map(x => el("tr", {}, [x.titulo, ETIQ_AUD[x.estado] || x.estado, x.detalle, x.fuente].map(c => el("td", {}, c)))))));
+  dialogo("Auditoría de " + d.design_id, cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
+}
+const OMITIBLES_UI = [["cribado", "El cribado"], ["dcc", "El diseño central compuesto (DCC)"], ["doe", "El diseño de experimentos completo"]];
+function pedirOmision(recargar) {
+  const que = el("select", {}, OMITIBLES_UI.map(([v, t]) => el("option", { value: v }, t)));
+  const motivo = el("input", { placeholder: "Motivo (obligatorio, queda registrado)", style: "width:100%", autocomplete: "off" });
+  dialogo("Omitir un paso del DOE", el("div", { class: "formulario" },
+    el("p", { class: "tb-sub" }, "Omitir no borra nada: queda registrado qué se omitió y por qué. Sin motivo no se omite."),
+    el("label", {}, "Qué se omite ", que), el("label", {}, motivo)),
+    async () => { const r = await api().omitir_paso_doe(que.value, motivo.value); if (r && r.error) { registrarSesion(r.sesion); return false; } await recargar(r); return true; }, "Omitir");
+}
 async function dialogoDisenos() {
-  const ds = await api().disenos();
+  const ds = await api().disenos(); const omis = await api().omisiones();
   const recargar = async r => { if (r && r.sesion) registrarSesion(r.sesion); document.querySelector(".velo")?.remove(); await dialogoDisenos(); };
   const cuerpo = el("div", { class: "ficha", id: "disenos" }, ds.length ? ds.map(d => {
     const mezcla = d.respuestas.version != null && d.respuestas.version !== d.version_diseno;
@@ -274,11 +294,18 @@ async function dialogoDisenos() {
         el("button", { class: "boton chico", onclick: () => pedirLimites(d, recargar) }, d.region === "declarada" ? "Cambiar límites seguros…" : "Declarar límites seguros…"),
         mezcla ? el("button", { class: "boton chico", onclick: () => pedirMotivo("Confirmar respuestas", `Declaras que las respuestas de la hoja corresponden a la versión ${d.version_diseno}. Escribe por qué.`, async m => recargar(await api().confirmar_respuestas_diseno(d.design_id, m))) }, "Confirmar que son de la versión vigente…") : "",
         el("button", { class: "boton chico", title: "Corridas en el orden en que se corren, con RunId y la respuesta en blanco", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().exportar_corridas(d.design_id)); } }, "Exportar corridas…"),
-        el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…")));
-  }) : el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos."));
+        el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…"),
+        el("button", { class: "boton chico", title: "Alias, aleatorización, restricciones, curvatura, falta de ajuste y confirmación", onclick: () => { document.querySelector(".velo")?.remove(); dialogoAuditoria(d); } }, "Auditar diseño…")));
+  }).concat([el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
+      omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
+      el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"))])
+  : [el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos."),
+     el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
+       omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
+       el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"))]);
   dialogo("Diseños del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
 }
-window.dialogoDisenos = dialogoDisenos;
+window.dialogoDisenos = dialogoDisenos; window.dialogoAuditoria = dialogoAuditoria;
 
 async function iniciar() {
   const e = await api().estado_inicial();

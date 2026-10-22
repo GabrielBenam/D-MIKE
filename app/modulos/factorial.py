@@ -184,4 +184,5 @@ class Factorial(ModuloDialogo):
         avisos = [f"{fuera} filas incompletas quedaron fuera."] if fuera else []
         if gl_e <= 0: avisos.append("Diseño sin réplicas ni puntos centrales: la significancia se estima con el método de Lenth (no hay error puro).")
         return resultado(cls.ID, f"Diseño factorial: efectos sobre {ny}", p, bl, avisos, interpretacion=interp,
-                         datos={"columnas": [yj] + xs}, png=png)
+                         datos={"columnas": [yj] + xs, "diagnostico": {"respuesta": ny, "modulo": cls.ID, "alfa": alfa, "n": int(len(y)),          # E3-8: lo que lee la auditoría del diseño
+                                                                       "curvatura_p": curva["p"] if curva is not None else None, "lof_p": None}}, png=png)
