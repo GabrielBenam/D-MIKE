@@ -169,6 +169,7 @@ pruebas/test_g4_rendimiento.py
 pruebas/test_g7_persona.py
 pruebas/test_gage_rr.py
 pruebas/test_gestion_interfaz.py
+pruebas/test_graficas_media.py
 pruebas/test_hoja.py
 pruebas/test_hoja_e2.py
 pruebas/test_hoja_interfaz.py

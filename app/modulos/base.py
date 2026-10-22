@@ -233,6 +233,28 @@ def _f(v):
     except (TypeError, ValueError):
         return None
 
+def espec_probnormal(x, titulo, xl="", etiq=None, marcar=None):
+    """Especificación interactiva de la gráfica de probabilidad normal. [GENERAL] posiciones de Benard, como Minitab. etiq/marcar (por valor, en el orden de x)
+    sirven para rotular y destacar puntos (por ejemplo los efectos significativos)."""
+    import math
+    from scipy import stats as st
+    n = len(x)
+    pares = sorted(zip([float(v) for v in x], etiq or [""] * n, marcar or [False] * n), key=lambda t: t[0])
+    q = [float(st.norm.ppf((i - 0.3) / (n + 0.4))) for i in range(1, n + 1)]
+    o = [t[0] for t in pares]; m = sum(o) / n if n else 0
+    sd = math.sqrt(sum((v - m) ** 2 for v in o) / (n - 1)) if n > 1 else 0
+    pct = [1, 5, 10, 25, 50, 75, 90, 95, 99]
+    sp = {"g": "probnormal", "titulo": titulo, "xl": xl, "x": [_f(v) for v in o], "q": q, "etiq": [t[1] for t in pares], "marcar": [bool(t[2]) for t in pares],
+          "tq": [float(st.norm.ppf(c / 100)) for c in pct], "tl": [str(c) for c in pct]}
+    if sd > 0 and n: sp["linea"] = {"x": [_f(m + q[0] * sd), _f(m + q[-1] * sd)], "q": [q[0], q[-1]]}
+    return sp
+
+
+def espec_residuos(res, aj, titulo="Residuos"):
+    """Especificación interactiva de la gráfica de residuos 4 en 1 (probabilidad normal, contra ajustados, histograma y contra orden)."""
+    return {"g": "residuos", "titulo": titulo, "pn": espec_probnormal(res, ""), "res": [_f(v) for v in res], "aj": [_f(v) for v in aj]}
+
+
 
 def b_tabla(titulo, cabeza, filas, alinear=None):
     """A4: «filas» trae el texto redondeado para mostrar; «crudas» conserva la precisión completa de cada número para exportar."""

@@ -8,7 +8,7 @@ import numpy as np
 from scipy import stats as st
 from . import registrar, doe as D, regresion as R
 from .analisis import _prob_normal
-from .base import _f
+from .base import _f, espec_probnormal
 from .base import (ErrorEntrada, columna, filas_validas, valor, figura, a_svg_png, num, p_texto, p_igual, frase_p, resultado,
                    b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO, PALETA)
 from .dialogo import ModuloDialogo
@@ -163,7 +163,7 @@ class Factorial(ModuloDialogo):
         _ef = [{"factor": f"{letras[q]}: {nombres[q]}", "niveles": [str(niveles[q][0]), str(niveles[q][1])], "medias": [_f(yf[Xf[:, q] < 0].mean()), _f(yf[Xf[:, q] > 0].mean())]} for q in range(k)]
         _in = [{"par": f"{letras[a]}{letras[b]}", "niveles": [str(niveles[a][0]), str(niveles[a][1])], "series": [{"nombre": f"{letras[b]} {niveles[b][0] if nb < 0 else niveles[b][1]}",
                  "medias": [_f(yf[(Xf[:, a] == la) & (Xf[:, b] == nb)].mean()) if np.any((Xf[:, a] == la) & (Xf[:, b] == nb)) else None for la in (-1, 1)]} for nb in (-1, 1)]} for a, b in pares]
-        bl += [b_grafica(svg_n), b_grafica(svg_e, {"g": "efectos", "titulo": f"Efectos principales para {ny}", "media": _f(yf.mean()), "efectos": _ef}),
+        bl += [b_grafica(svg_n, espec_probnormal(list(efe), f"Gráfica normal de los efectos de {ny}", "Efecto", etiq=list(terms), marcar=[t_ in sig for t_ in terms])), b_grafica(svg_e, {"g": "efectos", "titulo": f"Efectos principales para {ny}", "media": _f(yf.mean()), "efectos": _ef}),
                b_grafica(svg_i, {"g": "interaccion", "titulo": "Interacciones", "pares": _in})]
         if aliases:
             bl.append(b_tabla("Estructura de alias (efectos confundidos)", ["Término estimado", "Confundido con"],

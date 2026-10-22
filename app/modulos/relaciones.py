@@ -5,7 +5,7 @@ import numpy as np
 from scipy import stats as st
 from . import registrar, regresion as R, estadistica as E
 from .analisis import _prob_normal
-from .base import _f
+from .base import _f, espec_residuos
 from .base import (ErrorEntrada, columna, nombre_col, filas_validas, valor, figura, a_svg_png, num, p_igual, p_texto, frase_p,
                    resultado, b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO)
 from .dialogo import ModuloDialogo
@@ -179,7 +179,7 @@ class Regresion(ModuloDialogo):
                                    [["; ".join(num(t) for t in v), num(q["pred"], 5), f"{num(q['ic_media'][0], 5)} a {num(q['ic_media'][1], 5)}",
                                      f"{num(q['ip'][0], 5)} a {num(q['ip'][1], 5)}"]]))
             if fuera_rango: bloques.append(b_texto("El punto está fuera del rango de los datos: es una extrapolación y el modelo puede no valer ahí.", "aviso"))
-        bloques += [b_grafica(svg_r)]
+        bloques += [b_grafica(svg_r, espec_residuos(res, aj, f"Residuos de {ny}"))]
         if inus: bloques.append(b_tabla("Observaciones inusuales", ["Fila", "Y", "Ajustado", "Residuo estand.", "Apalancamiento", "Cook", "Motivo"], inus))
         bloques.append(b_texto("Fórmulas: 27_BB_REGRESION (REG-ESTIMACION, REG-SIGNIFICADO, REG-PRUEBAS-PARAMETROS, REG-IC, REG-PREDICCION, "
                                "REG-R2, REG-R2-AJUSTADO, REG-COOK-PRESS-DW, REG-MULTICOLINEALIDAD, REG-MULTIPLE-MATRICIAL, REG-POLINOMIAL). "
