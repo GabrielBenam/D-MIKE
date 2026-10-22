@@ -11,7 +11,7 @@ F_ALEATORIO = "No respaldado por la base: el curso no fija un criterio de aleato
 F_REGION = "Regla de D-MIKE (ESPEC_flujo, Entrega 3), no del curso: los límites seguros los declara el usuario"
 F_CURVATURA = "28_BB_SUPERFICIES_RESPUESTA: RSM-PUNTOS-CENTRALES"
 F_LOF = "27_BB_REGRESION: REG-FALTA-AJUSTE (28_BB RSM-PRUEBAS-2DO-ORDEN)"
-F_CONFIRMACION = "ESPEC_flujo_real_dmaic, sección 3 y criterio 13; el plan se registra en E3-9"
+F_CONFIRMACION = "ESPEC_flujo_real_dmaic, sección 3 y criterios 11 y 13: el plan, el criterio de éxito y el número de corridas los define el usuario"
 CAUTELA = ("Una interacción confundida con otra no se interpreta como causal: el análisis no puede atribuir el efecto a una sola de las dos (cautela de ESPEC_flujo).")
 
 
@@ -99,8 +99,16 @@ def _diagnostico(proyecto, info, n_resp):
                 "no se detecta falta de ajuste", "hay falta de ajuste: el modelo no describe bien la superficie")]
 
 
-def _confirmacion(proyecto, info):
-    return _rev("confirmacion", "Confirmación", "aviso", "No hay plan de confirmación registrado.", F_CONFIRMACION)
+def _confirmacion(proyecto, info, design_id):
+    from . import confirmacion as CF
+    t = "Confirmación"; ps = CF.planes(proyecto, design_id)
+    if not ps: return _rev("confirmacion", t, "aviso", "No hay plan de confirmación registrado.", F_CONFIRMACION)
+    det = []
+    for p_ in ps:
+        n = len(p_["observados"])
+        det.append(f"{p_['id']} ({CF.TIPOS[p_['tipo']]}): {n} de {p_['n_corridas']} observaciones" + ("" if n >= p_["n_corridas"] else "; faltan por capturar"))
+    completo = all(len(p_["observados"]) >= p_["n_corridas"] for p_ in ps)
+    return _rev("confirmacion", t, "cumple" if completo else "aviso", "Plan registrado. " + "; ".join(det) + ". La comparación observado menos predicho está en «Confirmación» de este diseño.", F_CONFIRMACION)
 
 
 def auditar(proyecto, hoja, design_id):
@@ -109,7 +117,7 @@ def auditar(proyecto, hoja, design_id):
         ident = DIS.identidad(info, clave)
         if ident["design_id"] != design_id: continue
         n_resp, _ = DIS.estado_respuestas(hoja, info)
-        rev = [_alias(info), _aleatorizacion(hoja, info), _restricciones(hoja, info, clave)] + _diagnostico(proyecto, info, n_resp) + [_confirmacion(proyecto, info)]
+        rev = [_alias(info), _aleatorizacion(hoja, info), _restricciones(hoja, info, clave)] + _diagnostico(proyecto, info, n_resp) + [_confirmacion(proyecto, info, design_id)]
         cuenta = {e: sum(1 for r in rev if r["estado"] == e) for e in ("cumple", "no_cumple", "no_evaluable", "no_aplica", "aviso")}
         return {"design_id": design_id, "version_diseno": ident["version_diseno"], "respuestas": n_resp, "revisiones": rev, "resumen": cuenta}, None
     return None, f"No existe el diseño {design_id}."

@@ -199,4 +199,9 @@ class Regresion(ModuloDialogo):
         avisos = [f"{fuera} filas incompletas quedaron fuera."] if fuera else []
         if n < 15: avisos.append(f"Hay {n} observaciones; el curso pide al menos 15 para Durbin-Watson (árbol de diagnóstico).")
         return resultado(cls.ID, f"Regresión de {ny} contra {', '.join(nx)}" + (f" (grado {grado})" if grado > 1 else ""), p, bloques, avisos,
-                         datos={"columnas": [yj] + xs}, png=png, supuestos=supuestos, interpretacion=interp)
+                         datos={"columnas": [yj] + xs,
+                                # E3-9: solo la regresión simple (un predictor, grado 1) respalda el intervalo de predicción de un plan de confirmación (REG-PREDICCION)
+                                **({"modelo_reg": {"respuesta": ny, "predictor": nx[0], "n": n, "alfa": alfa, "tc": m["tc"], "mce": m["mce"], "constante": m["constante"],
+                                                   "b": [float(v) for v in m["b"]], "xtx_inv": [[float(v) for v in f] for f in m["xtx_inv"]],
+                                                   "x_min": min(r[0] for r in X0), "x_max": max(r[0] for r in X0)}} if len(xs) == 1 and grado == 1 else {})},
+                         png=png, supuestos=supuestos, interpretacion=interp)
