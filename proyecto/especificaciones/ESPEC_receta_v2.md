@@ -257,3 +257,8 @@ Concreta la sección 8 (Decisión 5).
 - `Api.auditar_diseno(design_id)`: seis revisiones (alias, aleatorización, restricciones, curvatura, falta de ajuste, confirmación), cada una con `estado`, `detalle` y `fuente`. Solo en pantalla: no viaja en el paquete de avance.
 - Un diseño nuevo guarda `aleatorizado`, `semilla` y `orden_creacion`; `RSM` y `FACTORIAL` guardan `datos.diagnostico` (`respuesta`, `alfa`, `curvatura_p`, `lof_p`). Claves nuevas y opcionales: los diseños y resultados anteriores se auditan como «no evaluable» donde falta el dato.
 - Sin respuestas capturadas no se muestra ningún valor p. No hay umbrales propios: la significancia es la del análisis que se lee.
+
+## 19.5 Plan de confirmación (E3-9, implementada en el camino a 0.29.0)
+
+- Plan: `tipo` (`confirmacion` o `vigilancia`), `n_corridas`, `criterio_exito`, `condiciones`, `predicho` (valor, origen, `resultado_uid` opcional, `tipo_modelo`) y `observados`. Todo lo define el usuario; D-MIKE no propone tamaño de muestra ni criterio de éxito. Vive en el `.dmike` como `_confirmaciones`; no viaja en la receta ni en el paquete de avance.
+- Comparación: observado menos predicho siempre. Intervalo de predicción individual solo con regresión simple (27_BB REG-PREDICCION); en cualquier otro modelo, «no respaldado» y sin veredicto.
