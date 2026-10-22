@@ -127,3 +127,18 @@ def test_interfaz_registra_un_plan_y_compara(pagina):
     assert pagina.api.planes_confirmacion()[0]["observados"] == [54.0, 56.0]
     pagina.click("#disenos button:has-text('Comparar')")
     expect(pagina.locator("#comparacion")).to_contain_text("Diferencia media (observado − predicho): 0"); expect(pagina.locator("#comparacion")).to_contain_text("No respaldado")
+
+
+def test_plan_sin_diseno_aparece_en_la_vista_de_planes(pagina):
+    from playwright.sync_api import expect
+    pagina.reload(); pagina.wait_for_selector("body[data-listo='1']"); pagina.evaluate("document.getElementById('inicio') && document.getElementById('inicio').remove()")
+    pagina.evaluate("ACCIONES_UI.disenos_dialogo()")
+    expect(pagina.locator("#planes-confirmacion")).to_contain_text("No hay planes de confirmación registrados.")           # también sin diseños
+    pagina.click("#planes-confirmacion button:has-text('Plan sin diseño')")
+    d = pagina.locator(".dialogo").last
+    d.locator("input[name='n_corridas']").fill("3"); d.locator("input[name='criterio']").fill("Media dentro de 1"); d.locator("input[name='condiciones']").fill("Cambio de proveedor")
+    d.locator("input[name='origen']").fill("Análisis de capacidad previo"); d.locator("input[name='predicho']").fill("12.5"); d.locator(".primario").click()
+    expect(pagina.locator("#planes-confirmacion")).to_contain_text("CONF-001"); expect(pagina.locator("#planes-confirmacion")).to_contain_text("sin diseño")
+    assert pagina.api.planes_confirmacion()[0]["design_id"] is None
+    pagina.click("#planes-confirmacion button:has-text('Comparar')")
+    expect(pagina.locator("#comparacion")).to_contain_text("Valor predicho: 12.5")

@@ -277,11 +277,11 @@ async function pedirPlanConfirmacion(d, recargar) {
   const de = el("select", { name: "resultado" }, [el("option", { value: "" }, "Lo escribo yo (modelo de superficie, múltiple u otro)")].concat(regs.map(r => el("option", { value: r.uid }, `Regresión: ${r.titulo} (${r.fecha})`))));
   const f = { n: campo("n_corridas", "Número de corridas (lo defines tú)"), criterio: campo("criterio", "Criterio de éxito (lo defines tú)"), cond: campo("condiciones", "Condiciones: lote, equipo, ajustes"),
               origen: campo("origen", "De dónde sale el valor predicho"), pred: campo("predicho", "Valor predicho (si lo escribes tú)"), x0: campo("x0", "Valor del predictor en la confirmación (solo regresión simple)") };
-  dialogo("Plan de confirmación de " + d.design_id, el("div", { class: "formulario" },
+  dialogo(d ? "Plan de confirmación de " + d.design_id : "Plan de confirmación sin diseño", el("div", { class: "formulario" },
     el("p", { class: "tb-sub" }, "D-MIKE no propone el tamaño de muestra ni el criterio de éxito: los defines tú. El intervalo de predicción solo se calcula con una regresión simple (27_BB REG-PREDICCION)."),
     el("label", {}, "Tipo ", tipo), el("label", {}, f.n), el("label", {}, f.criterio), el("label", {}, f.cond), el("label", {}, "El valor predicho sale de ", de),
     el("label", {}, f.origen), el("label", {}, f.pred), el("label", {}, f.x0)),
-    async () => { const r = await api().registrar_plan_confirmacion(tipo.value, f.n.value, f.criterio.value, f.cond.value, f.origen.value, d.design_id, f.pred.value, de.value, f.x0.value);
+    async () => { const r = await api().registrar_plan_confirmacion(tipo.value, f.n.value, f.criterio.value, f.cond.value, f.origen.value, d ? d.design_id : null, f.pred.value, de.value, f.x0.value);
       if (r && r.error) { registrarSesion(r.sesion); return false; } await recargar(r); return true; }, "Registrar plan");
 }
 async function dialogoComparacion(id) {
@@ -316,7 +316,16 @@ function pedirOmision(recargar) {
 async function dialogoDisenos() {
   const ds = await api().disenos(); const omis = await api().omisiones(); const planes = await api().planes_confirmacion();
   const recargar = async r => { if (r && r.sesion) registrarSesion(r.sesion); document.querySelector(".velo")?.remove(); await dialogoDisenos(); };
-  const cuerpo = el("div", { class: "ficha", id: "disenos" }, ds.length ? ds.map(d => {
+  const seccionPlanes = el("div", { class: "tb-def", id: "planes-confirmacion" }, el("h4", {}, "Planes de confirmación"),
+    planes.length ? el("table", { class: "tabla-seg" }, el("thead", {}, el("tr", {}, ["Plan", "Tipo", "Diseño", "Observaciones", ""].map(h => el("th", {}, h)))),
+      el("tbody", {}, planes.map(p => el("tr", {}, [p.id, p.tipo === "vigilancia" ? "Vigilancia" : "Confirmación", p.design_id || "sin diseño", `${p.observados.length} de ${p.n_corridas}`].map(x => el("td", {}, x)).concat([el("td", {},
+        el("button", { class: "boton chico", onclick: () => pedirObservados(p, recargar) }, "Capturar observaciones…"),
+        el("button", { class: "boton chico", onclick: () => { document.querySelector(".velo")?.remove(); dialogoComparacion(p.id); } }, "Comparar…"))]))))) : el("p", { class: "vacio" }, "No hay planes de confirmación registrados."),
+    el("button", { class: "boton chico", title: "Un plan que no pertenece a un diseño de D-MIKE (por ejemplo, un cambio sin DOE)", onclick: () => pedirPlanConfirmacion(null, recargar) }, "Plan sin diseño…"));
+  const seccionOmis = el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
+    omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
+    el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"));
+  const cuerpo = el("div", { class: "ficha", id: "disenos" }, (ds.length ? ds.map(d => {
     const mezcla = d.respuestas.version != null && d.respuestas.version !== d.version_diseno;
     return el("div", { class: "tb-def" },
       el("h4", {}, `${d.design_id} · versión ${d.version_diseno} · ${d.corridas ?? "?"} corridas`),
@@ -331,17 +340,8 @@ async function dialogoDisenos() {
         el("button", { class: "boton chico", title: "Corridas en el orden en que se corren, con RunId y la respuesta en blanco", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().exportar_corridas(d.design_id)); } }, "Exportar corridas…"),
         el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…"),
         el("button", { class: "boton chico", title: "Alias, aleatorización, restricciones, curvatura, falta de ajuste y confirmación", onclick: () => { document.querySelector(".velo")?.remove(); dialogoAuditoria(d); } }, "Auditar diseño…"),
-        el("button", { class: "boton chico", onclick: () => pedirPlanConfirmacion(d, recargar) }, "Plan de confirmación…")),
-      ...planes.filter(p => p.design_id === d.design_id).map(p => el("p", {}, `${p.id} · ${p.tipo === "vigilancia" ? "vigilancia" : "confirmación"} · ${p.observados.length} de ${p.n_corridas} observaciones `,
-        el("button", { class: "boton chico", onclick: () => pedirObservados(p, recargar) }, "Capturar observaciones…"),
-        el("button", { class: "boton chico", onclick: () => { document.querySelector(".velo")?.remove(); dialogoComparacion(p.id); } }, "Comparar…"))));
-  }).concat([el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
-      omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
-      el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"))])
-  : [el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos."),
-     el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
-       omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
-       el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"))]);
+        el("button", { class: "boton chico", onclick: () => pedirPlanConfirmacion(d, recargar) }, "Plan de confirmación…")));
+  }) : [el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos.")]).concat([seccionPlanes, seccionOmis]));
   dialogo("Diseños del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
 }
 window.dialogoDisenos = dialogoDisenos; window.dialogoAuditoria = dialogoAuditoria;

@@ -262,3 +262,8 @@ Concreta la sección 8 (Decisión 5).
 
 - Plan: `tipo` (`confirmacion` o `vigilancia`), `n_corridas`, `criterio_exito`, `condiciones`, `predicho` (valor, origen, `resultado_uid` opcional, `tipo_modelo`) y `observados`. Todo lo define el usuario; D-MIKE no propone tamaño de muestra ni criterio de éxito. Vive en el `.dmike` como `_confirmaciones`; no viaja en la receta ni en el paquete de avance.
 - Comparación: observado menos predicho siempre. Intervalo de predicción individual solo con regresión simple (27_BB REG-PREDICCION); en cualquier otro modelo, «no respaldado» y sin veredicto.
+
+## 19.6 Análisis sin diseño de D-MIKE y planes sin diseño (después del cierre de 0.29.0)
+
+- En modo real, `RSM` solo analiza la respuesta de un diseño de D-MIKE o una segunda respuesta medida en las mismas corridas (se liga por los nombres de los factores). En demostración no se bloquea. El optimizador solo usa modelos `RSM` guardados.
+- Un plan de confirmación puede no pertenecer a un diseño (`design_id` nulo): se registra y se compara igual y se ve en la sección «Planes de confirmación» de «Diseños del proyecto».

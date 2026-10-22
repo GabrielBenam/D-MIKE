@@ -226,6 +226,10 @@ class Rsm(ModuloDialogo):
         bajos, altos = [b for b, _ in niveles], [a for _, a in niveles]
         Xc = [D.a_codificado(r, bajos, altos) for r in X]
         region = DIS.region_del_modelo(proyecto, ny, nombres)          # E3-6: región autorizada (límites seguros del diseño)
+        if region["estado"] == "sin_diseno":                           # decisión del usuario (22/10/2026): en un proyecto real no se analiza una superficie sin diseño de D-MIKE
+            raise ErrorEntrada(f"En un proyecto real el análisis de superficie de respuesta solo corre sobre la respuesta de un diseño creado en D-MIKE, y «{ny}» no lo es. "
+                               "Crea el diseño en Estadística > Diseño de experimentos, corre los experimentos e importa las respuestas por RunId (Importar respuestas del diseño). "
+                               "Así el análisis conoce la región autorizada y D-MIKE puede decir qué recomendar y qué no.")
         sin_reco = region["estado"] == "no_declarada"                  # modo real, diseño de D-MIKE sin región: se analiza, no se recomienda
         def en_region(orig):
             return all(l is None or l[0] - 1e-9 * max(1.0, abs(l[0])) <= v <= l[1] + 1e-9 * max(1.0, abs(l[1])) for v, l in zip(orig, region["limites"]))
@@ -394,7 +398,6 @@ class Rsm(ModuloDialogo):
         avisos = [f"{fuera} filas incompletas quedaron fuera (corridas sin respuesta)."] if fuera else []
         avisos += avisos_region
         if sin_reco: avisos.append("Región autorizada no declarada (modo real): el análisis corre, pero no se recomiendan parámetros hasta declarar los límites seguros del diseño.")
-        if region["estado"] == "sin_diseno": avisos.append("Esta respuesta no viene de un diseño de D-MIKE: no hay región autorizada que comprobar. Las predicciones fuera de la región experimentada son solo una guía.")
         if retenidos: avisos.append("Se conservaron por jerarquía los términos lineales: " + ", ".join(retenidos) + ".")
         if desconocidos: avisos.append("No se reconocieron estos términos a quitar: " + ", ".join(desconocidos) + ".")
         if not diseno and not p.get("niveles"):

@@ -130,3 +130,31 @@ def test_resultado_anterior_sin_region_se_sigue_optimizando(tmp_path):
     a = monta(tmp_path); assert rsm(a)["error"] is None
     a.proyecto.resultados[-1]["datos"]["modelo_rsm"].pop("region")                                  # resultado guardado antes de 0.29
     r = _opt(a); assert r["error"] is None and any((b.get("titulo") or "") == "Ajuste óptimo de los factores" for b in r["resultado"]["bloques"])
+
+
+# ---------- decisión del usuario (22/10/2026): sin diseño de D-MIKE no se analiza la superficie en un proyecto real ----------
+def _pegado(demo=False):
+    a = Api()
+    if demo: MD.fijar(a.proyecto, MD.DEMO, MD.DECLARADO)
+    a.pegar(-1, 0, "A\tB\tY\n" + "\n".join(f"{x}\t{z}\t{10 + x - z * 0.5 + 0.01 * (x * z)}" for x in (1, 2, 3) for z in (1, 2, 3)))
+    return a
+
+
+def test_real_sin_diseno_de_dmike_bloquea_el_analisis_de_superficie_con_la_salida():
+    a = _pegado(); r = a.ejecutar_modulo("RSM", {"y": 2, "xs": [0, 1], "modelo": "lineal"})
+    t = r["sesion"][-1]["texto"]
+    assert r["error"] == "entrada" and "solo corre sobre la respuesta de un diseño creado en D-MIKE" in t and "Importar respuestas del diseño" in t and not a.resultados()
+
+
+def test_el_bloqueo_no_aplica_en_demostracion():
+    a = _pegado(demo=True); assert a.ejecutar_modulo("RSM", {"y": 2, "xs": [0, 1], "modelo": "lineal"})["error"] is None
+
+
+def test_una_segunda_respuesta_en_las_corridas_del_diseno_si_se_analiza(tmp_path):
+    a = monta(tmp_path); a.pegar(-1, len(a.hoja.columnas), "Costo\n" + "\n".join(str(20 + i) for i in range(a.hoja.n)))
+    r = a.ejecutar_modulo("RSM", {"y": col(a, "Costo"), "xs": [col(a, "Temp"), col(a, "Tiempo")], "modelo": "lineal"}); assert r["error"] is None, r["sesion"][-1]["texto"]
+    assert a.proyecto.resultados[-1]["datos"]["modelo_rsm"]["region"]["estado"] == "declarada"                  # hereda la región del diseño por sus factores
+
+
+def test_el_optimizador_queda_bloqueado_por_consecuencia():
+    a = _pegado(); assert a.ejecutar_modulo("OPTIMIZADOR", {"r1": ""})["error"] == "entrada"
