@@ -237,3 +237,11 @@ Concreta la sección 8 (Decisión 5).
 - Región «no_declarada»: marca de un diseño sin región (anterior a 0.29, de una receta anterior, o de demostración sin límites). No invalida el diseño. En un proyecto real genera la tarea «declarar límites seguros» (`auto:limites:<design_id>`), derivada al consultar el seguimiento y el paquete de avance y nunca guardada; desaparece al declarar la región.
 - Declarar después: todos los puntos que el diseño ya tiene deben caber en la región; si no, se rechaza y no se guarda nada (un diseño existente no se mueve). Un cambio de una región ya declarada queda en `historial_limites`.
 - Todo diseño nuevo en modo real exige su propia región; no se bloquea crear uno nuevo porque otro diseño tenga la región sin declarar (así las recetas anteriores que crean varios diseños siguen funcionando). Que el análisis y el optimizador no recomienden parámetros fuera de la región, ni sin región en modo real, es E3-6.
+
+## 19.2 Región autorizada en el análisis (E3-6, implementada en el camino a 0.29.0)
+
+- `RSM` guarda en `datos.modelo_rsm.region` el estado de la región de su respuesta (`declarada`, `no_declarada`, `sin_diseno` o `no_aplica`) y los límites por factor en unidades reales. `no_aplica`: demostración o sin proyecto (la región es opcional). `sin_diseno`: la respuesta no viene de un diseño de D-MIKE; no hay a qué declarar la región y el análisis corre como antes con un aviso.
+- Punto estacionario: con región declarada y el punto fuera, se reporta con su tipo y «no se recomienda». Con la región no declarada en modo real, se reporta como resultado del modelo y no como recomendación.
+- Ruta de ascenso (28_BB RSM-ASCENSO): se muestran los pasos hasta el último que cabe en la región; el aviso nombra el paso que la cruzaría. Con la región no declarada en modo real no se muestra la ruta.
+- Optimizador: busca en la intersección de la región elegida con la región autorizada de cada modelo; sin intersección da error. Con la región no declarada en modo real no emite combinación sugerida.
+- Los resultados guardados antes de 0.29 no traen `region` y se tratan como antes.

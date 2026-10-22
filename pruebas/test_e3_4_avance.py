@@ -1,6 +1,6 @@
 """E3-4 (parte 2): el paquete de avance lleva el design_id formal y la versión de cada diseño (ESPEC_receta_v2 sección 13: «el design_id formal llega con la
 Entrega 3»). Son claves nuevas y opcionales: avance_version sigue en 1. Datos SINTÉTICOS."""
-import json
+import json, re
 from pathlib import Path
 from app.api import Api
 from app.nucleo import receta as RC
@@ -43,7 +43,7 @@ def test_el_paquete_refleja_la_version_registrada_y_sigue_siendo_solo_estado(tmp
     assert d["design_id"] == "DIS-Resistencia" and d["version_diseno"] == 2 and "huella_diseno" not in d and "historial_versiones" not in d
     assert set(d) == {"id", "estado", "corridas", "respuestas_capturadas", "design_id", "version_diseno"}         # solo estado: ni niveles ni huellas ni respuestas
     texto = json.dumps(pkg, ensure_ascii=False)
-    assert "RunId" not in texto and "140" not in texto                                                           # ni identificadores de corrida ni niveles
+    assert "RunId" not in texto and not re.search(r"\b140\b", texto)                                              # ni identificadores de corrida ni niveles (la palabra completa: una huella hexadecimal puede contener «140» por azar)
 
 
 def test_demostracion_tambien_lo_trae_y_la_huella_del_paquete_se_comprueba(tmp_path):
