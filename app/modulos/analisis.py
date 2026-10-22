@@ -3,7 +3,7 @@ import math
 from collections import OrderedDict
 from scipy import stats as st
 from . import registrar, estadistica as E
-from .base import _f, espec_probnormal
+from .base import _f, espec_probnormal, espec_residuos
 from .base import (ErrorEntrada, columna, nombre_col, filas_validas, valor, figura, a_svg_png, num, p_texto, p_igual, frase_p,
                    resultado, b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO)
 from .dialogo import ModuloDialogo
@@ -127,8 +127,8 @@ class Anova(ModuloDialogo):
             b_texto(concl, "conclusion"), *bloques_txt,
             b_tabla("Tabla ANOVA", ["Fuente", "GL", "SC", "CM", "F", "F de tablas", "Valor p"], tabla),
             b_tabla("Medias por nivel", ["Nivel", "N", "Media", "Desv. est."], medias_tab),
-            b_grafica(svg),
-            b_grafica(svg_res),
+            b_grafica(svg, {"g": "caja", "titulo": f"{nom} por {fnom}", "yl": nom, "grupos": {k: [_f(v) for v in grupos[k]] for k in ks}}),
+            b_grafica(svg_res, espec_residuos(res, [a_ for _, a_ in resid], f"Residuos de {nom}")),
             b_texto("Fórmulas: 17_GB_ANALIZAR, ANOVA-QUE-ES y ANOVA-TIPOS; F de tablas: 20_GB_TABLA_F. SC = suma de "
                     "cuadrados, CM = cuadrado medio, GL = grados de libertad.")],
             avisos=avisos, datos={"columnas": cols}, png=png)

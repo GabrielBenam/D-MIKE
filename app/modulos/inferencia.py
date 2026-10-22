@@ -7,6 +7,7 @@ import numpy as np
 from scipy import stats as st, optimize
 from . import registrar, estadistica as E
 from .analisis import _prob_normal
+from .base import _f, espec_residuos
 from .base import (ErrorEntrada, columna, filas_validas, valor, figura, a_svg_png, num, p_igual, p_texto, frase_p, resultado,
                    b_grafica, b_tabla, b_texto, NARANJA, TINTA, SUAVE, CLARO, PALETA)
 from .dialogo import ModuloDialogo
@@ -305,6 +306,8 @@ class Anova2(ModuloDialogo):
         axs[2].set_xticks(range(len(r["la"]))); axs[2].set_xticklabels(r["la"], fontsize=7); axs[2].legend(fontsize=6, title=nb, title_fontsize=6, frameon=False)
         axs[2].set_title("Interacción (líneas no paralelas = interacción)", fontsize=8)
         svg, png = a_svg_png(fig)
+        _ef2 = [{"factor": nm_, "niveles": [str(l) for l in lv], "medias": [_f(np.mean([yi for yi, v in zip(y, vals) if v == l])) for l in lv]} for lv, vals, nm_ in ((r["la"], a, na), (r["lb"], b, nb))]
+        _in2 = [{"par": f"{na} × {nb}", "niveles": [str(l) for l in r["la"]], "series": [{"nivel": str(lb_), "medias": [_f(np.mean(celdas[(la_, lb_)])) for la_ in r["la"]]} for lb_ in r["lb"]]}]
         fig, ax4 = figura(9.6, 5.4, nrows=2, ncols=2)
         _prob_normal(ax4[0][0], list(r["residuos"]), "Probabilidad normal de residuos")
         ax4[0][1].scatter(r["ajustados"], r["residuos"], s=12, color=NARANJA); ax4[0][1].axhline(0, color=TINTA, lw=1); ax4[0][1].set_title("Residuos contra ajustados")
@@ -318,9 +321,10 @@ class Anova2(ModuloDialogo):
         interp.append("Para saber qué niveles difieren, usa Estadística > Comparaciones de Tukey con cada factor.")
         ad = E.anderson_darling(list(r["residuos"])) if r["n"] >= 8 else None
         return resultado(cls.ID, f"ANOVA de dos factores: {ny} contra {na} y {nb}", p, [
-            b_grafica(svg), b_tabla("Análisis de varianza", ["Fuente", "GL", "SC", "CM", "F", f"F de tablas ({alfa:g})", "Valor p"], tabla),
+            b_grafica(svg, {"g": "interaccion", "titulo": f"Interacción {na} × {nb} (y efectos principales)", "pares": _in2}) if len(r["la"]) > 1 else b_grafica(svg),
+            b_tabla("Análisis de varianza", ["Fuente", "GL", "SC", "CM", "F", f"F de tablas ({alfa:g})", "Valor p"], tabla),
             b_tabla("Resumen del modelo", ["S", "R²", "R² ajustado"], [[num(r["s"], 5), f"{100 * r['r2']:.2f}%", f"{100 * r['r2_aj']:.2f}%"]]),
-            b_grafica(svg_r), b_texto("Regla de decisión de 17_GB ANOVA-QUE-ES: si F calculada < F de tablas (valor p > alfa) no se rechaza H0. Tipos de ANOVA: 17_GB ANOVA-TIPOS. "
+            b_grafica(svg_r, espec_residuos(list(r["residuos"]), list(r["ajustados"]), f"Residuos de {ny}")), b_texto("Regla de decisión de 17_GB ANOVA-QUE-ES: si F calculada < F de tablas (valor p > alfa) no se rechaza H0. Tipos de ANOVA: 17_GB ANOVA-TIPOS. "
                                        "No respaldado por la base: la codificación de efectos y las sumas de cuadrados ajustadas en diseños desbalanceados.")],
             avisos, datos={"columnas": [yj, aj, bj]}, png=png, interpretacion=interp,
             supuestos=[("Residuos normales", "Anderson-Darling", p_igual(ad["p"], .005) if ad else "pocos datos"),
@@ -380,7 +384,9 @@ class Tukey(ModuloDialogo):
         ax.set_title(f"IC simultáneos de {100 * (1 - alfa):.0f}% (los que no cruzan el cero difieren)", fontsize=8)
         svg, png = a_svg_png(fig)
         return resultado(cls.ID, f"Tukey: {_nom(hoja, yj)} por {_nom(hoja, fj)}", p, [
-            b_tabla("Agrupación (niveles que no comparten letra son distintos)", ["Nivel", "N", "Media", "Grupo"], ag), b_grafica(svg),
+            b_tabla("Agrupación (niveles que no comparten letra son distintos)", ["Nivel", "N", "Media", "Grupo"], ag),
+            b_grafica(svg, {"g": "tukey", "titulo": f"IC simultáneos de {100 * (1 - alfa):.0f}% (Tukey)", "xl": "Diferencia de medias",
+                            "pares": [{"par": f"{pp['par'][0]} - {pp['par'][1]}", "dif": _f(pp["dif"]), "lo": _f(pp["ic"][0]), "hi": _f(pp["ic"][1]), "sig": bool(pp["p"] < alfa)} for pp in t["pares"]]}),
             b_tabla("Diferencias por pares", ["Diferencia", "Diferencia de medias", "EE", f"IC simultáneo {100 * (1 - alfa):.0f}%", "t", "Valor p ajustado", "Distinta"], pr),
             b_texto(f"Método de Tukey (Tukey-Kramer con tamaños distintos), CM del error = {num(t['mce'], 5)} con {t['gl']} GL, q crítico = {num(t['q'], 4)}. " + GENERAL)],
             [f"{fuera} filas incompletas quedaron fuera."] if fuera else [], datos={"columnas": [yj, fj]}, png=png,
