@@ -220,6 +220,29 @@ def region_del_modelo(proyecto, respuesta, nombres):
     return {"estado": estado, "limites": limites}
 
 
+# ---------------- omisión justificada (E3-7) ----------------
+OMITIBLES = {"cribado": "el cribado", "dcc": "el diseño central compuesto (DCC)", "doe": "el diseño de experimentos completo"}
+
+
+def omisiones(proyecto):
+    """Omisiones registradas (id del paso, qué se omitió, motivo, fecha, origen). Registro permanente: una omisión no se borra."""
+    return [dict(x) for x in (proyecto.formatos.get("_omisiones") or []) if isinstance(x, dict)]
+
+
+def omitir(proyecto, que, motivo, id_paso=None, origen="usuario", ahora=None):
+    """Registra que el usuario omite el cribado, el DCC o el DOE completo, con su motivo (ESPEC_flujo sección 3: el motivo es obligatorio).
+    Devuelve (estado, mensaje): «omitido», «sin_cambios» (ya estaba registrado igual) o «error»."""
+    que = str(que or "").strip().lower(); motivo = str(motivo or "").strip()
+    if que not in OMITIBLES: return "error", f"Qué se omite: elige uno de {', '.join(OMITIBLES)}."
+    if not motivo: return "error", f"Para omitir {OMITIBLES[que]} escribe el motivo: queda registrado y no se puede omitir sin él."
+    id_paso = id_paso or f"manual-{que}"
+    lista = proyecto.formatos.setdefault("_omisiones", [])
+    if any(x.get("id") == id_paso and x.get("que") == que and x.get("motivo") == motivo for x in lista if isinstance(x, dict)):
+        return "sin_cambios", f"Ya estaba registrada la omisión de {OMITIBLES[que]} con ese motivo."
+    lista.append({"id": id_paso, "que": que, "motivo": motivo, "fecha": (ahora or datetime.now()).isoformat(timespec="seconds"), "origen": origen})
+    return "omitido", f"Registrada la omisión de {OMITIBLES[que]}. Motivo: {motivo}"
+
+
 # ---------------- respuestas del diseño (E3-3) ----------------
 def estado_respuestas(hoja, info):
     """(cuántas respuestas hay en la hoja, versión con la que se capturaron o None). Cuenta las celdas no vacías de la columna de respuestas

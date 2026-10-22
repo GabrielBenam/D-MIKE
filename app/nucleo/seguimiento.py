@@ -324,6 +324,7 @@ def disenos_estado(proyecto, hoja):
     design_id y version_diseno (claves nuevas y opcionales; avance_version sigue en 1)."""
     ids = (proyecto.formatos.get("_receta") or {}).get("ids") or {}; out = []
     for d in _lista(_receta_guardada(proyecto).get("disenos")):
+        if d.get("omitido"): continue                                  # los pasos omitidos salen de omisiones_estado (E3-7)
         if d.get("id") not in ids: continue
         filas = filas_diseno(hoja, d); resps = [r for r in d.get("respuestas") or [] if isinstance(r, str)]
         capt = sum(1 for r in resps if respuesta_completa(hoja, filas, r))
@@ -333,6 +334,12 @@ def disenos_estado(proyecto, hoja):
         if ident: e.update(design_id=ident["design_id"], version_diseno=ident["version_diseno"])
         out.append(e)
     return out
+
+
+def omisiones_estado(proyecto):
+    """E3-7: pasos omitidos con motivo registrado. Al paquete de avance solo viaja que se omitió y qué (no el motivo, que es texto libre del usuario)."""
+    from . import disenos as DIS
+    return [{"id": o["id"], "estado": "omitido", "que": o["que"]} for o in DIS.omisiones(proyecto)]
 
 
 def estado_ruta(proyecto, hoja, disenos=None):
@@ -369,6 +376,7 @@ def paquete_avance(proyecto, hoja):
            "analisis": [{"id": k, "modulo": e.get("modulo"), "estado": e["estado"]} for k, e in an.items()],
            "disenos": dis,
            "tareas_abiertas": [{"id": t["id"], "descripcion": _descripcion_exportable(t)} for t in _lista(proyecto.formatos.get("_tareas")) + _tareas_de_limites(proyecto) if t.get("estado") == "abierta"]}
+    if (om := omisiones_estado(proyecto)): pkg["omisiones"] = om             # clave opcional: sin omisiones el paquete queda igual que antes
     pkg["huella"] = RC.huella_receta(pkg)
     return pkg, None
 

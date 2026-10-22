@@ -245,3 +245,9 @@ Concreta la sección 8 (Decisión 5).
 - Ruta de ascenso (28_BB RSM-ASCENSO): se muestran los pasos hasta el último que cabe en la región; el aviso nombra el paso que la cruzaría. Con la región no declarada en modo real no se muestra la ruta.
 - Optimizador: busca en la intersección de la región elegida con la región autorizada de cada modelo; sin intersección da error. Con la región no declarada en modo real no emite combinación sugerida.
 - Los resultados guardados antes de 0.29 no traen `region` y se tratan como antes.
+
+## 19.3 Omisión justificada (E3-7, implementada en el camino a 0.29.0)
+
+- `disenos[].omitido`: `{"que": "cribado" | "dcc" | "doe", "motivo": "texto"}`. El motivo es obligatorio. El paso no crea diseño ni tarea de correrlo, y no necesita `limites_seguros`.
+- Registro en el `.dmike`: `_omisiones` (id del paso, qué, motivo, fecha, origen). No se borra. También se registra a mano con `Api.omitir_paso_doe`.
+- Paquete de avance: clave opcional `omisiones` con `{id, estado, que}`; el motivo no viaja.

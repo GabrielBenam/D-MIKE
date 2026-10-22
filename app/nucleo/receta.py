@@ -95,7 +95,7 @@ def errores_limites(receta, modo):
     se aceptan sin ellos (el diseño queda con región «no declarada»)."""
     err = []; exige = modo == "real" and _version(receta.get("dmike_minimo") or "0") >= _version(EXIGE_LIMITES_DESDE)
     for i, d in enumerate(receta.get("disenos") or [], 1):
-        if not isinstance(d, dict) or d.get("modulo") != "DISENO-RSM": continue
+        if not isinstance(d, dict) or d.get("modulo") != "DISENO-RSM" or d.get("omitido"): continue          # un paso omitido no crea diseño: no necesita región
         nom = d.get("id") or i; ls = d.get("limites_seguros")
         nombres = [x.strip() for x in str((d.get("parametros") or {}).get("nombres") or "").replace(";", ",").split(",") if x.strip()]
         if ls is None:
@@ -107,6 +107,19 @@ def errores_limites(receta, modo):
             if not isinstance(v, dict) or any(isinstance(v.get(c), bool) or not isinstance(v.get(c), (int, float)) for c in ("min", "max")):
                 err.append(f"limites_seguros del diseño «{nom}»: falta un {{min, max}} numérico para el factor «{n}»")
             elif v["min"] >= v["max"]: err.append(f"limites_seguros del diseño «{nom}»: el mínimo de «{n}» debe ser menor que su máximo")
+    return err
+
+
+def errores_omitido(receta):
+    """Entrega 3 (E3-7): disenos[].omitido = {"que": "cribado"|"dcc"|"doe", "motivo": "texto"}. Sin motivo no hay omisión."""
+    from .disenos import OMITIBLES
+    err = []
+    for i, d in enumerate(receta.get("disenos") or [], 1):
+        if not isinstance(d, dict) or d.get("omitido") is None: continue
+        nom = d.get("id") or i; o = d["omitido"]
+        if not isinstance(o, dict): err.append(f"omitido del paso «{nom}» debe ser un objeto con «que» y «motivo»"); continue
+        if o.get("que") not in OMITIBLES: err.append(f"omitido del paso «{nom}»: «que» debe ser uno de {', '.join(OMITIBLES)}")
+        if not isinstance(o.get("motivo"), str) or not o["motivo"].strip(): err.append(f"omitido del paso «{nom}»: falta el motivo (una omisión sin motivo registrado no se acepta)")
     return err
 
 
@@ -175,6 +188,7 @@ def validar(receta, registro, version_programa, modo=None):
     modo_efectivo = modo or MD.detectar(receta, huella_sintetica(receta))[0]
     err += errores_modo(receta, modo_efectivo)
     err += errores_limites(receta, modo_efectivo)
+    err += errores_omitido(receta)
     for paso in receta.get("disenos", []) + receta.get("analisis", []):
         if isinstance(paso, dict) and paso.get("modulo") not in registro: err.append(f"módulo desconocido: {paso.get('modulo')}")
     from ..modulos.formatos import FORMATOS
@@ -274,10 +288,14 @@ def ejecutar(api, receta, datos, actualizar=False, id_proyecto=None):
     if receta.get("hoja_sugerida") is False and not actualizar: a.hoja = Hoja()
     for mid, fase in receta.get("complementarios", []):
         if not (actualizar and a.proyecto.modulos.get(mid, {}).get("estado") == "activo"): a.proyecto.activar_modulo(mid, fase, a.catalogo)
-    dis_hojas = {d.get("hoja") for d in receta.get("disenos", [])}
+    dis_hojas = {d.get("hoja") for d in receta.get("disenos", []) if not d.get("omitido")}
     ref = {}
     # 1) diseños de experimentos primero (así las columnas quedan donde el usuario las espera) de experimentos y sus respuestas
     for d in receta.get("disenos", []):
+        if d.get("omitido"):                                          # E3-7: omisión justificada; no se crea diseño ni se agenda corrida
+            from . import disenos as DIS
+            est, msg = DIS.omitir(a.proyecto, d["omitido"].get("que"), d["omitido"].get("motivo"), id_paso=d.get("id"), origen="receta")
+            log.append(f"Paso «{d.get('id')}» omitido: {msg}" if est != "sin_cambios" else f"Paso «{d.get('id')}»: la omisión ya estaba registrada."); continue
         if actualizar and (d.get("id") in hechos_antes or any(a.hoja.indice(x) is not None for x in d.get("respuestas", []))):
             if d.get("id") in hechos_antes: ref[d["id"]] = hechos_antes[d["id"]]
             info = {"factores": [{"nombre": f} for f in (d["parametros"].get("nombres") or "").replace(";", ",").split(",") if f.strip()]}

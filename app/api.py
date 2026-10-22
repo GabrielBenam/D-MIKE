@@ -884,6 +884,16 @@ class Api:
         r["corridas"] = {"design_id": meta["design_id"], "version_diseno": meta["version_diseno"], "n": len(filas), "ruta": ruta}
         return r
 
+    def omitir_paso_doe(self, que, motivo=""):
+        """E3-7: el usuario omite el cribado, el DCC o el DOE completo con un motivo registrado (sin motivo no se omite)."""
+        estado, msg = DIS.omitir(self.proyecto, que, motivo)
+        r = self._resp(msg, "aviso" if estado == "error" else "info", error="omitir" if estado == "error" else None, hoja=False)
+        r["estado"] = estado; r["omisiones"] = DIS.omisiones(self.proyecto); return r
+
+    def omisiones(self):
+        """E3-7: omisiones justificadas registradas en el proyecto."""
+        return DIS.omisiones(self.proyecto)
+
     def declarar_limites_diseno(self, design_id, limites):
         """E3-5 parte B: declara (o cambia) la región autorizada de un diseño existente («90, 125; 5, 40»). Todos sus puntos actuales deben caber en ella."""
         estado, msg = DIS.declarar_limites(self.proyecto, self.hoja, design_id, limites)
@@ -1067,7 +1077,7 @@ class Api:
 _HOJA = ("editar", "pegar", "renombrar", "cambiar_tipo", "insertar_columna", "eliminar_columna", "insertar_fila", "eliminar_fila",
          "borrar_rango", "llenar_con", "rellenar", "insertar_filas", "eliminar_filas", "eliminar_columnas", "filtrar", "importar", "abrir_perfil",
          "ejecutar_modulo", "importar_respuestas")
-_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno", "declarar_limites_diseno"}
+_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno", "declarar_limites_diseno", "omitir_paso_doe"}
 
 
 def _con_deshacer(f, cambia_hoja):
