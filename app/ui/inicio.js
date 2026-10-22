@@ -304,6 +304,17 @@ function pedirObservados(plan, recargar) {
   dialogo("Observaciones de " + plan.id, el("div", { class: "formulario" }, el("p", { class: "tb-sub" }, `Llevas ${plan.observados.length} de ${plan.n_corridas}. Captura lo que mediste en las corridas de confirmación.`), el("label", {}, campo)),
     async () => { const r = await api().registrar_observados_confirmacion(plan.id, campo.value); if (r && r.error) { registrarSesion(r.sesion); return false; } await recargar(r); return true; }, "Guardar");
 }
+async function dialogoHistorial() {
+  const h = await api().historial_cambios();
+  dialogo("Historial de cambios", el("div", { class: "ficha", id: "historial" }, h.length ? el("table", { class: "tabla-seg" }, el("thead", {}, el("tr", {}, ["Fecha", "Qué", "Detalle", "Objeto"].map(c => el("th", {}, c)))),
+    el("tbody", {}, h.map(e => el("tr", {}, [e.fecha.replace("T", " "), e.que, e.detalle, e.objeto].map(c => el("td", {}, c)))))) : el("p", { class: "vacio" }, "Todavía no hay cambios registrados.")), () => true, "Cerrar");
+  document.querySelector(".dialogo").classList.add("ancho");
+}
+function pedirDecision(titulo, ayuda, accion, extra) {
+  const motivo = el("input", { name: "motivo", placeholder: "Justificación (obligatoria, queda registrada)", style: "width:100%", autocomplete: "off" });
+  dialogo(titulo, el("div", { class: "formulario" }, el("p", { class: "tb-sub" }, ayuda), extra || "", el("label", {}, motivo)),
+    async () => { const r = await accion(motivo.value); if (r && r.error) { registrarSesion(r.sesion); return false; } return true; }, "Registrar");
+}
 const OMITIBLES_UI = [["cribado", "El cribado"], ["dcc", "El diseño central compuesto (DCC)"], ["doe", "El diseño de experimentos completo"]];
 function pedirOmision(recargar) {
   const que = el("select", {}, OMITIBLES_UI.map(([v, t]) => el("option", { value: v }, t)));
@@ -322,6 +333,13 @@ async function dialogoDisenos() {
         el("button", { class: "boton chico", onclick: () => pedirObservados(p, recargar) }, "Capturar observaciones…"),
         el("button", { class: "boton chico", onclick: () => { document.querySelector(".velo")?.remove(); dialogoComparacion(p.id); } }, "Comparar…"))]))))) : el("p", { class: "vacio" }, "No hay planes de confirmación registrados."),
     el("button", { class: "boton chico", title: "Un plan que no pertenece a un diseño de D-MIKE (por ejemplo, un cambio sin DOE)", onclick: () => pedirPlanConfirmacion(null, recargar) }, "Plan sin diseño…"));
+  const dec = (await api().decisiones());
+  const seccionDec = el("div", { class: "tb-def", id: "decisiones" }, el("h4", {}, "Decisiones y reglas"),
+    dec.decisiones.length ? el("ul", {}, dec.decisiones.map(d => el("li", {}, `${d.id} · ${d.tipo === "segundo_doe" ? "Segundo DOE" + (d.design_id ? " desde " + d.design_id : "") : "Mejora terminada sin DOE"} (${d.fecha.slice(0, 10)}): ${d.motivo}`))) : el("p", { class: "vacio" }, "No hay decisiones registradas."),
+    el("p", { class: "tb-sub" }, dec.reglas.map(r => `${r.titulo}: ${r.regla}`).join(" · ")),
+    el("button", { class: "boton chico", onclick: () => pedirDecision("Terminar la mejora sin DOE", "Queda registrado que decidiste no hacer un DOE y por qué. D-MIKE no concluye que la mejora funciona.", async m => { const r = await api().registrar_mejora_sin_doe(m, null); if (!r.error) await recargar(r); return r; }) }, "Terminar la mejora sin DOE…"),
+    ...ds.map(d => el("button", { class: "boton chico", onclick: () => pedirDecision("Recomendar un segundo DOE desde " + d.design_id, "Solo se registra si el primer diseño ya tiene respuestas y un análisis guardado de su respuesta.", async m => { const r = await api().recomendar_segundo_doe(d.design_id, m); if (!r.error) await recargar(r); return r; }) }, "Segundo DOE desde " + d.design_id + "…")),
+    el("button", { class: "boton chico", onclick: () => { document.querySelector(".velo")?.remove(); dialogoHistorial(); } }, "Historial de cambios…"));
   const seccionOmis = el("div", { class: "tb-def" }, el("h4", {}, "Pasos omitidos"),
     omis.length ? el("ul", {}, omis.map(o => el("li", {}, `${(OMITIBLES_UI.find(x => x[0] === o.que) || [0, o.que])[1]} (${o.fecha.slice(0, 10)}): ${o.motivo}`))) : el("p", { class: "vacio" }, "No se ha omitido ningún paso."),
     el("button", { class: "boton chico", onclick: () => pedirOmision(recargar) }, "Omitir cribado, DCC o DOE…"));
@@ -341,10 +359,10 @@ async function dialogoDisenos() {
         el("button", { class: "boton chico", onclick: async () => { document.querySelector(".velo")?.remove(); await aplicar(api().importar_respuestas(null, d.design_id)); } }, "Importar respuestas…"),
         el("button", { class: "boton chico", title: "Alias, aleatorización, restricciones, curvatura, falta de ajuste y confirmación", onclick: () => { document.querySelector(".velo")?.remove(); dialogoAuditoria(d); } }, "Auditar diseño…"),
         el("button", { class: "boton chico", onclick: () => pedirPlanConfirmacion(d, recargar) }, "Plan de confirmación…")));
-  }) : [el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos.")]).concat([seccionPlanes, seccionOmis]));
+  }) : [el("p", { class: "vacio" }, "Este proyecto no tiene diseños de experimentos. Crea uno en Estadística > Diseño de experimentos.")]).concat([seccionPlanes, seccionDec, seccionOmis]));
   dialogo("Diseños del proyecto", cuerpo, () => true, "Cerrar"); document.querySelector(".dialogo").classList.add("ancho");
 }
-window.dialogoDisenos = dialogoDisenos; window.dialogoAuditoria = dialogoAuditoria;
+window.dialogoDisenos = dialogoDisenos; window.dialogoHistorial = dialogoHistorial; window.dialogoAuditoria = dialogoAuditoria;
 
 async function iniciar() {
   const e = await api().estado_inicial();
