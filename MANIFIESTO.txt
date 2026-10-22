@@ -46,6 +46,7 @@ app/modulos/superficies.py
 app/modulos/verificacion.py
 app/nucleo/__init__.py
 app/nucleo/archivo.py
+app/nucleo/auditoria.py
 app/nucleo/catalogo.py
 app/nucleo/corridas.py
 app/nucleo/disenos.py
@@ -153,6 +154,7 @@ pruebas/test_e3_5_limites.py
 pruebas/test_e3_5b_region.py
 pruebas/test_e3_6_region.py
 pruebas/test_e3_7_omitido.py
+pruebas/test_e3_8_auditoria.py
 pruebas/test_estadistica.py
 pruebas/test_exportar_catalogo.py
 pruebas/test_factorial.py

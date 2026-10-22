@@ -251,3 +251,9 @@ Concreta la sección 8 (Decisión 5).
 - `disenos[].omitido`: `{"que": "cribado" | "dcc" | "doe", "motivo": "texto"}`. El motivo es obligatorio. El paso no crea diseño ni tarea de correrlo, y no necesita `limites_seguros`.
 - Registro en el `.dmike`: `_omisiones` (id del paso, qué, motivo, fecha, origen). No se borra. También se registra a mano con `Api.omitir_paso_doe`.
 - Paquete de avance: clave opcional `omisiones` con `{id, estado, que}`; el motivo no viaja.
+
+## 19.4 Auditoría del diseño (E3-8, implementada en el camino a 0.29.0)
+
+- `Api.auditar_diseno(design_id)`: seis revisiones (alias, aleatorización, restricciones, curvatura, falta de ajuste, confirmación), cada una con `estado`, `detalle` y `fuente`. Solo en pantalla: no viaja en el paquete de avance.
+- Un diseño nuevo guarda `aleatorizado`, `semilla` y `orden_creacion`; `RSM` y `FACTORIAL` guardan `datos.diagnostico` (`respuesta`, `alfa`, `curvatura_p`, `lof_p`). Claves nuevas y opcionales: los diseños y resultados anteriores se auditan como «no evaluable» donde falta el dato.
+- Sin respuestas capturadas no se muestra ningún valor p. No hay umbrales propios: la significancia es la del análisis que se lee.

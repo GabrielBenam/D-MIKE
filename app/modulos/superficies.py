@@ -114,7 +114,9 @@ class DisenoRsm(ModuloDialogo):
         reales = [hoja.columnas[col0 + j].nombre for j in range(len(cab))]
         info = {"tipo": tipo, "factores": [{"nombre": reales[4 + j], "bajo": bajos[j], "alto": altos[j]} for j in range(k)],
                 "alfa": alfa, "respuesta": reales[-1], "bloque": reales[3], "tipo_punto": reales[2], "corridas": n,
-                "orden_est": reales[0], "orden_corrida": reales[1]}
+                "orden_est": reales[0], "orden_corrida": reales[1],
+                "aleatorizado": bool(p.get("aleatorio", True)), "semilla": int(semilla) if semilla is not None else None,          # E3-8: para auditar la aleatorización
+                "orden_creacion": [i + 1 for i in orden]}
         if lim is not None:
             info["limites_seguros"] = {info["factores"][q]["nombre"]: {"min": lim[q][0], "max": lim[q][1]} for q in range(k)}
             info["region"] = "declarada"; info["alternativa_axial_en_limites"] = usar_limites
@@ -401,7 +403,10 @@ class Rsm(ModuloDialogo):
         modelo_guardado = {"respuesta": ny, "factores": nombres, "bajos": bajos, "altos": altos, "b0": b0, "b": b.tolist(), "B": B.tolist(),
                            "limite": lim, "region": region, "terminos": [D.nombre_termino(t, nombres) for t in ts]}
         return resultado(cls.ID, f"Superficie de respuesta de {ny}", p, bloques_out, avisos, supuestos=supuestos, interpretacion=interp,
-                         datos={"columnas": [yj] + xs + ([bj] if bc else []), "modelo_rsm": modelo_guardado}, png=png)
+                         datos={"columnas": [yj] + xs + ([bj] if bc else []), "modelo_rsm": modelo_guardado,
+                                "diagnostico": {"respuesta": ny, "modulo": cls.ID, "alfa": alfa, "n": m["n"],          # E3-8: lo que lee la auditoría del diseño
+                                                "curvatura_p": next((a["p"] for a in sup["anova"] if a["fuente"] == "Curvatura"), None) if sup["con_curvatura"] else None,
+                                                "lof_p": lof["p"] if lof else None}}, png=png)
 
 
 # ---------------- optimizador ----------------

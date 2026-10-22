@@ -9,7 +9,7 @@ from .nucleo import archivo
 from .nucleo import modo as MD
 from .nucleo import seguimiento as SG
 from . import modulos
-from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR
+from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR, auditoria as AUD
 from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_entrada
 import json, os
 from datetime import datetime
@@ -883,6 +883,12 @@ class Api:
                        + ("Incluye las respuestas que ya hay en la hoja." if con_respuestas else "La respuesta va en blanco: captúrala al correr cada experimento y vuelve con «Importar respuestas del diseño»."), hoja=False)
         r["corridas"] = {"design_id": meta["design_id"], "version_diseno": meta["version_diseno"], "n": len(filas), "ruta": ruta}
         return r
+
+    def auditar_diseno(self, design_id):
+        """E3-8: auditoría del diseño (alias, aleatorización, restricciones, curvatura, falta de ajuste, confirmación). Solo en pantalla: no viaja en el paquete de avance."""
+        a, motivo = AUD.auditar(self.proyecto, self.hoja, design_id)
+        if a is None: return {"error": "auditoria", "mensaje": motivo}
+        return {"error": None, "auditoria": a}
 
     def omitir_paso_doe(self, que, motivo=""):
         """E3-7: el usuario omite el cribado, el DCC o el DOE completo con un motivo registrado (sin motivo no se omite)."""
