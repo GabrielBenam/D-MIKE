@@ -1,0 +1,44 @@
+{
+ "_nota": "Esquema del índice por pregunta. ruta: lista ordenada de 2 a 4 IDs de módulo del catálogo. fuente_base: sección de la base del curso o «no respaldado». El contenido real lo entrega el proyecto de metodología en un lote posterior; las filas con rotulo son EJEMPLO DE ESQUEMA.",
+ "preguntas": [
+  {
+   "rotulo": "EJEMPLO DE ESQUEMA",
+   "pregunta": "¿Cómo se distribuyen mis datos?",
+   "ruta": [
+    "ESTADISTICOS",
+    "DISTRIB"
+   ],
+   "fase": "M",
+   "tipo_dato": "Una columna numérica",
+   "resultado_esperado": "Tabla de estadísticos descriptivos y el análisis de distribución y normalidad",
+   "nivel": "Básico",
+   "fuente_base": "no respaldado"
+  },
+  {
+   "rotulo": "EJEMPLO DE ESQUEMA",
+   "pregunta": "¿Mi proceso es estable en el tiempo?",
+   "ruta": [
+    "CORRIDA",
+    "SPC"
+   ],
+   "fase": "M",
+   "tipo_dato": "Una columna numérica en orden cronológico",
+   "resultado_esperado": "Gráfica de corrida con sus patrones y cartas de control con puntos de causa especial",
+   "nivel": "Intermedio",
+   "fuente_base": "no respaldado"
+  },
+  {
+   "rotulo": "EJEMPLO DE ESQUEMA",
+   "pregunta": "¿Qué factores cambian mi respuesta?",
+   "ruta": [
+    "ANOVA",
+    "FACTORIAL"
+   ],
+   "fase": "A",
+   "tipo_dato": "Una respuesta numérica y uno o más factores",
+   "resultado_esperado": "Tabla ANOVA y efectos del diseño factorial",
+   "nivel": "Intermedio",
+   "fuente_base": "no respaldado"
+  }
+ ]
+}
