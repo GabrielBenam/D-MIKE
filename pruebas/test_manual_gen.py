@@ -80,3 +80,37 @@ def test_manual_completo_sin_permitir_faltantes(tmp_path):
     texto = subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True, text=True).stdout
     assert "Sección no generada" not in texto and "6.10 Notas de rigor" in texto and "A3: formato de una hoja" in texto
     assert (tmp_path / "s" / "manual.html").read_text(encoding="utf-8").count("<figure>") == 10
+
+
+# ---------- concordancia documental (Entrega 5): lo que el manual dice debe existir en el programa ----------
+def _rutas_del_manual():
+    import json, html
+    t = json.load(open(MANUAL / "textos.json", encoding="utf-8"))
+    for k, v in t.items():
+        for m in re.finditer(r'<span class="ruta">(.*?)</span>', v):
+            yield k, html.unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip()
+
+
+def test_las_rutas_del_manual_existen_en_el_menu():
+    """Cada ruta «Pestaña › … › Botón…» del manual debe existir en el menú real (app/nucleo/menus.py), que es lo que ve el usuario."""
+    sys.path.insert(0, str(RAIZ))
+    from app.nucleo.menus import MENUS
+    por_menu = {m: {re.sub(r"\s*\((?:Ctrl|Alt|F\d)[^)]*\)$", "", n).strip().rstrip("…").strip() for n, _ in items if not n.startswith("§")} for m, items in MENUS}
+    # botones dentro de diálogos o ventanas: no son entradas del menú
+    DIALOGO = {"Declarar límites seguros", "Auditar diseño", "Omitir cribado, DCC o DOE", "Terminar la mejora sin DOE", "Plan de confirmación", "Comparar", "Historial de cambios", "Segundo DOE desde"}
+    fallos = []
+    for k, ruta in _rutas_del_manual():
+        partes = [p.strip() for p in ruta.split("›")]
+        if len(partes) < 2 or partes[0] not in por_menu: continue                       # solo se comprueban las rutas que empiezan en un menú conocido
+        ultimo = partes[-1].rstrip("…").strip()
+        if ultimo not in por_menu[partes[0]] and ultimo not in DIALOGO: fallos.append((k, ruta))
+    assert not fallos, fallos
+
+
+def test_el_manual_trae_la_guia_del_proyecto_real_y_las_novedades_de_la_0_29():
+    import json
+    t = json.load(open(MANUAL / "textos.json", encoding="utf-8"))
+    s5 = t["s5"]
+    for frag in ("5.8 Guía del proyecto real", "Límites seguros", "RunId", "registrar una versión nueva", "atómica", "Auditar diseño", "Plan de confirmación", "no respaldado", "región no declarada"):
+        assert frag in s5, frag
+    assert "20 tipos" in t["s3"] and "design_id" in s5 and "5.8" in (MANUAL / "gen.py").read_text(encoding="utf-8")

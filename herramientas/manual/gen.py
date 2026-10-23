@@ -174,7 +174,7 @@ def construir_caso(md):
            "## 8. Controlar": "## 6.7 Controlar", "## 9. Resumen": "## 6.8 Resumen", "## 10. Cómo armar": "## 6.9 Cómo armar", "## 11. Notas de rigor": "## 6.10 Notas de rigor"}
     for a_, b_ in ren.items(): md = md.replace(a_, b_)
     md = md.replace("D-MIKE 0.21.1", f"D-MIKE {VERSION}").replace("«Repetir»", "«Repetir con datos actuales»")
-    md = md.replace("**Dos formas de seguirlo.**", "**Novedades de la v0.25 en el caso.** Todos los resultados del caso se recalcularon con la versión " + VERSION + ": cada uno guarda su copia congelada y su huella SHA-256 (indicador «Vigente» junto al título), y sus gráficas son interactivas (Estilo y color, Escala original y pestaña «Gráfico»). La forma más rápida de reproducir el caso es abrir la plantilla llena con «Archivo › Abrir proyecto» y elegir «Ejecutar en un proyecto nuevo».\n\n**Dos formas de seguirlo.**")
+    md = md.replace("**Dos formas de seguirlo.**", "**Novedades en el caso.** Todos los resultados del caso se recalcularon con la versión " + VERSION + ": cada uno guarda su copia congelada y su huella SHA-256 (indicador «Vigente» junto al título), y sus gráficas son interactivas (Estilo y color, Escala original y pestaña «Gráfico»). La forma más rápida de reproducir el caso es abrir la plantilla llena con «Archivo › Abrir proyecto» y elegir «Ejecutar en un proyecto nuevo».\n\n**Dos formas de seguirlo.**")
     def fig(mod, k=0, j=0, pie=""):
         try: s = SV[mod][k]["svg"][j]; h = SV[mod][k]["huella"]
         except (KeyError, IndexError): return ""
@@ -211,7 +211,7 @@ cmd_html = "<table class='cmd'><thead><tr><th>Comando</th><th>Atajo</th><th>Func
 TXT = json.load(open(AQUI / "textos.json", encoding="utf-8"))
 L10O = open(RAIZ / "app" / "ui" / "logo10_oscuro.svg", encoding="utf-8").read()
 TOC = [("1", "Introducción"), ("2", "Trabajo con proyectos"), ("3", "Resultados, gráficas y reglas de cálculo"), ("4", "Módulos por pestaña de la cinta")] + toc4 + \
-      [("5", "Recetas y Diagnóstico en línea"), ("6", "Caso maestro de principio a fin")] + [(k.split()[0], " ".join(k.split()[1:])) for k in re.findall(r"<h2 id='c[^']*'>([^<]*)</h2>", caso_html)] + [("7", "Apéndice A · Comandos y atajos"), ("8", "Apéndice B · Glosario")]
+      [("5", "Recetas y Diagnóstico en línea"), ("5.8", "Guía del proyecto real: DOE progresivo (versión 0.29)"), ("6", "Caso maestro de principio a fin")] + [(k.split()[0], " ".join(k.split()[1:])) for k in re.findall(r"<h2 id='c[^']*'>([^<]*)</h2>", caso_html)] + [("7", "Apéndice A · Comandos y atajos"), ("8", "Apéndice B · Glosario")]
 def doc(paginas):
     toc = "".join(f"<li class='{'sub' if '.' in n else ''}'><span>{E(n)} {E(t)}</span><span class='pun'></span><span>{paginas.get(n, '')}</span></li>" for n, t in TOC)
     return f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><style>
