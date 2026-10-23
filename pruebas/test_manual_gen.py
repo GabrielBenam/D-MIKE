@@ -263,10 +263,13 @@ def test_indice_por_pregunta_esquema_y_rutas_validas():
     assert len(probs) == 3 and any("NO-EXISTE" in p for p in probs) and any("2 a 4" in p for p in probs) and any("nivel" in p for p in probs)
 
 
+@pytest.mark.interfaz
 def test_capturas_guardas_de_modo_y_selectores(tmp_path):
     """R-C2 y R-C3: un selector inexistente se reporta (no se salta); en modo real nunca se cargan datos sintéticos."""
     pytest.importorskip("playwright")
-    import capturas, os
+    import importlib.util, os
+    spec = importlib.util.spec_from_file_location("capturas_manual", MANUAL / "capturas.py")      # por ruta: pruebas/capturas.py ya existe y taparía este módulo
+    capturas = importlib.util.module_from_spec(spec); spec.loader.exec_module(capturas)
     from playwright.sync_api import sync_playwright
     os.environ["APPDATA"] = str(tmp_path / "ap")
     srv, url = capturas.servidor(RAIZ / "app" / "ui")
