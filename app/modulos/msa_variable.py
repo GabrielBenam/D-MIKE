@@ -148,6 +148,16 @@ class GageRR(ModuloDialogo):
         axs[1][2].legend(fontsize=6, frameon=False); axs[1][2].set_title("Interacción pieza * evaluador", fontsize=8)
         for ax in axs.flat: ax.tick_params(labelsize=6)
         svg, png = a_svg_png(fig)
+        from .base import _f
+        espec_gage = {"g": "gage", "titulo": f"Gage R&R de {nom}",
+                      "componentes": {"nombres": nombres, "series": [{"et": et, "vals": [_f(f[cl]) for f in sel]} for et, cl in
+                                                                     (("% contribución", "pct_contrib"), ("% var. estudio", "pct_sv")) + ((("% tolerancia", "pct_tol"),) if tol else ())]},
+                      "cartaR": {"ops": [{"nombre": str(o_), "rg": [_f(max(datos[(pz, o_)]) - min(datos[(pz, o_)])) for pz in piezas_o]} for o_ in ops], "rb": _f(rb),
+                                 "lsc": _f(D4[a["r"]] * rb if a["r"] in D4 else rb * 3)},
+                      "cartaX": {"ops": [{"nombre": str(o_), "m": [_f(a["medias_celda"][(pz, o_)]) for pz in piezas_o]} for o_ in ops], "mg": _f(mg), "lsc": _f(mg + 3 * sx), "lic": _f(mg - 3 * sx)},
+                      "piezas": {"x": [q + 1 for q, pz in enumerate(piezas_o) for _ in sum((datos[(pz, o_)] for o_ in ops), [])],
+                                 "y": [_f(v) for pz in piezas_o for v in sum((datos[(pz, o_)] for o_ in ops), [])], "medias": [_f(a["media_pieza"][pz]) for pz in piezas_o]},
+                      "evaluadores": {"nombres": [str(o_) for o_ in ops], "grupos": [[_f(v) for v in sum((datos[(pz, o_)] for pz in piezas_o), [])] for o_ in ops]}}
         # ---------- conclusión (14_GB MED-RR-VARIABLE) ----------
         base_pct = filas_r[0]["pct_tol"] if tol else filas_r[0]["pct_sv"]
         que = "tolerancia" if tol else "variación del estudio"
@@ -171,7 +181,7 @@ class GageRR(ModuloDialogo):
         if destructivo is not None:
             avisos.append(AVISO_DESTRUCTIVO.format(variable=destructivo.get("nombre")))
         res = resultado(cls.ID, f"Gage R&R de {nom}", p, [
-            b_grafica(svg), b_texto(concl, "conclusion"),
+            b_grafica(svg, espec_gage), b_texto(concl, "conclusion"),
             b_tabla("ANOVA de dos factores" + (" con interacción" if c["con_inter"] else " sin interacción"), ["Fuente", "GL", "SC", "CM", "F", "Valor p"], anova),
             b_tabla("Componentes de varianza", cab_c, comp), b_tabla("Variación del estudio", cab_s, sv),
             b_texto("Método ANOVA. Criterio de aceptación: 14_GB_MEDIR, MED-RR-VARIABLE. No respaldados por la base: componentes de varianza por "

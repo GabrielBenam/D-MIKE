@@ -126,6 +126,31 @@ const GCAT = {
         if (o.e.reg) { const [lo, hi] = s.busqueda[i]; [lo, hi].forEach(v => sh.push({ type: "line", xref: "x" + ax, yref: "y" + ax + " domain", x0: v, x1: v, y0: 0, y1: 1, line: { color: gcss("--linea"), dash: "dot" } })); } }));
       lay.shapes = sh; lay.annotations = [{ xref: "paper", yref: "paper", x: 0, y: 1.1, xanchor: "left", showarrow: false, font: { size: 10 }, text: "Línea roja: óptimo · punteado: región de búsqueda" + (s.autorizada ? " (limitada por los límites seguros)" : "") }];
       return { d, l: lay }; } },
+  tukey: { est: ["Intervalos por par"], el: { cero: ["Línea en cero", 1], sig: ["Resaltar los que difieren", 1] },
+    f: (s, o, p) => { const d = [], n = s.pares.length;
+      s.pares.forEach((q, i) => { const c = o.e.sig && q.sig ? gTono(p, .55) : gTono(p, .88);
+        d.push({ type: "scatter", x: [q.lo, q.hi], y: [q.par, q.par], mode: "lines", line: { color: c, width: 4 }, showlegend: false, hoverinfo: "x" });
+        d.push({ type: "scatter", x: [q.dif], y: [q.par], mode: "markers", marker: { size: 9, color: c }, showlegend: false, hovertemplate: "%{y}: %{x:.4g}<extra></extra>" }); });
+      return { d, l: gLay({ margin: { l: 110, r: 20, t: 34, b: 44 }, showlegend: false, xaxis: { title: s.xl, gridcolor: gcss("--linea") }, yaxis: { autorange: "reversed", gridcolor: gcss("--linea") },
+        shapes: o.e.cero ? [gV(0, "#b3261e", "dash")] : [] }) }; } },
+  rendimiento: { est: ["Barras por paso"], el: { eti: ["Valores", 1] },
+    f: (s, o, p) => ({ d: [{ type: "bar", x: s.etiq, y: s.vals, marker: { color: s.vals.map((_, i) => s.rty && i === s.vals.length - 1 ? gcss("--tinta") : (s.ok[i] ? gTono(p, .55) : "#cfc8bb")) },
+      text: o.e.eti ? s.vals.map(v => v ? v.toFixed(1) + " %" : "") : null, textposition: "outside", customdata: s.n, hovertemplate: "%{x}: %{y:.1f} %<br>Unidades: %{customdata}<extra></extra>" }],
+      l: gLay({ yaxis: { title: "% aprobado a la primera", range: [0, 108], gridcolor: gcss("--linea") }, xaxis: { type: "category" } }) }) },
+  gage: { est: ["6 paneles"], el: { lim: ["Límites de control", 1] },
+    f: (s, o, p) => { const d = [], sh = [], lay = gLay({ grid: { rows: 2, columns: 3, pattern: "independent" }, margin: { l: 48, r: 14, t: 52, b: 40 }, showlegend: true, legend: { orientation: "h", y: -0.12 } }), tit = [];
+      const ax = k => k > 1 ? String(k) : "", pie = (k, t) => { tit.push({ text: t, xref: "x" + ax(k) + " domain", yref: "y" + ax(k) + " domain", x: .5, y: 1.12, showarrow: false, font: { size: 11 } }); };
+      s.componentes.series.forEach((se, i) => d.push({ type: "bar", x: s.componentes.nombres, y: se.vals, name: se.et, xaxis: "x", yaxis: "y", marker: { color: gTono(p, .3 + .25 * i) } })); pie(1, "Componentes de variación");
+      s.cartaR.ops.forEach((q, i) => d.push({ type: "scatter", x: q.rg.map((_, j) => j + 1), y: q.rg, mode: "lines+markers", name: q.nombre, xaxis: "x2", yaxis: "y2", line: { color: gTono(p, .25 + .5 * i / Math.max(1, s.cartaR.ops.length - 1)), width: 1 }, marker: { size: 5 } })); pie(2, "Carta R por evaluador");
+      sh.push({ type: "line", xref: "x2 domain", yref: "y2", x0: 0, x1: 1, y0: s.cartaR.rb, y1: s.cartaR.rb, line: { color: gcss("--tinta") } }); if (o.e.lim) sh.push({ type: "line", xref: "x2 domain", yref: "y2", x0: 0, x1: 1, y0: s.cartaR.lsc, y1: s.cartaR.lsc, line: { color: "#b3261e", dash: "dash" } });
+      s.cartaX.ops.forEach((q, i) => d.push({ type: "scatter", x: q.m.map((_, j) => j + 1), y: q.m, mode: "lines+markers", name: q.nombre, showlegend: false, xaxis: "x3", yaxis: "y3", line: { color: gTono(p, .25 + .5 * i / Math.max(1, s.cartaX.ops.length - 1)), width: 1 }, marker: { size: 5 } })); pie(3, "Carta X̄ por evaluador");
+      sh.push({ type: "line", xref: "x3 domain", yref: "y3", x0: 0, x1: 1, y0: s.cartaX.mg, y1: s.cartaX.mg, line: { color: gcss("--tinta") } }); if (o.e.lim) [s.cartaX.lsc, s.cartaX.lic].forEach(v => sh.push({ type: "line", xref: "x3 domain", yref: "y3", x0: 0, x1: 1, y0: v, y1: v, line: { color: "#b3261e", dash: "dash" } }));
+      d.push({ type: "scatter", x: s.piezas.x, y: s.piezas.y, mode: "markers", showlegend: false, xaxis: "x4", yaxis: "y4", marker: { size: 5, color: gTono(p, .5), opacity: .6 } });
+      d.push({ type: "scatter", x: s.piezas.medias.map((_, j) => j + 1), y: s.piezas.medias, mode: "lines", showlegend: false, xaxis: "x4", yaxis: "y4", line: { color: gcss("--tinta"), width: 1 } }); pie(4, "Mediciones por pieza");
+      s.evaluadores.nombres.forEach((nm, i) => d.push({ type: "box", y: s.evaluadores.grupos[i], name: nm, showlegend: false, xaxis: "x5", yaxis: "y5", marker: { color: gTono(p, .4) } })); pie(5, "Mediciones por evaluador");
+      s.cartaX.ops.forEach((q, i) => d.push({ type: "scatter", x: q.m.map((_, j) => j + 1), y: q.m, mode: "lines+markers", name: q.nombre, showlegend: false, xaxis: "x6", yaxis: "y6", line: { color: gTono(p, .25 + .5 * i / Math.max(1, s.cartaX.ops.length - 1)), width: 1 }, marker: { size: 5 } })); pie(6, "Interacción pieza * evaluador");
+      for (let k = 1; k <= 6; k++) { lay["xaxis" + ax(k)] = { gridcolor: gcss("--linea"), type: k === 1 || k === 5 ? "category" : "linear" }; lay["yaxis" + ax(k)] = { gridcolor: gcss("--linea") }; }
+      lay.shapes = sh; lay.annotations = tit; return { d, l: lay }; } },
 };
 // ---------- estado por gráfica (se guarda con el proyecto) ----------
 function gEstado(clave, spec) {

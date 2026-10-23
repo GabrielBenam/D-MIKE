@@ -66,11 +66,26 @@ function tbExplora(d) {
     <div class="tb-cat">${L.map(k => `<div class="tb-item"><div><b>${esc(k.nombre)}</b><small>${esc(k.categoria)} · ${esc(k.unidad)} · mejor si ${k.sentido === ">=" ? "mayor" : "menor"}</small><p>${esc(k.formula)}</p></div>
       ${ya.has(k.id) ? `<button class="boton chico" data-quitar="${ya.get(k.id)}">Quitar</button>` : `<button class="boton chico primario" data-agregar="${k.id}">Agregar</button>`}</div>`).join("")}</div>`;
 }
+// Tendencia semanal de un indicador con Plotly (misma lectura que el dibujo propio: puntos coloreados por estado, meta, advertencia y periodo visible sombreado)
+function tbTendenciaPlot(div, k) {
+  if (!div || !window.Plotly || typeof gLay !== "function") return;
+  const v = k.vals, x = v.map((_, j) => "S" + (j + 1)), colE = { ok: gcss("--tb-verde") || "#2e7d32", advertencia: gcss("--tb-amar") || "#f9a825", no: gcss("--tb-rojo") || "#b3261e" };
+  const sh = [], an = [], x0 = Math.max(0, v.length - TB.per) - .5;
+  sh.push({ type: "rect", xref: "x", yref: "paper", x0, x1: v.length - .5, y0: 0, y1: 1, fillcolor: gcss("--acento-suave") || "rgba(221,88,19,.12)", opacity: .5, line: { width: 0 }, layer: "below" });
+  if (k.meta != null) { sh.push({ type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: k.meta, y1: k.meta, line: { color: gcss("--acento") || "#dd5813", dash: "dash" } }); an.push({ xref: "paper", yref: "y", x: 0, y: k.meta, xanchor: "left", yanchor: "bottom", showarrow: false, font: { size: 10 }, text: "meta " + tbFmt(k, k.meta) }); }
+  if (k.adv != null) sh.push({ type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: k.adv, y1: k.adv, line: { color: colE.advertencia, dash: "dot" } });
+  Plotly.newPlot(div, [{ type: "scatter", x, y: v, mode: "lines+markers", connectgaps: false, line: { color: gcss("--tinta"), width: 1.6 },
+    marker: { size: 8, color: v.map((_, j) => colE[k.estados[j]] || gcss("--tinta-suave")) }, hovertemplate: "%{x}: %{y}<extra></extra>" }],
+    gLay({ shapes: sh, annotations: an, showlegend: false, xaxis: { type: "category", gridcolor: gcss("--linea") }, yaxis: { title: k.unidad || "", gridcolor: gcss("--linea") }, margin: { l: 56, r: 14, t: 10, b: 36 } }),
+    { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["toImage", "resetScale2d", "autoScale2d"] });
+}
 function tbDetalle(i) {
   const k = TB.d.indicadores.find(x => x.i === i); if (!k) return;
   const W = 640, H = 210, v = k.vals, num_ = v.filter(x => x != null).concat(k.meta != null ? [k.meta] : []);
   let svg = '<p class="tb-sin">Sin valores capturados.</p>';
-  if (v.some(x => x != null)) {
+  const conPlotly = !!(window.Plotly && typeof gLay === "function" && leerPref("graficas_int") !== "0");
+  if (v.some(x => x != null) && conPlotly) svg = '<div class="tb-plot" style="height:240px"></div>';
+  else if (v.some(x => x != null)) {
     const mn = Math.min(...num_), mx = Math.max(...num_), pad = (mx - mn) * .1 || 1, sx = j => 40 + j * (W - 54) / Math.max(v.length - 1, 1), sy = y => H - 24 - (y - mn + pad) / (mx - mn + 2 * pad) * (H - 36);
     const x0 = sx(Math.max(0, v.length - TB.per));
     svg = `<svg viewBox="0 0 ${W} ${H}" width="100%"><rect x="${x0}" y="6" width="${W - 10 - x0}" height="${H - 30}" style="fill:var(--acento-suave)" opacity=".5"/>
@@ -88,7 +103,7 @@ function tbDetalle(i) {
   const tipo = el("select", {}, [["", "(sin definir)"], ["Adelantado", "Adelantado (anticipa)"], ["Atrasado", "Atrasado (resultado)"]].map(([v, t]) => el("option", { value: v, selected: v === k.tipo }, t)));
   const expl = el("textarea", { rows: 2, placeholder: "Por qué no cumple y qué se hará (obligatorio si está en rojo)", style: "width:100%" }); expl.value = k.explicacion || "";
   const res = el("input", { type: "checkbox", checked: k.resumen });
-  const cuerpo = el("div", { class: "tb-detalle" }); cuerpo.innerHTML = `<p class="tb-sub">${esc(k.categoria)}${cat ? " · " + esc(cat.formula) : ""}</p>${svg}${stats}${k.base ? `<p class="tb-sub">Base del último valor: ${esc(k.base)}</p>` : ""}${k.definicion.nota ? `<p class="aviso-res">${esc(k.definicion.nota)}</p>` : ""}${tbDefinicionHtml(k)}`;
+  const cuerpo = el("div", { class: "tb-detalle" }); requestAnimationFrame(() => tbTendenciaPlot(cuerpo.querySelector(".tb-plot"), k)); cuerpo.innerHTML = `<p class="tb-sub">${esc(k.categoria)}${cat ? " · " + esc(cat.formula) : ""}</p>${svg}${stats}${k.base ? `<p class="tb-sub">Base del último valor: ${esc(k.base)}</p>` : ""}${k.definicion.nota ? `<p class="aviso-res">${esc(k.definicion.nota)}</p>` : ""}${tbDefinicionHtml(k)}`;
   cuerpo.append(el("div", { class: "tb-campos" }, el("label", {}, "Meta ", meta, ` ${k.unidad} (${k.sentido === ">=" ? "mayor o igual" : "menor o igual"} es mejor)`),
     el("label", {}, "Límite de advertencia ", adv), el("label", {}, "Tipo ", tipo), el("label", { class: "casilla" }, res, " Mostrar en el resumen ejecutivo"),
     el("label", { class: "tb-expl-campo" }, "Explicación si no cumple la meta (PMBOK 7, 2.7.3.1)", expl),

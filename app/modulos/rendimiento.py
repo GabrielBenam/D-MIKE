@@ -184,7 +184,10 @@ class Rendimiento(ModuloDialogo):
             ax.set_xticks(range(len(vals))); ax.set_xticklabels(etiquetas, rotation=20 if len(vals) > 5 else 0)
             for x, v in enumerate(vals): ax.text(x, v + 1.5, f"{v:.1f}%" if v else "", ha="center", fontsize=8, color=TINTA)
             ax.set_ylabel("% aprobado a la primera"); ax.set_title(f"Rendimiento por paso y RTY de {nom}")
-            svg, png = a_svg_png(fig); bloques.append(b_grafica(svg))
+            svg, png = a_svg_png(fig)
+            bloques.append(b_grafica(svg, {"g": "rendimiento", "titulo": f"Rendimiento por paso y RTY de {nom}", "etiq": etiquetas, "vals": [_f(v) for v in vals],
+                                           "ok": [q["estado"] == "ok" for q in pasos] + ([True] if r["rty"] is not None else []), "rty": r["rty"] is not None,
+                                           "n": [q["n"] for q in pasos] + ([None] if r["rty"] is not None else [])}))
         else: png = None
         k = len(pasos); pl = "paso" if k == 1 else "pasos"
         t, fty, rty = r["tradicional"], r["fty"], r["rty"]; mot = r["motivos"]
