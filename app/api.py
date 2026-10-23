@@ -844,9 +844,10 @@ class Api:
         """E3-2: identidad de los diseños del proyecto (design_id, version_diseno, estado de su definición, RunId)."""
         return DIS.descriptores(self.proyecto, self.hoja)
 
-    def importar_respuestas(self, ruta=None, design_id=None, sobrescribir=False):
+    def importar_respuestas(self, ruta=None, design_id=None, sobrescribir=False, respuesta_extra=None):
         """E3-3: importa las respuestas de un diseño por RunId (columnas RunId, version_diseno, la respuesta y, opcional, los factores). Atómica:
-        con un solo desajuste no se escribe nada y se informa cada error."""
+        con un solo desajuste no se escribe nada y se informa cada error. respuesta_extra: nombre de una segunda respuesta medida en las mismas corridas
+        (se importa por RunId y queda ligada al diseño y a su región)."""
         from .nucleo import importar as imp, respuestas as RS
         ruta = ruta or self._elegir("abrir", ["Respuestas del diseño (*.csv;*.tsv;*.txt;*.xlsx)", "Todos los archivos (*.*)"])
         if not ruta: return self._resp("Importación cancelada.", hoja=False)
@@ -854,14 +855,14 @@ class Api:
         try: filas, fmt = imp.leer(ruta); huella = RS.huella_archivo(ruta)
         except (OSError, ValueError) as e:
             return self._resp(f"No se pudieron leer las respuestas: {e}. No se cambió nada.", "aviso", error="respuestas", hoja=False)
-        plan = RS.analizar(self.proyecto, self.hoja, filas, design_id, bool(sobrescribir))
+        plan = RS.analizar(self.proyecto, self.hoja, filas, design_id, bool(sobrescribir), respuesta_extra or None)
         resumen = {k: plan[k] for k in ("ok", "errores", "avisos", "design_id", "version", "escritas", "iguales", "sobrescritas", "sin_dato")}
         if not plan["ok"]:
             r = self._resp(f"Respuestas no importadas de {nombre}: {len(plan['errores'])} {'problema' if len(plan['errores']) == 1 else 'problemas'}. No se escribió nada.",
                            "aviso", error="respuestas", mensajes=[(e, "aviso") for e in plan["errores"]] + [(a, "info") for a in plan["avisos"]], hoja=False)
             r["importacion"] = resumen; return r
         n = RS.aplicar(self.proyecto, self.hoja, plan, nombre, huella)
-        r = self._resp(f"Importadas {n} respuestas de {nombre} ({fmt}) al diseño {plan['design_id']}, versión {plan['version']}"
+        r = self._resp(f"Importadas {n} respuestas{' de «' + plan['extra'] + '»' if plan.get('extra') else ''} de {nombre} ({fmt}) al diseño {plan['design_id']}, versión {plan['version']}"
                        + (f"; {plan['iguales']} ya estaban iguales" if plan["iguales"] else "") + (f"; {plan['sobrescritas']} sobrescritas" if plan["sobrescritas"] else "") + ".",
                        mensajes=[(a, "info") for a in plan["avisos"]])
         r["importacion"] = resumen; return r

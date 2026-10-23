@@ -359,6 +359,8 @@ def tukey(grupos, alfa=.05):
 
 @registrar
 class Tukey(ModuloDialogo):
+    NOTA_FUENTE = ("Método no incluido en la base del curso (archivos 00 a 32 y PL). Verificado contra la salida de Minitab del ejemplo 11.1 de «Industrial Statistics with Minitab» "
+                   "(registrado en ESTADO, verificación de la etapa estadística); esa verificación no es una fuente del curso.")
     ID, TITULO = "TUKEY", "Comparaciones de Tukey"
     CAMPOS = [{"campo": "y", "etiqueta": "Respuesta", "tipo": "col", "filtro": "num", "rol": ["respuesta"]},
               {"campo": "factor", "etiqueta": "Factor (niveles a comparar)", "tipo": "col", "rol": ["factor"]},
@@ -382,13 +384,14 @@ class Tukey(ModuloDialogo):
             ax.plot(pp["ic"], [r_, r_], color=col, lw=2); ax.plot([pp["dif"]], [r_], "o", color=col)
         ax.axvline(0, color=TINTA, lw=1, ls="--"); ax.set_yticks(range(len(t["pares"]))); ax.set_yticklabels([f"{a} - {b}" for a, b in (pp["par"] for pp in t["pares"])], fontsize=7)
         ax.set_title(f"IC simultáneos de {100 * (1 - alfa):.0f}% (los que no cruzan el cero difieren)", fontsize=8)
+        ax.set_xlabel("Método no incluido en la base del curso", fontsize=7)
         svg, png = a_svg_png(fig)
         return resultado(cls.ID, f"Tukey: {_nom(hoja, yj)} por {_nom(hoja, fj)}", p, [
             b_tabla("Agrupación (niveles que no comparten letra son distintos)", ["Nivel", "N", "Media", "Grupo"], ag),
-            b_grafica(svg, {"g": "tukey", "titulo": f"IC simultáneos de {100 * (1 - alfa):.0f}% (Tukey)", "xl": "Diferencia de medias",
+            b_grafica(svg, {"g": "tukey", "titulo": f"IC simultáneos de {100 * (1 - alfa):.0f}% (Tukey)", "xl": "Diferencia de medias", "nota": "Método no incluido en la base del curso",
                             "pares": [{"par": f"{pp['par'][0]} - {pp['par'][1]}", "dif": _f(pp["dif"]), "lo": _f(pp["ic"][0]), "hi": _f(pp["ic"][1]), "sig": bool(pp["p"] < alfa)} for pp in t["pares"]]}),
             b_tabla("Diferencias por pares", ["Diferencia", "Diferencia de medias", "EE", f"IC simultáneo {100 * (1 - alfa):.0f}%", "t", "Valor p ajustado", "Distinta"], pr),
-            b_texto(f"Método de Tukey (Tukey-Kramer con tamaños distintos), CM del error = {num(t['mce'], 5)} con {t['gl']} GL, q crítico = {num(t['q'], 4)}. " + GENERAL)],
+            b_texto(f"Método de Tukey (Tukey-Kramer con tamaños distintos), CM del error = {num(t['mce'], 5)} con {t['gl']} GL, q crítico = {num(t['q'], 4)}. " + cls.NOTA_FUENTE + " " + GENERAL)],
             [f"{fuera} filas incompletas quedaron fuera."] if fuera else [], datos={"columnas": [yj, fj]}, png=png,
             interpretacion=["Las comparaciones controlan el error de toda la familia de pares, no de cada par por separado."])
 

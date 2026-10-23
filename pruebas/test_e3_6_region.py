@@ -150,10 +150,46 @@ def test_el_bloqueo_no_aplica_en_demostracion():
     a = _pegado(demo=True); assert a.ejecutar_modulo("RSM", {"y": 2, "xs": [0, 1], "modelo": "lineal"})["error"] is None
 
 
-def test_una_segunda_respuesta_en_las_corridas_del_diseno_si_se_analiza(tmp_path):
-    a = monta(tmp_path); a.pegar(-1, len(a.hoja.columnas), "Costo\n" + "\n".join(str(20 + i) for i in range(a.hoja.n)))
+def _csv_extra(a, tmp, nombre, version=1, saltar=0, desordenar=False):
+    import csv
+    info = a.proyecto.formatos["_disenos"]["Resistencia"]; ids, _ = DIS.run_ids(a.hoja, info, "Resistencia")
+    filas = [[ids[i], version, 20 + i] for i in range(a.hoja.n) if i >= saltar]
+    if desordenar: filas.reverse()                                                                  # el orden de las filas del archivo no importa: manda el RunId
+    ruta = tmp / f"{nombre}.csv"
+    with open(ruta, "w", encoding="utf-8", newline="") as fh:
+        w = csv.writer(fh); w.writerow(["RunId", "version_diseno", nombre]); w.writerows(filas)
+    return str(ruta)
+
+
+def test_una_segunda_respuesta_importada_por_runid_se_analiza_y_hereda_la_region(tmp_path):
+    a = monta(tmp_path); r = a.importar_respuestas(_csv_extra(a, tmp_path, "Costo", desordenar=True), "DIS-Resistencia", respuesta_extra="Costo"); assert r["error"] is None, r["sesion"][-1]["texto"]
+    assert a.proyecto.formatos["_disenos"]["Resistencia"]["respuestas_extra"] == {"Costo": {"version": 1}}
     r = a.ejecutar_modulo("RSM", {"y": col(a, "Costo"), "xs": [col(a, "Temp"), col(a, "Tiempo")], "modelo": "lineal"}); assert r["error"] is None, r["sesion"][-1]["texto"]
-    assert a.proyecto.resultados[-1]["datos"]["modelo_rsm"]["region"]["estado"] == "declarada"                  # hereda la región del diseño por sus factores
+    assert a.proyecto.resultados[-1]["datos"]["modelo_rsm"]["region"]["estado"] == "declarada"                  # hereda la región del diseño
+    assert a.proyecto.resultados[-1]["datos"]["modelo_rsm"]["region"]["limites"][0] == [90, 130]
+    ids = [x["que"] for x in a.historial_cambios()]; assert "Importación de respuestas" in ids
+
+
+def test_una_columna_pegada_a_mano_no_se_liga_al_diseno(tmp_path):
+    a = monta(tmp_path); a.pegar(-1, len(a.hoja.columnas), "Costo\n" + "\n".join(str(20 + i) for i in range(a.hoja.n)))          # ligada solo por la posición de las filas
+    r = a.ejecutar_modulo("RSM", {"y": col(a, "Costo"), "xs": [col(a, "Temp"), col(a, "Tiempo")], "modelo": "lineal"})
+    assert r["error"] == "entrada" and "solo corre sobre la respuesta de un diseño creado en D-MIKE" in r["sesion"][-1]["texto"]
+
+
+def test_la_importacion_de_la_segunda_respuesta_es_por_runid_y_atomica(tmp_path):
+    a = monta(tmp_path); mal = tmp_path / "mal.csv"
+    mal.write_text("RunId,version_diseno,Costo\nDIS-Resistencia-R999,1,5\n", encoding="utf-8")
+    r = a.importar_respuestas(str(mal), "DIS-Resistencia", respuesta_extra="Costo"); assert r["error"] == "respuestas" and a.hoja.indice("Costo") is None      # no crea la columna
+    r = a.importar_respuestas(_csv_extra(a, tmp_path, "Costo", version=2), "DIS-Resistencia", respuesta_extra="Costo"); assert r["error"] == "respuestas" and a.hoja.indice("Costo") is None
+    for reservado in ("Temp", "Resistencia", "RunId", "Respuesta"):
+        assert a.importar_respuestas(_csv_extra(a, tmp_path, reservado), "DIS-Resistencia", respuesta_extra=reservado)["error"] == "respuestas"
+
+
+def test_una_segunda_respuesta_de_otra_version_no_se_analiza(tmp_path):
+    a = monta(tmp_path); a.importar_respuestas(_csv_extra(a, tmp_path, "Costo"), "DIS-Resistencia", respuesta_extra="Costo")
+    a.editar(0, col(a, "Temp"), "125"); assert a.registrar_version_diseno("DIS-Resistencia", "Cambió una temperatura")["estado"] == "nueva"
+    r = a.ejecutar_modulo("RSM", {"y": col(a, "Costo"), "xs": [col(a, "Temp"), col(a, "Tiempo")], "modelo": "lineal"})
+    assert r["error"] == "entrada" and "son de la versión 1" in r["sesion"][-1]["texto"]
 
 
 def test_el_optimizador_queda_bloqueado_por_consecuencia():

@@ -77,3 +77,13 @@ def test_interfaz_registra_una_decision_y_muestra_el_historial(pagina):
     expect(pagina.locator("#decisiones")).to_contain_text("DEC-001"); expect(pagina.locator("#decisiones")).to_contain_text("Verificado con tres lotes")
     pagina.click("#decisiones button:has-text('Historial de cambios')")
     expect(pagina.locator("#historial")).to_contain_text("Decisión"); expect(pagina.locator("#historial")).to_contain_text("Terminar la mejora sin DOE")
+
+
+# ---------- TUKEY: método no incluido en la base del curso ----------
+def test_tukey_dice_que_no_esta_en_la_base_y_con_que_se_verifico():
+    a = Api(); a.pegar(-1, 0, "y\tg\n" + "\n".join(f"{v}\t{g}" for g, vs in (("A", [1.9, 1.8, 2.1, 1.8]), ("B", [1.6, 1.1, 1.3, 1.4, 1.1]), ("C", [1.3, 1.6, 1.8, 1.1, 1.5, 1.1])) for v in vs))
+    r = a.ejecutar_modulo("TUKEY", {"y": 0, "factor": 1})["resultado"]
+    texto = " ".join(b.get("texto", "") for b in r["bloques"])
+    assert "Método no incluido en la base del curso" in texto and "ejemplo 11.1" in texto and "no es una fuente del curso" in texto
+    g = next(b for b in r["bloques"] if b["tipo"] == "grafica" and b.get("inter", {}).get("g") == "tukey")
+    assert g["inter"]["nota"] == "Método no incluido en la base del curso" and "Método no incluido en la base del curso" in g["svg"]
