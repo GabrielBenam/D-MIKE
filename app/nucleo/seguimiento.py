@@ -376,6 +376,8 @@ def paquete_avance(proyecto, hoja):
            "analisis": [{"id": k, "modulo": e.get("modulo"), "estado": e["estado"]} for k, e in an.items()],
            "disenos": dis,
            "tareas_abiertas": [{"id": t["id"], "descripcion": _descripcion_exportable(t)} for t in _lista(proyecto.formatos.get("_tareas")) + _tareas_de_limites(proyecto) if t.get("estado") == "abierta"]}
+    from . import decisiones as DEC
+    if (dc := [{"id": d["id"], "tipo": d["tipo"], "design_id": d.get("design_id")} for d in DEC.decisiones(proyecto)]): pkg["decisiones"] = dc          # sin el motivo (texto libre)
     if (om := omisiones_estado(proyecto)): pkg["omisiones"] = om             # clave opcional: sin omisiones el paquete queda igual que antes
     pkg["huella"] = RC.huella_receta(pkg)
     return pkg, None

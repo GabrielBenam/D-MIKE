@@ -132,7 +132,8 @@ const GCAT = {
         d.push({ type: "scatter", x: [q.lo, q.hi], y: [q.par, q.par], mode: "lines", line: { color: c, width: 4 }, showlegend: false, hoverinfo: "x" });
         d.push({ type: "scatter", x: [q.dif], y: [q.par], mode: "markers", marker: { size: 9, color: c }, showlegend: false, hovertemplate: "%{y}: %{x:.4g}<extra></extra>" }); });
       return { d, l: gLay({ margin: { l: 110, r: 20, t: 34, b: 44 }, showlegend: false, xaxis: { title: s.xl, gridcolor: gcss("--linea") }, yaxis: { autorange: "reversed", gridcolor: gcss("--linea") },
-        shapes: o.e.cero ? [gV(0, "#b3261e", "dash")] : [] }) }; } },
+        shapes: o.e.cero ? [gV(0, "#b3261e", "dash")] : [],
+        annotations: s.nota ? [{ xref: "paper", yref: "paper", x: 0, y: -0.22, xanchor: "left", showarrow: false, font: { size: 10 }, text: s.nota }] : [] }) }; } },
   rendimiento: { est: ["Barras por paso"], el: { eti: ["Valores", 1] },
     f: (s, o, p) => ({ d: [{ type: "bar", x: s.etiq, y: s.vals, marker: { color: s.vals.map((_, i) => s.rty && i === s.vals.length - 1 ? gcss("--tinta") : (s.ok[i] ? gTono(p, .55) : "#cfc8bb")) },
       text: o.e.eti ? s.vals.map(v => v ? v.toFixed(1) + " %" : "") : null, textposition: "outside", customdata: s.n, hovertemplate: "%{x}: %{y:.1f} %<br>Unidades: %{customdata}<extra></extra>" }],

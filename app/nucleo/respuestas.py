@@ -58,11 +58,13 @@ def _diseno_de(proyecto, hoja, design_id, run_ids_archivo):
     return d["clave"], proyecto.formatos["_disenos"][d["clave"]], d
 
 
-def analizar(proyecto, hoja, filas, design_id=None, sobrescribir=False):
+def analizar(proyecto, hoja, filas, design_id=None, sobrescribir=False, extra=None):
     """Valida el archivo contra el diseño sin escribir nada. filas: lista de listas de texto, la primera con encabezados.
-    Devuelve {ok, errores, avisos, design_id, version, escrituras: [(fila_hoja, texto)], escritas, iguales, sobrescritas, sin_dato}."""
+    extra: nombre de una SEGUNDA respuesta medida en las mismas corridas del diseño (por ejemplo «Costo»); se importa por RunId igual que la principal y queda
+    registrada en el diseño (respuestas_extra), que es lo que la liga al diseño y a su región. Nunca por posición de fila.
+    Devuelve {ok, errores, avisos, design_id, version, escrituras: [(fila_hoja, texto)], escritas, iguales, sobrescritas, sin_dato, extra}."""
     plan = {"ok": False, "errores": [], "avisos": [], "design_id": design_id, "version": None, "escrituras": [], "escritas": 0, "iguales": 0,
-            "sobrescritas": 0, "sin_dato": 0}
+            "sobrescritas": 0, "sin_dato": 0, "extra": (str(extra).strip() or None) if extra else None}
     E, A = plan["errores"], plan["avisos"]
     if not filas or len(filas) < 2: E.append("El archivo no tiene filas de respuestas."); return plan
     enc = filas[0]; claves = [_clave(h) for h in enc]
@@ -77,16 +79,25 @@ def analizar(proyecto, hoja, filas, design_id=None, sobrescribir=False):
     plan["design_id"], plan["version"] = d["design_id"], d["version_diseno"]
     cols = DIS.columnas(hoja, info)
     if cols["respuesta"] is None: E.append("No se encuentra en la hoja la columna de respuestas del diseño."); return plan
-    j_resp = next((i for i, c in enumerate(claves) if c == _clave(info.get("respuesta"))), None)
-    if j_resp is None: j_resp = next((i for i, c in enumerate(claves) if c in RESPUESTAS_GENERICAS), None)
-    if j_resp is None: E.append(f"Falta la columna de la respuesta «{info.get('respuesta')}» (o «Respuesta»).")
+    nombre_resp = plan["extra"] or info.get("respuesta")
+    if plan["extra"]:
+        reservados = {_clave(f["nombre"]) for f in info.get("factores", [])} | {_clave(info.get(k)) for k in ("respuesta", "orden_est", "orden_corrida", "tipo_punto", "bloque", "col_runid") if info.get(k)}
+        if _clave(plan["extra"]) in reservados or _clave(plan["extra"]) in RUNID | VERSION | RESPUESTAS_GENERICAS:
+            E.append(f"«{plan['extra']}» no puede ser una segunda respuesta: es una columna del diseño o un nombre reservado."); return plan
+        cols = dict(cols, respuesta=hoja.indice(plan["extra"]))                       # None si la columna aún no existe: se crea al aplicar
+    j_resp = next((i for i, c in enumerate(claves) if c == _clave(nombre_resp)), None)
+    if j_resp is None and not plan["extra"]: j_resp = next((i for i, c in enumerate(claves) if c in RESPUESTAS_GENERICAS), None)
+    if j_resp is None: E.append(f"Falta la columna de la respuesta «{nombre_resp}»" + ("" if plan["extra"] else " (o «Respuesta»)") + ".")
     if j_run is None or j_ver is None or j_resp is None: return plan
     # estado del diseño
     legado = not info.get("huella_diseno")
     est = DIS.estado_definicion(hoja, info)
     if est == "cambiada": E.append(f"La definición de {d['design_id']} cambió y no está registrada: registra la versión nueva del diseño antes de importar respuestas.")
     if est == "no_verificable": E.append(f"Faltan en la hoja columnas de {d['design_id']} (OrdenEst o factores): no se puede verificar el diseño.")
-    n_resp, v_resp = DIS.estado_respuestas(hoja, info)
+    if plan["extra"]:
+        n_resp = sum(1 for t in hoja.columnas[cols["respuesta"]].celdas if t not in (None, "") and str(t).strip() != "") if cols["respuesta"] is not None else 0
+        v_resp = ((info.get("respuestas_extra") or {}).get(plan["extra"]) or {}).get("version") if n_resp else None
+    else: n_resp, v_resp = DIS.estado_respuestas(hoja, info)
     if n_resp and v_resp is not None and v_resp != plan["version"]:
         E.append(f"La hoja ya tiene respuestas de la versión {v_resp} y el diseño está en la versión {plan['version']}: no se mezclan. "
                  "Bórralas o confirma que corresponden a la versión vigente (Diseños del proyecto).")
@@ -134,7 +145,7 @@ def analizar(proyecto, hoja, filas, design_id=None, sobrescribir=False):
             x = a_numero(y)
             if x is None: no_num.append(f"{r}: «{y}»"); continue
             texto = y
-        actual = hoja.columnas[cols["respuesta"]].celdas[i_h] if i_h < len(hoja.columnas[cols["respuesta"]].celdas) else None
+        actual = (hoja.columnas[cols["respuesta"]].celdas[i_h] if i_h < len(hoja.columnas[cols["respuesta"]].celdas) else None) if cols["respuesta"] is not None else None
         if actual not in (None, ""):
             ya = a_numero(actual) if not (es_na(actual) or es_sin_datos_explicito(actual)) else None
             nuevo = a_numero(texto) if texto not in (TEXTO_NA, TEXTO_SIN_DATOS) else None
@@ -170,11 +181,18 @@ def aplicar(proyecto, hoja, plan, nombre_archivo, huella, ahora=None):
     info = proyecto.formatos["_disenos"][clave]
     DIS.asegurar_identidad(proyecto, hoja)                       # diseño anterior a 0.29: línea base en este momento
     cols = DIS.columnas(hoja, info)
-    col = hoja.columnas[cols["respuesta"]]
+    if plan.get("extra"):                                          # segunda respuesta: columna propia, registrada en el diseño con su versión
+        j = hoja.indice(plan["extra"])
+        if j is None:
+            hoja.pegar(-1, len(hoja.columnas), plan["extra"]); j = hoja.indice(plan["extra"]); hoja.cambiar_tipo(j, "num")
+        col = hoja.columnas[j]
+        if plan["escrituras"] or plan["iguales"]: info.setdefault("respuestas_extra", {})[plan["extra"]] = {"version": plan["version"]}
+    else:
+        col = hoja.columnas[cols["respuesta"]]
+        if plan["escrituras"] or plan["iguales"]: info["respuestas_version"] = plan["version"]
     if len(col.celdas) < hoja.n: col.celdas.extend([None] * (hoja.n - len(col.celdas)))
     for i, texto in plan["escrituras"]: col.celdas[i] = texto
-    if plan["escrituras"] or plan["iguales"]: info["respuestas_version"] = plan["version"]
     info.setdefault("importaciones", []).append({"archivo": nombre_archivo, "huella": huella, "version": plan["version"], "escritas": plan["escritas"],
-                                                 "sobrescritas": plan["sobrescritas"], "iguales": plan["iguales"], "sin_dato": plan["sin_dato"],
+                                                 "sobrescritas": plan["sobrescritas"], "iguales": plan["iguales"], "sin_dato": plan["sin_dato"], "respuesta": plan.get("extra") or info.get("respuesta"),
                                                  "fecha": (ahora or datetime.now()).isoformat(timespec="seconds")})
     return plan["escritas"]

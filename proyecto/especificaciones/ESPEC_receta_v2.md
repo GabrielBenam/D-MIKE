@@ -186,6 +186,30 @@ Archivo `.json` que D-MIKE exporta y el diagnóstico importa. Contiene solo esta
 
 Reglas: `huella` se calcula igual que la de la receta. Sin `id_proyecto` no se puede exportar y se explica por qué (el proyecto viene de una receta v1 o se creó sin receta). `estado_ruta` toma uno de los valores de ESPEC_flujo 4.5 solo cuando se deduce de la existencia de objetos: `Sin datos` (hoja vacía), `Historicos cargados` (hay columnas con datos), `DOE disenado` (hay un diseño creado), `DOE ejecutado` (un diseño con todas sus respuestas capturadas). El resto de valores (medición evaluada, línea base, causas, mejora validada, control) no se infieren: se devuelve `no_determinado`. `disenos[].estado` es `creado` o `ejecutado` (valores definidos en la Entrega 2). `disenos[].id` es el id de la receta; desde la Entrega 3 cada elemento trae además `design_id` y `version_diseno` (sección 16), claves opcionales: `avance_version` sigue en 1 y no viajan niveles, `RunId`, huellas ni respuestas. `tareas_abiertas[].descripcion` se limita a texto generado por D-MIKE o por la receta, nunca a contenido de celdas.
 
+### 13.1 El paquete de avance tal como queda en 0.29.0 más la Entrega 4 (contrato para el artefacto web que lo importa)
+
+`avance_version` sigue en 1: todo lo nuevo es una clave opcional (si el artefacto no la conoce, la ignora). Nunca viajan textos libres del usuario (motivos, criterios, condiciones), valores medidos ni resultados numéricos.
+
+```json
+{
+  "tipo": "dmike-avance", "avance_version": 1, "id_proyecto": "uuid-v4", "modo_proyecto": "real", "revision_aplicada": 3,
+  "generado_en": "ISO-8601", "huella": "sha256:...", "fase_actual": "M", "estado_ruta": "DOE disenado",
+  "variables": [{"nombre": "", "estado_evidencia": "REAL_VERIFICADO"}],
+  "analisis": [{"id": "", "modulo": "", "estado": "pendiente"}],
+  "disenos": [{"id": "d1", "estado": "creado", "corridas": 13, "respuestas_capturadas": 0, "design_id": "DIS-Resistencia", "version_diseno": 2}],
+  "tareas_abiertas": [{"id": "", "descripcion": ""}],
+  "omisiones": [{"id": "crib", "estado": "omitido", "que": "cribado"}],
+  "decisiones": [{"id": "DEC-001", "tipo": "mejora_sin_doe", "design_id": null}]
+}
+```
+
+- `disenos[].design_id` y `version_diseno`: claves opcionales por diseño, solo de los diseños que D-MIKE creó (entradas de la receta guardada). `design_id` es «DIS-» más el nombre de la respuesta; `version_diseno` la asigna solo D-MIKE (nace en 1 y sube al registrar una versión tras un cambio de definición). Un diseño anterior a 0.29 aparece con identidad derivada. No viajan `run_id`, niveles, huellas ni respuestas.
+- `omisiones` (solo si hay): pasos omitidos con su motivo registrado en el proyecto. Viaja `id`, `estado` («omitido») y `que` (`cribado`, `dcc` o `doe`); el motivo no viaja. Los pasos omitidos no cuentan como diseño en `estado_ruta`.
+- `decisiones` (solo si hay): `id` (DEC-###), `tipo` (`mejora_sin_doe` o `segundo_doe`) y `design_id` (nulo si no aplica). El motivo y la evidencia no viajan.
+- `tareas_abiertas` incluye las tareas derivadas «declarar límites seguros» (`auto:limites:<design_id>`) en proyectos reales; son derivadas y no se guardan en el proyecto.
+- No viajan: los planes de confirmación, la auditoría del diseño ni el historial de cambios (solo en pantalla o en el `.dmike`).
+- La `huella` cubre todo el contenido, claves opcionales incluidas; se calcula igual que la de la receta.
+
 ## 14. Botones de reciprocidad
 
 D-MIKE: `Archivo › Importar receta del diagnóstico…` (mismo flujo de Abrir proyecto con una receta, hoy ya disponible por `abrir_proyecto`) y `Archivo › Exportar paquete de avance…`. El diagnóstico (artefacto, se hace fuera del repositorio): botón «Importar paquete de avance» con selector de archivo y, como respaldo, pegar el texto. La web compara `id_proyecto` y `revision_aplicada` y nunca envía ni recibe datos crudos. Las rutas exactas de menú las propone Claude Code según `app/nucleo/menus.py`.
@@ -265,5 +289,11 @@ Concreta la sección 8 (Decisión 5).
 
 ## 19.6 Análisis sin diseño de D-MIKE y planes sin diseño (después del cierre de 0.29.0)
 
-- En modo real, `RSM` solo analiza la respuesta de un diseño de D-MIKE o una segunda respuesta medida en las mismas corridas (se liga por los nombres de los factores). En demostración no se bloquea. El optimizador solo usa modelos `RSM` guardados.
+- En modo real, `RSM` solo analiza la respuesta de un diseño de D-MIKE o una segunda respuesta medida en las mismas corridas que se importó por RunId como respuesta adicional del diseño (`respuestas_extra`) y cuyos factores son los del diseño por nombre; hereda su región. Nunca se liga por la posición de la fila. En demostración no se bloquea. El optimizador solo usa modelos `RSM` guardados.
 - Un plan de confirmación puede no pertenecer a un diseño (`design_id` nulo): se registra y se compara igual y se ve en la sección «Planes de confirmación» de «Diseños del proyecto».
+
+## 20. Entrega 4 — decisiones y historial (implementada después del cierre de 0.29.0)
+
+- `_decisiones` (en el `.dmike`): `{id, tipo, motivo, design_id, evidencia, fecha}`. Tipos: `mejora_sin_doe` (justificación obligatoria) y `segundo_doe` (solo con respuestas y análisis guardado del diseño base; la evidencia se copia en la decisión). No se borran ni se editan.
+- Paquete de avance: clave opcional `decisiones` con `{id, tipo, design_id}`; el motivo no viaja.
+- Historial de cambios: lectura de los registros existentes; no agrega almacenamiento.

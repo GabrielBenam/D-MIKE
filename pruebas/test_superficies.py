@@ -20,10 +20,15 @@ def con_diseno(tipo="ccd", ruido=0.05, f=VERDAD, extra=None):
     for i in range(a.hoja.n):
         t, p = a.hoja.columnas[jt].valor(i)[2], a.hoja.columnas[jp].valor(i)[2]
         a.hoja.editar(i, jy, str(round(f(t, p) + rng.gauss(0, ruido), 4)))
-    if extra:
-        a.hoja.editar(0, len(a.hoja.columnas), "")
-        a.pegar(-1, len(a.hoja.columnas), "Costo\n" + "\n".join(str(round(extra(a.hoja.columnas[jt].valor(i)[2], a.hoja.columnas[jp].valor(i)[2]), 4))
-                                                                  for i in range(a.hoja.n)))
+    if extra:                                    # segunda respuesta medida en las mismas corridas: se importa por RunId como respuesta adicional del diseño
+        import csv, tempfile, os
+        from app.nucleo import disenos as DIS
+        ids, _ = DIS.run_ids(a.hoja, a.proyecto.formatos["_disenos"]["Rendimiento"], "Rendimiento")
+        ruta = os.path.join(tempfile.mkdtemp(), "costo.csv")
+        with open(ruta, "w", encoding="utf-8", newline="") as fh:
+            w = csv.writer(fh); w.writerow(["RunId", "version_diseno", "Costo"])
+            for i in range(a.hoja.n): w.writerow([ids[i], 1, round(extra(a.hoja.columnas[jt].valor(i)[2], a.hoja.columnas[jp].valor(i)[2]), 4)])
+        r = a.importar_respuestas(ruta, "DIS-Rendimiento", respuesta_extra="Costo"); assert r.get("error") in (None, ""), r["sesion"][-1]["texto"]
     return a, info, (jt, jp, jy)
 
 

@@ -218,9 +218,11 @@ def region_del_modelo(proyecto, respuesta, nombres):
     if proyecto is None or MD.es_demo(proyecto): estado = "no_aplica"
     else: estado = None
     info = _disenos(proyecto).get(respuesta) if proyecto is not None else None
-    if info is None and proyecto is not None:        # una segunda respuesta medida en las mismas corridas de un diseño: se liga por sus factores
+    if info is None and proyecto is not None:
+        # Segunda respuesta medida en las mismas corridas de un diseño: se liga SOLO si se importó por RunId como respuesta adicional de ese diseño
+        # (respuestas_extra) Y los factores del análisis son los del diseño, por nombre. Una columna pegada a mano no se liga: nunca por posición de fila.
         nm = {n.lower() for n in nombres}
-        info = next((i for i in _disenos(proyecto).values() if nm and nm <= {f["nombre"].lower() for f in i.get("factores", [])}), None)
+        info = next((i for i in _disenos(proyecto).values() if respuesta in (i.get("respuestas_extra") or {}) and nm and nm <= {f["nombre"].lower() for f in i.get("factores", [])}), None)
     lim = (info or {}).get("limites_seguros") if (info or {}).get("region") == "declarada" else None
     por_nombre = {str(n).lower(): v for n, v in (lim or {}).items()}
     limites = [([por_nombre[n.lower()]["min"], por_nombre[n.lower()]["max"]] if n.lower() in por_nombre else None) for n in nombres]
@@ -285,7 +287,15 @@ def verificar_para_analisis(proyecto, hoja, nombre_respuesta):
     Diseños anteriores a 0.29 (sin identidad guardada) y columnas que no son la respuesta de un diseño no se verifican."""
     if proyecto is None: return None
     info = _disenos(proyecto).get(nombre_respuesta)
-    if not info or not info.get("design_id"): return None
+    if not info:                                                       # segunda respuesta importada por RunId: su versión debe ser la vigente del diseño
+        info = next((i for i in _disenos(proyecto).values() if nombre_respuesta in (i.get("respuestas_extra") or {})), None)
+        if info and info.get("design_id"):
+            v = ((info["respuestas_extra"]).get(nombre_respuesta) or {}).get("version"); vig = int(info.get("version_diseno") or 1)
+            if v is not None and v != vig:
+                return (f"Las respuestas de «{nombre_respuesta}» son de la versión {v} y el diseño {info['design_id']} está en la versión {vig}: no se mezclan versiones. "
+                        "Impórtalas de nuevo con la versión vigente.")
+        return None
+    if not info.get("design_id"): return None
     n, v = estado_respuestas(hoja, info)
     if n == 0: return None
     ident = identidad(info, nombre_respuesta)

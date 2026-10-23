@@ -9,7 +9,7 @@ from .nucleo import archivo
 from .nucleo import modo as MD
 from .nucleo import seguimiento as SG
 from . import modulos
-from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR, auditoria as AUD, confirmacion as CONF
+from .nucleo import indicadores as IND, disenos as DIS, corridas as CORR, auditoria as AUD, confirmacion as CONF, decisiones as DEC
 from .modulos.base import ErrorEntrada, agregar_nota_persona, agregar_estados_entrada
 import json, os
 from datetime import datetime
@@ -844,9 +844,10 @@ class Api:
         """E3-2: identidad de los diseños del proyecto (design_id, version_diseno, estado de su definición, RunId)."""
         return DIS.descriptores(self.proyecto, self.hoja)
 
-    def importar_respuestas(self, ruta=None, design_id=None, sobrescribir=False):
+    def importar_respuestas(self, ruta=None, design_id=None, sobrescribir=False, respuesta_extra=None):
         """E3-3: importa las respuestas de un diseño por RunId (columnas RunId, version_diseno, la respuesta y, opcional, los factores). Atómica:
-        con un solo desajuste no se escribe nada y se informa cada error."""
+        con un solo desajuste no se escribe nada y se informa cada error. respuesta_extra: nombre de una segunda respuesta medida en las mismas corridas
+        (se importa por RunId y queda ligada al diseño y a su región)."""
         from .nucleo import importar as imp, respuestas as RS
         ruta = ruta or self._elegir("abrir", ["Respuestas del diseño (*.csv;*.tsv;*.txt;*.xlsx)", "Todos los archivos (*.*)"])
         if not ruta: return self._resp("Importación cancelada.", hoja=False)
@@ -854,14 +855,14 @@ class Api:
         try: filas, fmt = imp.leer(ruta); huella = RS.huella_archivo(ruta)
         except (OSError, ValueError) as e:
             return self._resp(f"No se pudieron leer las respuestas: {e}. No se cambió nada.", "aviso", error="respuestas", hoja=False)
-        plan = RS.analizar(self.proyecto, self.hoja, filas, design_id, bool(sobrescribir))
+        plan = RS.analizar(self.proyecto, self.hoja, filas, design_id, bool(sobrescribir), respuesta_extra or None)
         resumen = {k: plan[k] for k in ("ok", "errores", "avisos", "design_id", "version", "escritas", "iguales", "sobrescritas", "sin_dato")}
         if not plan["ok"]:
             r = self._resp(f"Respuestas no importadas de {nombre}: {len(plan['errores'])} {'problema' if len(plan['errores']) == 1 else 'problemas'}. No se escribió nada.",
                            "aviso", error="respuestas", mensajes=[(e, "aviso") for e in plan["errores"]] + [(a, "info") for a in plan["avisos"]], hoja=False)
             r["importacion"] = resumen; return r
         n = RS.aplicar(self.proyecto, self.hoja, plan, nombre, huella)
-        r = self._resp(f"Importadas {n} respuestas de {nombre} ({fmt}) al diseño {plan['design_id']}, versión {plan['version']}"
+        r = self._resp(f"Importadas {n} respuestas{' de «' + plan['extra'] + '»' if plan.get('extra') else ''} de {nombre} ({fmt}) al diseño {plan['design_id']}, versión {plan['version']}"
                        + (f"; {plan['iguales']} ya estaban iguales" if plan["iguales"] else "") + (f"; {plan['sobrescritas']} sobrescritas" if plan["sobrescritas"] else "") + ".",
                        mensajes=[(a, "info") for a in plan["avisos"]])
         r["importacion"] = resumen; return r
@@ -889,6 +890,26 @@ class Api:
         a, motivo = AUD.auditar(self.proyecto, self.hoja, design_id)
         if a is None: return {"error": "auditoria", "mensaje": motivo}
         return {"error": None, "auditoria": a}
+
+    def decisiones(self):
+        """Entrega 4: decisiones registradas (terminar la mejora sin DOE, recomendar un segundo DOE) con sus reglas."""
+        return {"decisiones": DEC.decisiones(self.proyecto), "reglas": DEC.REGLAS}
+
+    def registrar_mejora_sin_doe(self, motivo, resultado_uid=None):
+        """Entrega 4 (criterio 8): termina la mejora sin DOE registrando la justificación (obligatoria)."""
+        estado, r = DEC.registrar_mejora_sin_doe(self.proyecto, motivo, resultado_uid or None)
+        if estado == "error": return self._resp(r, "aviso", error="decision", hoja=False)
+        out = self._resp(f"Decisión {r['id']} registrada: terminar la mejora sin DOE. Motivo: {r['motivo']}", hoja=False); out["decision"] = r; return out
+
+    def recomendar_segundo_doe(self, design_id, motivo):
+        """Entrega 4 (criterio 9): recomienda un segundo DOE solo después de revisar la evidencia del primero (respuestas y análisis guardado)."""
+        estado, r = DEC.recomendar_segundo_doe(self.proyecto, self.hoja, design_id, motivo)
+        if estado == "error": return self._resp(r, "aviso", error="decision", hoja=False)
+        out = self._resp(f"Decisión {r['id']} registrada: segundo DOE a partir de {design_id}, con la evidencia de «{r['evidencia']['titulo']}».", hoja=False); out["decision"] = r; return out
+
+    def historial_cambios(self):
+        """Entrega 4: historial de cambios del proyecto (solo lectura)."""
+        return DEC.historial(self.proyecto)
 
     def planes_confirmacion(self, design_id=None):
         """E3-9: planes de confirmación o vigilancia registrados (de un diseño, o todos)."""
@@ -1105,7 +1126,7 @@ class Api:
 _HOJA = ("editar", "pegar", "renombrar", "cambiar_tipo", "insertar_columna", "eliminar_columna", "insertar_fila", "eliminar_fila",
          "borrar_rango", "llenar_con", "rellenar", "insertar_filas", "eliminar_filas", "eliminar_columnas", "filtrar", "importar", "abrir_perfil",
          "ejecutar_modulo", "importar_respuestas")
-_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno", "declarar_limites_diseno", "omitir_paso_doe", "registrar_plan_confirmacion", "registrar_observados_confirmacion"}
+_MUTAN = set(_HOJA) | {"reproducir_resultado", "guardar_estilo_grafica", "fijar_datos", "marcar_avance", "activar_modulo", "desactivar_modulo", "guardar_formato", "borrar_resultado", "tablero_kpi", "registrar_version_diseno", "confirmar_respuestas_diseno", "declarar_limites_diseno", "omitir_paso_doe", "registrar_plan_confirmacion", "registrar_observados_confirmacion", "registrar_mejora_sin_doe", "recomendar_segundo_doe"}
 
 
 def _con_deshacer(f, cambia_hoja):
