@@ -77,3 +77,22 @@ def test_qfd_interactivo_y_casa_completa(pagina, tmp_path):
     expect(pagina.locator(".formato.dividida")).to_be_visible()                 # el QFD abre con la casa completa a la derecha
     pagina.click(".vista-barra button:has-text('Casa completa a la derecha')"); expect(pagina.locator(".formato.dividida")).to_have_count(0)
     assert not errores, errores
+
+
+def test_el_boton_cinta_oculta_y_muestra_la_cinta_y_libera_el_espacio(pagina, tmp_path):
+    """El botón «Cinta» (y Ctrl+F1) debe ocultar la cinta de verdad: antes el atributo hidden perdía contra `.cinta { display: flex }` y la cinta nunca se iba."""
+    nueva(pagina, tmp_path, con_reciente=False)
+    pagina.evaluate("document.getElementById('inicio') && document.getElementById('inicio').remove()")
+    expect(pagina.locator("#cinta")).to_be_visible()
+    alto_con = pagina.evaluate("document.querySelector('.vista:not([hidden]), #hoja-marco, #pestanas').getBoundingClientRect().top")
+    pagina.click(".boton-ctrl:text-is('Cinta')")
+    expect(pagina.locator("#cinta")).to_be_hidden(); assert not pagina.evaluate("document.body.classList.contains('cinta-fija')")
+    assert pagina.evaluate("document.getElementById('cinta').getBoundingClientRect().height") == 0
+    alto_sin = pagina.evaluate("document.querySelector('.vista:not([hidden]), #hoja-marco, #pestanas').getBoundingClientRect().top")
+    assert alto_sin < alto_con - 40                                                        # el espacio de trabajo sube: la cinta ya no lo ocupa
+    pagina.click("#menus .menu > button:text-is('Estadística')")                          # sin cinta fija, la pestaña abre su menú desplegable
+    expect(pagina.locator("#menus .menu.abierto")).to_have_count(1); expect(pagina.locator("#cinta")).to_be_hidden()
+    pagina.keyboard.press("Escape"); pagina.mouse.click(600, 500)
+    pagina.keyboard.press("Control+F1"); expect(pagina.locator("#cinta")).to_be_visible()   # Ctrl+F1 la vuelve a fijar
+    pagina.keyboard.press("Control+F1"); expect(pagina.locator("#cinta")).to_be_hidden()
+    assert pagina.evaluate("localStorage.getItem('dmike_cinta')") == "0"                   # la preferencia se guarda (esta prueba la borra al recargar, como las demás)
