@@ -28,6 +28,7 @@ COMPLEMENTARIOS = {
     "FODA": ("Análisis FODA", "D", "formato"), "BITACORA": ("Bitácora del proyecto", "D", "formato"),
     "VALOR-GANADO": ("Seguimiento por valor ganado", "C", "formato"),
     "RENDIMIENTO": ("Rendimientos: tradicional, FTY y RTY", "M", "datos"),
+    "CALIDAD-DATOS": ("Revisar la calidad de los datos", "M", "datos"), "DURACION": ("Duración entre dos fechas (lead time)", "M", "datos"),
 }
 CONSTRUIDOS = set(MVP + EXTRA + ESTADISTICA) | set(COMPLEMENTARIOS)
 

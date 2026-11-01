@@ -1,6 +1,6 @@
 {
- "version": "0.29.0",
- "total_modulos": 92,
+ "version": "0.30.0",
+ "total_modulos": 94,
  "modulos": [
   {
    "id": "A3",
@@ -1414,6 +1414,83 @@
      "campo": "ayuda",
      "etiqueta": "Funciones: LOG10 LN EXP RAIZ ABS REDONDEAR(x;d) SI(cond;a;b) ENTERO PISO TECHO SEN COS TAN · de una columna: SUMA PROMEDIO MEDIANA DESV VARIANZA MIN MAX N · por fila: ACUM DIF RETRASO(x;k) RANGO ESTAND FILA()",
      "tipo": "nota"
+    }
+   ]
+  },
+  {
+   "id": "CALIDAD-DATOS",
+   "titulo": "Revisar la calidad de los datos",
+   "ruta": "Datos › Calidad de los datos › Revisar la calidad de los datos",
+   "fases": [
+    "M"
+   ],
+   "tipo": "analisis",
+   "parametros": [
+    {
+     "campo": "claves",
+     "etiqueta": "Duplicados: columnas clave (la fila se repite si todas coinciden exactamente)",
+     "tipo": "cols",
+     "opcional": true
+    },
+    {
+     "campo": "apertura",
+     "etiqueta": "Fechas: columna de apertura",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "cierre",
+     "etiqueta": "Fechas: columna de cierre (una fecha anterior a la apertura es retroactiva)",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "unidad",
+     "etiqueta": "Primer evento: unidad (pieza, documento o folio)",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "paso",
+     "etiqueta": "Primer evento: paso o etapa (vacío = un solo paso)",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "resultado",
+     "etiqueta": "Primer evento: resultado de la inspección (opcional; desempata fechas iguales como en Rendimientos)",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "intento",
+     "etiqueta": "Primer evento: número de intento (1 = primera inspección)",
+     "tipo": "col",
+     "filtro": "num",
+     "opcional": true
+    },
+    {
+     "campo": "fecha",
+     "etiqueta": "Primer evento: fecha del evento (si no hay número de intento)",
+     "tipo": "col",
+     "filtro": "fecha",
+     "opcional": true
+    },
+    {
+     "campo": "declaro",
+     "etiqueta": "Declaro que cada fila es la primera inspección de su unidad en ese paso (solo si no hay intento ni fecha)",
+     "tipo": "bool"
+    },
+    {
+     "campo": "captura",
+     "etiqueta": "Lotes: columna con la fecha y hora de captura",
+     "tipo": "col",
+     "opcional": true
+    },
+    {
+     "campo": "lote_min",
+     "etiqueta": "Lotes: tamaño mínimo de un lote (lo fijas tú; no hay valor por defecto)",
+     "tipo": "numero"
     }
    ]
   },
@@ -3207,6 +3284,32 @@
      "etiqueta": "Columna de resultado (1 = repetida, 0 = primera aparición)",
      "tipo": "texto",
      "defecto": "Duplicado"
+    }
+   ]
+  },
+  {
+   "id": "DURACION",
+   "titulo": "Duración entre dos fechas (lead time)",
+   "ruta": "Estadística › Calidad del proceso › Duración entre dos fechas (lead time)",
+   "fases": [
+    "M"
+   ],
+   "tipo": "analisis",
+   "parametros": [
+    {
+     "campo": "inicio",
+     "etiqueta": "Columna de inicio",
+     "tipo": "col"
+    },
+    {
+     "campo": "fin",
+     "etiqueta": "Columna de fin",
+     "tipo": "col"
+    },
+    {
+     "campo": "grafica",
+     "etiqueta": "Mostrar el histograma de las duraciones",
+     "tipo": "bool"
     }
    ]
   },

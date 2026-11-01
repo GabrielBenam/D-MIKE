@@ -53,7 +53,7 @@ def _dialogos(api):
 
 
 def test_todos_los_dialogos_tienen_caso_valido(api):
-    faltan = set(_dialogos(api)) - set(VALIDOS) - {"MSA-ATR", "DISENO-RSM", "RSM", "OPTIMIZADOR", "ORDENAR", "REEMPLAZAR", "MSA-VAR", "FACTORIAL", "PROBABILIDAD", *CALC, *INF}   # cubiertos en test_superficies, test_hoja_e2, test_gage_rr y test_calc_hoja
+    faltan = set(_dialogos(api)) - set(VALIDOS) - {"MSA-ATR", "DISENO-RSM", "RSM", "OPTIMIZADOR", "ORDENAR", "REEMPLAZAR", "MSA-VAR", "FACTORIAL", "PROBABILIDAD", "CALIDAD-DATOS", "DURACION", *CALC, *INF}   # cubiertos en test_superficies, test_hoja y test_g5_g6_calidad_datos_e2, test_gage_rr y test_calc_hoja
     assert not faltan, f"Módulos sin caso en la revisión: {faltan}"
 
 

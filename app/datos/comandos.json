@@ -1042,6 +1042,16 @@
 },
 {
 "cat": "Datos",
+"n": "Revisar la calidad de los datos",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Duplicados, fechas retroactivas, primer evento ausente y capturas por lote (criterio de D-MIKE)"
+},
+{
+"cat": "Datos",
 "n": "Renombrar columna",
 "a": "F2 en el nombre",
 "c": [
@@ -1579,6 +1589,16 @@
 ],
 "e": "D",
 "d": "Rendimiento tradicional, FTY (promedio de los pasos) y RTY (producto), con regla de primer evento"
+},
+{
+"cat": "Estadística",
+"n": "Duración entre dos fechas (lead time)",
+"a": "—",
+"c": [
+"H"
+],
+"e": "D",
+"d": "Días entre dos fechas con mediana y P90; las duraciones negativas se cuentan aparte"
 },
 {
 "cat": "Estadística",

@@ -17,6 +17,7 @@ app/modulos/analisis.py
 app/modulos/base.py
 app/modulos/calc_hoja.py
 app/modulos/calidad.py
+app/modulos/calidad_datos.py
 app/modulos/capacidad.py
 app/modulos/datos_hoja.py
 app/modulos/dialogo.py
@@ -124,7 +125,7 @@ proyecto/artefactos/diagnostico/index.html
 proyecto/artefactos/guia_dmike.html
 proyecto/artefactos/tablero.plantilla.html
 proyecto/artefactos/visor.plantilla.html
-proyecto/catalogo/catalogo_dmike_0.29.0.json
+proyecto/catalogo/catalogo_dmike_0.30.0.json
 proyecto/especificaciones/ESPEC_flujo_real_dmaic.md
 proyecto/especificaciones/ESPEC_manual_v026.md
 proyecto/especificaciones/ESPEC_receta_v2.md
@@ -176,6 +177,7 @@ pruebas/test_formatos_v010_interfaz.py
 pruebas/test_formatos_v015_interfaz.py
 pruebas/test_g1_atributos.py
 pruebas/test_g4_rendimiento.py
+pruebas/test_g5_g6_calidad_datos.py
 pruebas/test_g7_persona.py
 pruebas/test_gage_rr.py
 pruebas/test_gestion_interfaz.py
