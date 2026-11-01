@@ -9,7 +9,7 @@ const AYUDA_TEXTOS = {
     <li>Abre cada módulo desde el riel DMAIC, la cinta o la paleta de comandos (Ctrl+K).</li>
     <li>Guarda con Ctrl+S. Todo queda en un solo archivo: datos, resultados, formatos y avance.</li></ol>`],
   interfaz: ["La interfaz", `
-    <p><b>Cinta.</b> Las pestañas de arriba (Archivo, Datos, Estadística, Calidad, Lean, Gestión…) muestran sus comandos como botones agrupados. Con el botón de fijar la cinta queda visible; sin fijar, se despliega al hacer clic y se oculta al usar un comando.</p>
+    <p><b>Cinta.</b> Las pestañas de arriba (Archivo, Datos, Estadística, Calidad, Lean, Gestión…) muestran sus comandos como botones agrupados. El botón «Cinta» (o Ctrl+F1) la fija o la contrae: contraída libera ese espacio para la hoja y los resultados, y cada pestaña abre sus comandos como menú desplegable. Lo que elijas se recuerda al volver a abrir el programa.</p>
     <p><b>Riel DMAIC.</b> La columna angosta de la izquierda tiene una letra por fase. Un clic en la letra despliega sus módulos activos y, debajo, el grupo «Inactivos» cerrado. Desde ahí se abren los módulos, se activan (botón +) y se marca su avance (botón ⋯ o clic derecho). Los botones «Tablero de módulos» y «Ruta DMAIC» abren la vista completa de todas las fases.</p>
     <p><b>Pestañas.</b> Cada módulo abierto es una pestaña, como en un navegador. Clic derecho en una pestaña: cerrar, cerrar las demás, reabrir la última cerrada, abrir a la derecha (vista dividida), repetir, modificar o exportar.</p>
     <p><b>Vista dividida.</b> Un resultado se puede abrir a la derecha mientras trabajas con la hoja o con otro módulo. Los formatos con gráficas (como el QFD) tienen su propio botón para ver las gráficas a la derecha mientras capturas.</p>

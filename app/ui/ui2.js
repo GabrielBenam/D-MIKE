@@ -46,7 +46,7 @@ function pintarCinta(titulo) {
     b.innerHTML = window.iconoCinta ? iconoCinta(o.accion, 24) : svgI("res"); b.append(el("span", {}, o.texto.replace(/…$/, "").replace(/\s*\((Ctrl|F1)[^)]*\)$/, "")));
     fila.append(b);
   }
-  const fijar = el("button", { class: "cinta-fijar", title: "Contraer la cinta (Ctrl+F1): se mostrará solo al hacer clic en una pestaña", "aria-label": "Contraer la cinta", onclick: () => alternarCinta(false) });
+  const fijar = el("button", { class: "cinta-fijar", title: "Contraer la cinta (Ctrl+F1): los comandos quedan en el menú desplegable de cada pestaña", "aria-label": "Contraer la cinta", onclick: () => alternarCinta(false) });
   fijar.innerHTML = svgI("cerrar", 14); c.append(fijar);
   if (!c.dataset.rueda) { c.dataset.rueda = "1"; c.addEventListener("wheel", ev => { if (c.scrollWidth > c.clientWidth && Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) { c.scrollLeft += ev.deltaY; ev.preventDefault(); } }, { passive: false }); }
 }
@@ -361,7 +361,7 @@ function ui2Iniciar(e) {
   $("#pestanas").addEventListener("auxclick", ev => { const b = ev.target.closest(".pestana"); if (ev.button === 1 && b && b.dataset.p !== "hoja") cerrarPestana(b.dataset.p); });
   document.addEventListener("keydown", ev => {
     const k = ev.key.toLowerCase(), ctrl = ev.ctrlKey || ev.metaKey;
-    if (ev.key === "F1") { ev.preventDefault(); return ev.shiftKey && P.activa !== "hoja" ? abrirAyuda("?" + (document.querySelector(".pestana.activa")?.textContent || "")) : abrirAyuda(); }
+    if (ev.key === "F1" && !ctrl) { ev.preventDefault(); return ev.shiftKey && P.activa !== "hoja" ? abrirAyuda("?" + (document.querySelector(".pestana.activa")?.textContent || "")) : abrirAyuda(); }
     if (!ctrl) return;
     if (k === "k") { ev.preventDefault(); paleta(); }
     else if (k === "f1") { ev.preventDefault(); alternarCinta(); }

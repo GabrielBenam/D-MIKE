@@ -441,6 +441,7 @@ html[data-tema="oscuro"] .grupo-in { color: var(--tinta-suave); border-top-color
 .cinta-b:hover:not([disabled]) { background: var(--acento-suave); }
 .cinta-b[disabled] { opacity: .45; cursor: default; }
 .cinta-b span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cinta[hidden] { display: none; }          /* sin esto `.cinta { display: flex }` anula el atributo hidden y el botón «Cinta» no oculta nada */
 .cinta-fijar { position: absolute; right: 8px; top: 6px; border: 0; background: none; color: var(--tinta-suave); cursor: pointer; padding: 4px; border-radius: 5px; }
 #menus .menu > button.cinta-activa { background: var(--superficie); color: var(--acento); box-shadow: inset 0 -2px 0 var(--acento); }
 body.compacto .cinta-b { min-height: 44px; width: 78px; padding: 3px; }

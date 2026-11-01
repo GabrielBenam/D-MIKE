@@ -152,7 +152,7 @@ def test_tipos_ficha_cubre_todo_el_catalogo():
     """R-T2: tipos_ficha.json trae exactamente los módulos del catálogo y cada tipo es uno de los cuatro; sigue las reglas de R-T1."""
     import fichas
     cat = _catalogo()["modulos"]; tipos = fichas.cargar_tipos(ENT / "tipos_ficha.json")
-    assert set(tipos) == {m["id"] for m in cat} and len(tipos) == 92
+    assert set(tipos) == {m["id"] for m in cat} and len(tipos) == 94
     assert set(tipos.values()) <= {"interfaz", "analisis", "formato", "gestion"}
     from app.modulos import cargar
     R = cargar()
@@ -359,14 +359,15 @@ def test_hipervinculos_internos_tienen_destino(manual):
 @pytest.mark.interfaz
 def test_fichas_piloto_en_el_manual(manual):
     h, t = manual["html"], "\n".join(manual["textos"])
-    assert h.count("class='ficha larga'") == 3 and h.count("Ficha automática, sin revisión pedagógica.") == 89         # las demás siguen apareciendo, con su leyenda
-    assert h.count("<p class='verif ok'>Ejemplo verificado con D-MIKE 0.29.0") == 3 and "class='verif mal'" not in h and t.count("Ejemplo verificado con D-MIKE 0.29.0") == 3
+    assert h.count("class='ficha larga'") == 3 and h.count("Ficha automática, sin revisión pedagógica.") == 91         # las demás siguen apareciendo, con su leyenda
+    from app.api import VERSION
+    assert h.count(f"<p class='verif ok'>Ejemplo verificado con D-MIKE {VERSION}") == 3 and "class='verif mal'" not in h and t.count(f"Ejemplo verificado con D-MIKE {VERSION}") == 3
     assert h.count("<p class='pend'>") == 35                          # solo los 35 del esqueleto del capítulo 7: las fichas piloto no tienen puntos pendientes
     for k in ("ESTADISTICOS", "REEMPLAZAR", "CHARTER"):
         assert all(f"id='p-{k}-{n}'" in h for n in range(1, 16)), k
     assert "Salida ejecutada" in h and "Referencia técnica automática" in h
     rep = json.loads((manual["dir"] / "fichas_reporte.json").read_text(encoding="utf-8"))
-    assert rep["no_coinciden"] == [] and rep["avisos"] == [] and rep["sin_ficha_escrita"] == 89
+    assert rep["no_coinciden"] == [] and rep["avisos"] == [] and rep["sin_ficha_escrita"] == 91
 
 
 @pytest.mark.interfaz

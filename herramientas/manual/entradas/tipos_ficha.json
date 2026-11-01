@@ -77,6 +77,8 @@
   "REEMPLAZAR": "interfaz",
   "REGRESION": "analisis",
   "RENDIMIENTO": "analisis",
+  "CALIDAD-DATOS": "analisis",
+  "DURACION": "analisis",
   "RIESGOS": "gestion",
   "RSM": "analisis",
   "SCRUM": "formato",
